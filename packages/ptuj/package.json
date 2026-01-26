@@ -1,0 +1,39 @@
+{
+    "name": "@aljazmc/ptuj",
+    "version": "0.0.0",
+    "description": "Medieval town simulation",
+    "author": "aljazmc",
+    "license": "MIT",
+    "private": true,
+    "type": "module",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/aljazmc/threejs-landscapes.git",
+        "directory": "packages/ptuj"
+    },
+    "dependencies": {
+        "@react-three/fiber": "^9.5.0",
+        "react": "^19.2.4",
+        "react-dom": "^19.2.4",
+        "three": "^0.183.2"
+    },
+    "devDependencies": {
+        "@types/node": "^25.5.0",
+        "@types/react": "^19.2.14",
+        "@types/react-dom": "^19.2.3",
+        "@types/three": "^0.183.1"
+    },
+    "packageManager": "yarn@4.13.0",
+    "engines": {
+        "node": "^20.19.0 || ^22.13.0 || >=24"
+    },
+    "scripts": {
+        "build": "esbuild src/index.{tsx,css} --bundle --platform=node --format=esm --target=es2022 --outdir=dist && esbuild src/dev/index.html --loader:.html=copy --outdir=dist --outbase=src/dev",
+        "build:p": "esbuild src/index.{tsx,css} --bundle --platform=node --format=esm --target=es2022 --outdir=dist  --external:react --external:react-dom --external:three --external:@react-three/fiber --outdir=dist && esbuild src/prod/index.html --loader:.html=copy --outdir=dist --outbase=src/prod",
+        "checktypes": "yarn ct:ptuj",
+        "serve": "yarn build && esbuild dist/** --loader:.html=copy --outdir=dist --servedir=dist --serve",
+        "serve:p": "yarn build:p && esbuild dist/** --loader:.html=copy --outdir=dist --servedir=dist --serve",
+        "watch": "yarn build && esbuild dist/** --loader:.html=copy --outdir=dist --servedir=dist --watch",
+        "watch:p": "yarn build:p && esbuild dist/** --loader:.html=copy --outdir=dist --servedir=dist --watch"
+    }
+}
