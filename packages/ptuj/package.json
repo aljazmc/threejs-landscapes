@@ -1,0 +1,29 @@
+{
+    "name": "@aljazmc/ptuj",
+    "version": "0.0.0",
+    "description": "Medieval town simulation",
+    "author": "aljazmc",
+    "license": "MIT",
+    "private": true,
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/aljazmc/threejs-landscapes.git",
+        "directory": "packages/ptuj"
+    },
+    "packageManager": "yarn@4.12.0",
+    "engines": {
+        "node": "^20.19.0 || ^22.13.0 || >=24"
+    },
+    "devDependencies": {
+        "@types/node": "^25.2.2",
+        "@types/react": "^19.2.13",
+        "@types/react-dom": "^19.2.3",
+        "@types/three": "^0.182.0"
+    },
+    "dependencies": {
+        "@react-three/fiber": "^9.5.0",
+        "react": "^19.2.4",
+        "react-dom": "^19.2.4",
+        "three": "^0.182.0"
+    }
+}
