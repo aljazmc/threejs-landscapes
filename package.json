@@ -1,0 +1,54 @@
+{
+    "name": "threejs-landscapes",
+    "version": "0.0.0",
+    "description": "Experiments with ThreeJS",
+    "author": "aljazmc",
+    "license": "MIT",
+    "private": true,
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/aljazmc/threejs-landscapes.git"
+    },
+    "dependencies": {
+        "@aljazmc/ptuj": "workspace:*"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^2.4.7",
+        "@types/jest": "^30.0.0",
+        "esbuild": "0.27.4",
+        "esbuild-register": "^3.6.0",
+        "jest": "^30.3.0",
+        "jest-esbuild": "^0.4.0",
+        "typescript": "^5.9.3"
+    },
+    "resolutions": {
+        "esbuild": "0.27.4"
+    },
+    "packageManager": "yarn@4.13.0",
+    "workspaces": [
+        "packages/**"
+    ],
+    "engines": {
+        "node": ">=25.3.0",
+        "npm": "Please use yarn instead of NPM to install dependencies",
+        "pnpm": "Please use yarn instead of PNPM to install dependencies",
+        "yarn": ">=4.12.0"
+    },
+    "scripts": {
+        "b:all": "yarn workspaces foreach -A run build",
+        "b:ptuj": "yarn workspace @aljazmc/ptuj run build",
+        "bp:all": "yarn workspaces foreach -A run build:p",
+        "bp:ptuj": "yarn workspace @aljazmc/ptuj run build:p",
+        "ct:all": "yarn workspaces foreach -A run checktypes",
+        "ct:ptuj": "tsc -b --noEmit packages/ptuj",
+        "lint": "biome check",
+        "lint:w": "biome check --write",
+        "lint:wu": "biome check --write --unsafe",
+        "s:ptuj": "yarn workspace @aljazmc/ptuj run serve",
+        "sp:ptuj": "yarn workspace @aljazmc/ptuj run serve:p",
+        "test": "jest",
+        "test:w": "jest --watchAll",
+        "w:ptuj": "yarn workspace @aljazmc/ptuj run watch",
+        "wp:ptuj": "yarn workspace @aljazmc/ptuj run watch:p"
+    }
+}
