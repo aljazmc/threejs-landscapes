@@ -1,0 +1,42 @@
+html,
+body,
+#root {
+    height: 100%;
+    margin: unset;
+    background-color: #a8dcff;
+    font-family: "Trebuchet MS", sans-serif;
+}
+
+.title {
+    position: absolute;
+    top: 16px;
+    left: 20px;
+    color: #ffffff;
+    text-shadow: 0 2px 0 #2f6f9f;
+    pointer-events: none;
+}
+
+.title h1 {
+    margin: 0;
+    font-size: 40px;
+    letter-spacing: 2px;
+}
+
+.title p {
+    margin: 0;
+    font-size: 14px;
+}
+
+.message {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 80px 20px;
+    color: #003333;
+}
+
+.message code {
+    display: block;
+    margin-top: 8px;
+    padding: 8px;
+    background-color: #ffffff;
+}
