@@ -1,0 +1,57 @@
+name: PUBLISH PTUJ
+run-name: Publish package ptuj by @${{ github.actor }}
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+    actions: write
+    contents: write
+
+env:
+    NODE_ENV:           production
+    NODE_OPTIONS:       "--experimental-vm-modules"
+    NODE_NO_WARNINGS:   "1"
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+
+        steps:
+              - name: Checkout code
+                uses: actions/checkout@v6
+                with:
+                    persist-credentials: false
+
+              - name: Install package manager
+                run: |
+                    corepack enable
+                    corepack install
+                    yarn install --mode update-lockfile
+
+              - name: Setup NodeJS
+                uses: actions/setup-node@v6
+                with:
+                    cache: "yarn"
+
+              - name: Install dependencies
+                run: yarn install --immutable
+
+              - name: Build package ptuj
+                run: yarn bp:ptuj
+
+              - name: Configure git, commit and force push
+                run: |
+                  cd packages/ptuj/dist
+                  git config --global user.name aljazmc
+                  git config --global user.email aljazmc@users.noreply.github.com
+                  git config --global init.defaultBranch main
+                  git config --global --type bool push.autoSetupRemote true
+                  git init
+                  git checkout -b main
+                  git add .
+                  git commit -m "feat: new package ptuj"
+                  git push -f --set-upstream https://${{ secrets.GH_TOKEN }}@github.com/aljazmc/ptuj-preview.git
