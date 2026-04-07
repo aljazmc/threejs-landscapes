@@ -15,7 +15,7 @@
     "devDependencies": {
         "@biomejs/biome": "^2.4.14",
         "@types/jest": "^30.0.0",
-        "esbuild": "0.27.4",
+        "esbuild": "0.28.0",
         "esbuild-register": "^3.6.0",
         "jest": "^30.3.0",
         "jest-esbuild": "^0.4.0",
