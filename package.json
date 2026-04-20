@@ -24,7 +24,7 @@
     "resolutions": {
         "esbuild": "0.27.4"
     },
-    "packageManager": "yarn@4.13.0",
+    "packageManager": "yarn@4.14.1",
     "workspaces": [
         "packages/**"
     ],
