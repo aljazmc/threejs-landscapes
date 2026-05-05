@@ -48,7 +48,6 @@
         "sp:ptuj": "yarn workspace @aljazmc/ptuj run serve:p",
         "test": "jest",
         "test:w": "jest --watchAll",
-        "w:ptuj": "yarn workspace @aljazmc/ptuj run watch",
-        "wp:ptuj": "yarn workspace @aljazmc/ptuj run watch:p"
+        "w:ptuj": "yarn workspace @aljazmc/ptuj run watch"
     }
 }
