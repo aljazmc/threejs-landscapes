@@ -28,11 +28,11 @@
         "node": "^20.19.0 || ^22.13.0 || >=24"
     },
     "scripts": {
-        "build": "esbuild src/index.{tsx,css} --bundle --platform=node --format=esm --target=es2022 --outdir=dist && esbuild src/dev/index.html --loader:.html=copy --outdir=dist --outbase=src/dev",
+        "build": "esbuild src/index.{css,html,tsx} --bundle --loader:.html=copy --platform=node --format=esm --target=es2022 --outdir=dist",
         "build:p": "esbuild src/index.{tsx,css} --bundle --platform=node --format=esm --target=es2022 --outdir=dist  --external:react --external:react-dom --external:three --external:@react-three/fiber --outdir=dist && esbuild src/prod/index.html --loader:.html=copy --outdir=dist --outbase=src/prod",
         "checktypes": "yarn ct:ptuj",
-        "serve": "yarn build && esbuild dist/** --loader:.html=copy --outdir=dist --servedir=dist --serve",
+        "serve": "esbuild src/index.{css,html,tsx} --bundle --loader:.html=copy --outdir=dist --serve",
         "serve:p": "yarn build:p && esbuild dist/** --loader:.html=copy --outdir=dist --servedir=dist --serve",
-        "watch": "esbuild src/index.tsx src/index.css src/index.html --bundle --loader:.html=copy --outdir=dist --serve --watch"
+        "watch": "esbuild src/index.{css,html,tsx} --bundle --loader:.html=copy --outdir=dist --serve --watch"
     }
 }
