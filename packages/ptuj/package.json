@@ -33,7 +33,6 @@
         "checktypes": "yarn ct:ptuj",
         "serve": "yarn build && esbuild dist/** --loader:.html=copy --outdir=dist --servedir=dist --serve",
         "serve:p": "yarn build:p && esbuild dist/** --loader:.html=copy --outdir=dist --servedir=dist --serve",
-        "watch": "yarn build && esbuild dist/** --loader:.html=copy --outdir=dist --servedir=dist --watch",
-        "watch:p": "yarn build:p && esbuild dist/** --loader:.html=copy --outdir=dist --servedir=dist --watch"
+        "watch": "esbuild src/index.tsx src/index.css src/index.html --bundle --loader:.html=copy --outdir=dist --serve --watch"
     }
 }
