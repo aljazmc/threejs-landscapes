@@ -4,6 +4,9 @@
 # coverage folder
 coverage/
 
+# dockerfile
+Dockerfile
+
 # node
 .node_modules/
 .npm/
