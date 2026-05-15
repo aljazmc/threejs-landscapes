@@ -30,6 +30,7 @@ clean() {
 
     docker compose down -v --rmi all --remove-orphans
     rm -rf \
+        Dockerfile \
         ale \
         coverage \
         docker-compose.yml \
@@ -58,20 +59,31 @@ clean() {
 
 compose() {
 
+if [[ ! -f Dockerfile ]]; then
+    cat << EOF > Dockerfile
+FROM node:current-alpine
+
+RUN apk update && \
+    apk add git && \
+    npm install -g corepack
+EOF
+fi
+
 if [[ ! -f docker-compose.yml ]]; then
     cat << EOF > docker-compose.yml
 services:
     node:
-        image: node:current-alpine
-        working_dir: $PWD
+        build: .
+        working_dir: "$PWD"
         volumes:
             - .:$PWD
         environment:
-            HOME:               $PWD
-            NODE_ENV:           development
-            NODE_OPTIONS:       "--experimental-vm-modules --no-webstorage"
-            NODE_NO_WARNINGS:   "1"
-            PATH:               "$PATH:$HOME/.yarn/releases/"
+            COREPACK_ENABLE_DOWNLOAD_PROMPT: 0
+            HOME:                            "$PWD"
+            NODE_ENV:                        development
+            NODE_OPTIONS:                    "--experimental-vm-modules --no-webstorage"
+            NODE_NO_WARNINGS:                "1"
+            PATH:                            "$PATH:$HOME/.yarn/releases/"
         network_mode: host
 EOF
 fi
@@ -172,7 +184,7 @@ start() {
 
     node
 
-    docker compose run --rm node yarn sp:ptuj
+    docker compose run --rm node yarn s:ptuj
 
 }
 
