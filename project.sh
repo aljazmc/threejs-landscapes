@@ -59,21 +59,21 @@ clean() {
 
 compose() {
 
-if [[ ! -f Dockerfile ]]; then
-    cat << EOF > Dockerfile
-FROM node:current-alpine
-
-RUN apk update && \
-    apk add git && \
-    npm install -g corepack
-EOF
-fi
+# if [[ ! -f Dockerfile ]]; then
+#     cat << EOF > Dockerfile
+# FROM node:current-alpine
+# 
+# RUN apk update && \
+#     apk add git && \
+#     npm install -g corepack
+# EOF
+# fi
 
 if [[ ! -f docker-compose.yml ]]; then
     cat << EOF > docker-compose.yml
 services:
     node:
-        build: .
+        image: node:25.6-alpine
         working_dir: "$PWD"
         volumes:
             - .:$PWD
