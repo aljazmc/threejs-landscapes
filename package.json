@@ -13,16 +13,16 @@
         "@aljazmc/ptuj": "workspace:*"
     },
     "devDependencies": {
-        "@biomejs/biome": "^2.4.15",
+        "@biomejs/biome": "^2.5.0",
         "@types/jest": "^30.0.0",
-        "esbuild": "0.28.0",
+        "esbuild": "0.28.1",
         "esbuild-register": "^3.6.0",
         "jest": "^30.4.2",
         "jest-esbuild": "^0.4.0",
         "typescript": "^6.0.3"
     },
     "resolutions": {
-        "esbuild": "0.28.0"
+        "esbuild": "0.28.1"
     },
     "packageManager": "yarn@4.15.0",
     "workspaces": [
