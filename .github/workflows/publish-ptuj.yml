@@ -12,7 +12,7 @@ permissions:
     contents: write
 
 env:
-    NODE_ENV:           production
+    NODE_ENV:           development
     NODE_OPTIONS:       "--experimental-vm-modules"
     NODE_NO_WARNINGS:   "1"
 
@@ -26,16 +26,18 @@ jobs:
                 with:
                     persist-credentials: false
 
+              - name: Setup NodeJS
+                uses: actions/setup-node@v6
+                with:
+                    cache-dependency-path: "packages/ptuj"
+                    node-version: "latest"
+                    cache: "yarn"
+
               - name: Install package manager
                 run: |
                     corepack enable
                     corepack install
                     yarn install --mode update-lockfile
-
-              - name: Setup NodeJS
-                uses: actions/setup-node@v6
-                with:
-                    cache: "yarn"
 
               - name: Install dependencies
                 run: yarn install --immutable
