@@ -59,31 +59,21 @@ clean() {
 
 compose() {
 
-# if [[ ! -f Dockerfile ]]; then
-#     cat << EOF > Dockerfile
-# FROM node:current-alpine
-# 
-# RUN apk update && \
-#     apk add git && \
-#     npm install -g corepack
-# EOF
-# fi
-
 if [[ ! -f docker-compose.yml ]]; then
     cat << EOF > docker-compose.yml
 services:
     node:
-        image: node:25.6-alpine
-        working_dir: "$PWD"
+        image: aljazmc/corepack-alpine
+        working_dir: $PWD
         volumes:
             - .:$PWD
         environment:
-            COREPACK_ENABLE_DOWNLOAD_PROMPT: 0
-            HOME:                            "$PWD"
-            NODE_ENV:                        development
-            NODE_OPTIONS:                    "--experimental-vm-modules --no-webstorage"
-            NODE_NO_WARNINGS:                "1"
-            PATH:                            "$PATH:$HOME/.yarn/releases/"
+            HOME:               $PWD
+            NODE_AUTH_TOKEN:    npm_000000000000000000000000000000000000
+            NODE_ENV:           development
+            NODE_OPTIONS:       "--experimental-vm-modules --no-webstorage"
+            NODE_NO_WARNINGS:   "1"
+            PATH:               "$PATH:$HOME/.yarn/releases/"
         network_mode: host
 EOF
 fi
