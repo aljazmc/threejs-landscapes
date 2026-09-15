@@ -8,30 +8,11 @@ PROJECT_GID=$(id -g)
 
 ## Functions
 
-biome() {
-
-if [[ ! -f ale/biome ]]; then
-
-    mkdir -p ale
-    touch ale/biome
-
-    cat << EOF > ale/biome
-#!/bin/sh
-
-docker compose run --rm node yarn biome lsp-proxy
-EOF
-
-    chmod +x ale/biome
-fi
-
-}
-
 clean() {
 
     docker compose down -v --rmi all --remove-orphans
     rm -rf \
         Dockerfile \
-        ale \
         coverage \
         docker-compose.yml \
         node_modules \
@@ -105,57 +86,6 @@ docker compose run --rm node sh -c "printenv"
 
 }
 
-vimrc() {
-	
-if [[ ! -f .vimrc ]]; then
-    cat << EOF > .vimrc
-set shell=/bin/sh
-
-" html
-autocmd Filetype html
-    \ setlocal tabstop=4 |
-    \ setlocal shiftwidth=4 |
-    \ setlocal softtabstop=0 |
-    \ setlocal noexpandtab
-
-" js,jsx,ts,tsx,json
-autocmd Filetype js,jsx,ts,tsx,json
-    \ setlocal tabstop=4 |
-    \ setlocal shiftwidth=4 |
-    \ setlocal softtabstop=0 |
-    \ setlocal expandtab |
-    \ setlocal autoindent |
-    \ setlocal smartindent
-
-" md
-autocmd Filetype md
-    \ setlocal tabstop=4 |
-    \ setlocal shiftwidth=4 |
-    \ setlocal softtabstop=0 |
-    \ setlocal noexpandtab |
-    \ setlocal nosmarttab
-
-" sh
-autocmd Filetype sh
-    \ setlocal tabstop=4 |
-    \ setlocal shiftwidth=4 |
-    \ setlocal softtabstop=0 |
-    \ setlocal expandtab
-
-" yml
-autocmd Filetype yml
-    \ setlocal tabstop=4 |
-    \ setlocal shiftwidth=4 |
-    \ setlocal softtabstop=0 |
-    \ setlocal expandtab
-
-let g:ale_biome_executable = '$PWD/ale/biome'
-let g:ale_biome_use_global = 1
-EOF
-fi
-
-}
-
 start() {
 
     compose
@@ -164,17 +94,11 @@ start() {
 
         composehack
 
-        if [[ "$USER" == "aljazmc" ]]; then
-
-            vimrc
-            biome
-
-        fi
     fi
 
     node
 
-    docker compose run --rm node yarn s:ptuj
+    docker compose run --rm node yarn sp:ptuj
 
 }
 
