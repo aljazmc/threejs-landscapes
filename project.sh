@@ -12,28 +12,26 @@ clean() {
 
     docker compose down -v --rmi all --remove-orphans
     rm -rf \
-        Dockerfile \
         coverage \
-        docker-compose.yml \
-        node_modules \
         packages/*/dist \
         .cache \
-        .pnp.cjs \
-        .pnp.loader.mjs \
-        .vim \
-        .vimrc \
         .yarn/berry \
         .yarn/bin \
         .yarn/cache \
         .yarn/sdks \
-        .yarn/unplugged \
-        .yarn/install-state.gz \
-        .yarnrc
+        .yarn/unplugged
 
-    find . \( -type f -name "*.d.ts" \
-                   -o -name "*.js" \
-                   -o -name "*.jsx" \
-                   -o -name "*.tsbuildinfo" \) -delete
+    find . \( -type f \
+        -name "*.d.ts" \
+        -o -name "*.js" \
+        -o -name "*.jsx" \
+        -o -name "*.tsbuildinfo" \
+        -o -name ".pnp.loader.mjs" \
+        -o -name ".pnp.cjs" \
+        -o -name "docker-compose.yml" \
+        -o -name "install-state.gz" \
+        \) \
+        -delete
 
 }
 
