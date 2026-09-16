@@ -23,7 +23,7 @@
         "@types/react-dom": "^19.2.7",
         "@types/three": "^0.185.4"
     },
-    "packageManager": "yarn@4.13.0",
+    "packageManager": "yarn@4.18.0",
     "engines": {
         "node": "^20.19.0 || ^22.13.0 || ^24 || ^25 || ^26"
     },
