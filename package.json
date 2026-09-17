@@ -10,7 +10,8 @@
         "url": "https://github.com/aljazmc/threejs-landscapes.git"
     },
     "dependencies": {
-        "@aljazmc/ptuj": "workspace:*"
+        "@aljazmc/ptuj": "workspace:*",
+        "@aljazmc/starter": "workspace:*"
     },
     "devDependencies": {
         "@biomejs/biome": "^2.5.13",
@@ -46,17 +47,23 @@
     "scripts": {
         "b:all": "yarn workspaces foreach -A run build",
         "b:ptuj": "yarn workspace @aljazmc/ptuj run build",
+        "b:starter": "yarn workspace @aljazmc/starter run build",
         "bp:all": "yarn workspaces foreach -A run build:p",
         "bp:ptuj": "yarn workspace @aljazmc/ptuj run build:p",
+        "bp:starter": "yarn workspace @aljazmc/starter run build:p",
         "ct:all": "yarn workspaces foreach -A run checktypes",
         "ct:ptuj": "tsc -b --noEmit packages/ptuj",
+        "ct:starter": "tsc -b --noEmit packages/starter",
         "lint": "biome check",
         "lint:w": "biome check --write",
         "lint:wu": "biome check --write --unsafe",
         "s:ptuj": "yarn workspace @aljazmc/ptuj run serve",
+        "s:starter": "yarn workspace @aljazmc/starter run serve",
         "sp:ptuj": "yarn workspace @aljazmc/ptuj run serve:p",
+        "sp:starter": "yarn workspace @aljazmc/starter run serve:p",
         "test": "jest",
         "test:w": "jest --watchAll",
-        "w:ptuj": "yarn workspace @aljazmc/ptuj run watch"
+        "w:ptuj": "yarn workspace @aljazmc/ptuj run watch",
+        "w:starter": "yarn workspace @aljazmc/starter run watch"
     }
 }

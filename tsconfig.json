@@ -18,13 +18,17 @@
         "target": "es2022",
         "verbatimModuleSyntax": true,
         "paths": {
-            "@aljazmc/ptuj": ["./packages/ptuj"]
+            "@aljazmc/ptuj": ["./packages/ptuj"],
+            "@aljazmc/starter": ["./packages/starter"]
         }
     },
     "exclude": ["jest.config.ts", "**/dist", "**/tests"],
     "references": [
         {
             "path": "./packages/ptuj"
+        },
+        {
+            "path": "./packages/starter"
         }
     ]
 }
