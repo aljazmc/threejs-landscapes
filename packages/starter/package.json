@@ -1,0 +1,38 @@
+{
+    "name": "@aljazmc/starter",
+    "version": "0.0.0",
+    "description": "ThreeJS landscapes starter package",
+    "author": "aljazmc",
+    "license": "MIT",
+    "private": true,
+    "type": "module",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/aljazmc/threejs-landscapes.git",
+        "directory": "packages/starter"
+    },
+    "dependencies": {
+        "@react-three/fiber": "^9.7.0",
+        "react": "^19.2.8",
+        "react-dom": "^19.2.8",
+        "three": "^0.186.0"
+    },
+    "devDependencies": {
+        "@types/node": "^26.6.0",
+        "@types/react": "^19.2.18",
+        "@types/react-dom": "^19.2.7",
+        "@types/three": "^0.186.0"
+    },
+    "packageManager": "yarn@4.18.0",
+    "engines": {
+        "node": "^20.19.0 || ^22.13.0 || ^24 || ^25 || ^26"
+    },
+    "scripts": {
+        "build": "esbuild src/index.{css,html,tsx} --bundle --loader:.html=copy --platform=node --format=esm --target=es2022 --outdir=dist",
+        "build:p": "esbuild src/index.{tsx,css} --bundle --platform=node --format=esm --target=es2022 --outdir=dist  --external:react --external:react-dom --external:three --external:@react-three/fiber --outdir=dist && esbuild src/prod/index.html --loader:.html=copy --outdir=dist --outbase=src/prod",
+        "checktypes": "yarn ct:starter",
+        "serve": "esbuild src/index.{css,html,tsx} --bundle --loader:.html=copy --outdir=dist --serve",
+        "serve:p": "yarn build:p && esbuild dist/** --loader:.html=copy --outdir=dist --servedir=dist --serve",
+        "watch": "esbuild src/index.{css,html,tsx} --bundle --loader:.html=copy --outdir=dist --serve --watch"
+    }
+}
