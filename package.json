@@ -14,11 +14,11 @@
         "@aljazmc/starter": "workspace:*"
     },
     "devDependencies": {
-        "@biomejs/biome": "^2.5.13",
+        "@biomejs/biome": "^2.5.14",
         "@types/jest": "^30.0.0",
         "esbuild": "0.28.2",
         "esbuild-register": "^3.6.0",
-        "jest": "^30.5.1",
+        "jest": "^30.5.2",
         "jest-esbuild": "^0.4.0",
         "typescript": "^7.0.2",
         "unrs-resolver": "^1.12.2"
