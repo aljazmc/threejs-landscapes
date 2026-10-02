@@ -14,7 +14,7 @@
         "@aljazmc/starter": "workspace:*"
     },
     "devDependencies": {
-        "@biomejs/biome": "^2.5.14",
+        "@biomejs/biome": "^2.5.15",
         "@types/jest": "^30.0.0",
         "esbuild": "0.28.2",
         "esbuild-register": "^3.6.0",
