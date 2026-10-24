@@ -13,6 +13,7 @@ clean() {
     docker compose down -v --rmi all --remove-orphans
     rm -rf \
         coverage \
+        node_modules \
         packages/*/dist \
         .cache \
         .yarn/berry \
