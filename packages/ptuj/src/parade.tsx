@@ -89,8 +89,8 @@ interface Member {
     /** Its place in the group's single file, from the back. */
     rank: number;
     /** The arm with the ježevka and the kicking leg, if it has them. */
-    arm?: THREE.Object3D;
-    leg?: THREE.Object3D;
+    arm?: THREE.Object3D | undefined;
+    leg?: THREE.Object3D | undefined;
     /** Where it walks now: meters along the parade and to the right. */
     s: number;
     lateral: number;
