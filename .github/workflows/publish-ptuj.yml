@@ -1,15 +1,29 @@
 name: PUBLISH PTUJ
-run-name: Publish package ptuj by @${{ github.actor }}
+run-name: Publish package ptuj ${{ inputs.version }} by @${{ github.actor }}
 
 on:
-    push:
-        branches: [ main ]
+    # pull requests only build the package
     pull_request:
         branches: [ main ]
+        paths: [ ".github/workflows/publish-ptuj.yml", "packages/ptuj/**" ]
+    # started by ci.yml when the version of ptuj is not in ptuj-preview yet, or by hand
+    workflow_dispatch:
+        inputs:
+            version:
+                description: Version to publish, built from its tag @aljazmc/ptuj@<version>; empty publishes the branch with its package.json version
+                type: string
+                default: ""
+            force:
+                description: Publish even if the version is already in ptuj-preview
+                type: boolean
+                default: false
 
 permissions:
-    actions: write
-    contents: write
+    contents: read
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event_name }}
+    cancel-in-progress: false
 
 env:
     NODE_ENV: development
@@ -24,6 +38,7 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v6
               with:
+                  ref: ${{ inputs.version && format('refs/tags/@aljazmc/ptuj@{0}', inputs.version) || '' }}
                   persist-credentials: false
 
             - name: Setup NodeJS
@@ -45,14 +60,21 @@ jobs:
             - name: Build package ptuj
               run: yarn bp:ptuj
 
-            - name: Configure git, commit and force push
-              if: github.event_name == 'push'
+            - name: Configure git, commit, tag and force push
+              if: github.event_name == 'workflow_dispatch'
               env:
                   GH_TOKEN: ${{ secrets.GH_TOKEN }}
+                  FORCE: ${{ inputs.force }}
               run: |
                   if [ -z "$GH_TOKEN" ]; then
                       echo "::error::GH_TOKEN secret is empty or not available to this run"
                       exit 1
+                  fi
+                  version=$(node -p "require('./packages/ptuj/package.json').version")
+                  repository="https://x-access-token:${GH_TOKEN}@github.com/aljazmc/ptuj-preview.git"
+                  if [ "$FORCE" != "true" ] && [ -n "$(git ls-remote --tags "$repository" "refs/tags/v$version")" ]; then
+                      echo "::notice::@aljazmc/ptuj@$version is already in ptuj-preview."
+                      exit 0
                   fi
                   cd packages/ptuj/dist
                   git config --global user.name aljazmc
@@ -62,5 +84,6 @@ jobs:
                   git init
                   git checkout -b main
                   git add .
-                  git commit -m "feat: new package ptuj"
-                  git push -f --set-upstream https://x-access-token:${GH_TOKEN}@github.com/aljazmc/ptuj-preview.git
+                  git commit -m "feat: new package ptuj v$version"
+                  git tag -a "v$version" -m "version: @aljazmc/ptuj v$version"
+                  git push -f "$repository" main "refs/tags/v$version"
