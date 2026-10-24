@@ -22,7 +22,7 @@
             "@aljazmc/starter": ["./packages/starter"]
         }
     },
-    "exclude": ["jest.config.ts", "**/dist", "**/tests"],
+    "exclude": ["*.config.ts", "**/dist", "**/tests"],
     "references": [
         {
             "path": "./packages/ptuj"
