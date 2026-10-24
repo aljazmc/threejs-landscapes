@@ -60,6 +60,16 @@ jobs:
             - name: Build package ptuj
               run: yarn bp:ptuj
 
+            # a build without the 3D models is not worth publishing
+            - name: Check 3D models
+              run: |
+                  models=$(find packages/ptuj/dist/models -type f \( -name "*.glb" -o -name "*.gltf" \) 2>/dev/null | wc -l)
+                  if [ "$models" -eq 0 ]; then
+                      echo "::error::packages/ptuj/dist/models has no 3D models (.glb or .gltf)"
+                      exit 1
+                  fi
+                  echo "$models 3D models in packages/ptuj/dist/models."
+
             - name: Configure git, commit, tag and force push
               if: github.event_name == 'workflow_dispatch'
               env:
