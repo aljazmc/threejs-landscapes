@@ -8,7 +8,7 @@ coverage/
 Dockerfile
 
 # node
-.node_modules/
+node_modules/
 .npm/
 
 # secrets
