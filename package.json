@@ -14,12 +14,11 @@
         "@aljazmc/starter": "workspace:*"
     },
     "devDependencies": {
-        "@biomejs/biome": "^2.6.2",
-        "@types/jest": "^30.0.0",
+        "@aljazmc/formatero": "^0.4.0",
+        "@aljazmc/lintero": "^0.4.0",
+        "@aljazmc/monorepo": "^0.3.0",
+        "@aljazmc/testero": "^0.3.0",
         "esbuild": "0.28.2",
-        "esbuild-register": "^3.6.0",
-        "jest": "^30.5.2",
-        "jest-esbuild": "^0.4.0",
         "typescript": "^7.0.2",
         "unrs-resolver": "^1.12.2"
     },
@@ -53,15 +52,14 @@
         "ct:all": "yarn workspaces foreach -A run checktypes",
         "ct:ptuj": "tsc -b --noEmit packages/ptuj",
         "ct:starter": "tsc -b --noEmit packages/starter",
-        "lint": "biome check",
-        "lint:w": "biome check --write",
-        "lint:wu": "biome check --write --unsafe",
+        "lint": "lintero && formatero",
+        "lint:w": "lintero --write && formatero --write",
+        "lint:wu": "lintero --write --unsafe && formatero --write",
         "s:ptuj": "yarn workspace @aljazmc/ptuj run serve",
         "s:starter": "yarn workspace @aljazmc/starter run serve",
         "sp:ptuj": "yarn workspace @aljazmc/ptuj run serve:p",
         "sp:starter": "yarn workspace @aljazmc/starter run serve:p",
-        "test": "jest",
-        "test:w": "jest --watchAll",
+        "test": "testero",
         "w:ptuj": "yarn workspace @aljazmc/ptuj run watch",
         "w:starter": "yarn workspace @aljazmc/starter run watch"
     }
