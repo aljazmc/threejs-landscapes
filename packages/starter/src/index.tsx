@@ -10,8 +10,6 @@ function Box(props: ThreeElements["mesh"]) {
     useFrame((state, delta) => (meshRef.current.rotation.x += delta));
     return (
         <mesh
-            // @ts-expect-error
-            role="treeitem"
             {...props}
             ref={meshRef}
             scale={active ? 1.5 : 1}
