@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <title>castle</title>
+    <path d="M8 56V26h8v6h6v-6h8v6h6v-6h8v6h6v-6h8v30z"/>
+    <path d="M26 56V44a6 6 0 0 1 12 0v12"/>
+    <path d="M28 26V10l8 4-8 4"/>
+</svg>

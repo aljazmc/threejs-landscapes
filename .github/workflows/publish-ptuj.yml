@@ -60,15 +60,15 @@ jobs:
             - name: Build package ptuj
               run: yarn bp:ptuj
 
-            # a build without the 3D models is not worth publishing
-            - name: Check 3D models
+            # a build without the map is not worth publishing
+            - name: Check the map
               run: |
-                  models=$(find packages/ptuj/dist/models -type f \( -name "*.glb" -o -name "*.gltf" \) 2>/dev/null | wc -l)
-                  if [ "$models" -eq 0 ]; then
-                      echo "::error::packages/ptuj/dist/models has no 3D models (.glb or .gltf)"
+                  if [ ! -s packages/ptuj/dist/map/ptuj.json ]; then
+                      echo "::error::packages/ptuj/dist/map/ptuj.json is missing"
                       exit 1
                   fi
-                  echo "$models 3D models in packages/ptuj/dist/models."
+                  icons=$(find packages/ptuj/dist/icons -name "*.svg" 2>/dev/null | wc -l)
+                  echo "map and $icons icons in packages/ptuj/dist."
 
             - name: Configure git, commit, tag and force push
               if: github.event_name == 'workflow_dispatch'

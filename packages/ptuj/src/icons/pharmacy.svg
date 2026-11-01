@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <title>pharmacy</title>
+    <rect x="10" y="22" width="44" height="22" rx="11" transform="rotate(-40 32 33)"/>
+    <path d="M25 24l14 17"/>
+</svg>

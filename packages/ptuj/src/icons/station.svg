@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <title>station</title>
+    <rect x="14" y="8" width="36" height="38" rx="6"/>
+    <path d="M14 30h36"/>
+    <path d="M22 56l6-10M42 56l-6-10"/>
+    <circle cx="22" cy="38" r="2"/>
+    <circle cx="42" cy="38" r="2"/>
+    <path d="M22 16h20"/>
+</svg>

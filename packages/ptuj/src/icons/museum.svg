@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <title>museum</title>
+    <path d="M6 56h52M10 50h44"/>
+    <path d="M6 22L32 8l26 14z"/>
+    <path d="M15 28v20M25 28v20M39 28v20M49 28v20"/>
+    <circle cx="32" cy="17" r="2"/>
+</svg>

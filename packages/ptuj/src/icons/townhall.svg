@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <title>townhall</title>
+    <path d="M6 56h52"/>
+    <path d="M10 56V28h44v28"/>
+    <path d="M6 28l26-14 26 14"/>
+    <path d="M32 14V6"/>
+    <circle cx="32" cy="22" r="4"/>
+    <path d="M18 56V38M28 56V38M36 56V38M46 56V38"/>
+</svg>

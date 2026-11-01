@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <title>court</title>
+    <path d="M8 56h48M12 50h40"/>
+    <path d="M8 22l24-14 24 14z"/>
+    <path d="M16 26v22M26 26v22M38 26v22M48 26v22"/>
+</svg>

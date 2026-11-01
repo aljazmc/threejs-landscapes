@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <title>church</title>
+    <path d="M12 56V30l10-8 10 8v26z"/>
+    <path d="M32 56V34h22v22z"/>
+    <path d="M22 22V6M17 11h10"/>
+    <path d="M19 56v-9a3 3 0 0 1 6 0v9"/>
+</svg>

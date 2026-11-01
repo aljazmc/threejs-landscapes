@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <title>bar</title>
+    <path d="M12 8h40L32 32z"/>
+    <path d="M32 32v20M20 56h24"/>
+    <path d="M18 14h28"/>
+</svg>

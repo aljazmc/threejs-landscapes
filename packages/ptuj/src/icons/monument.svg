@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <title>monument</title>
+    <path d="M14 56h36M18 56v-8h28v8"/>
+    <path d="M26 48V30"/>
+    <path d="M38 48V30"/>
+    <path d="M22 30h20l-4-8H26z"/>
+    <circle cx="32" cy="14" r="5"/>
+</svg>

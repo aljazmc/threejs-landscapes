@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <title>cafe</title>
+    <path d="M10 24h36v14c0 10-8 16-18 16S10 48 10 38z"/>
+    <path d="M46 28h4a6 6 0 0 1 0 12h-4"/>
+    <path d="M20 6c-3 4 3 8 0 12M30 6c-3 4 3 8 0 12"/>
+</svg>

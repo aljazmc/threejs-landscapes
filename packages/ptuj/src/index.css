@@ -1,42 +1,210 @@
+:root {
+    --sky: #02050b;
+    --panel: rgba(4, 16, 26, 0.82);
+    --neon: #00e5ff;
+    --neon-dim: rgba(0, 229, 255, 0.35);
+    --text: #c8f6ff;
+    --amber: #ffcf40;
+    --magenta: #ff5cf4;
+}
+
 html,
 body,
 #root {
     height: 100%;
     margin: unset;
-    background-color: #a8dcff;
-    font-family: "Trebuchet MS", sans-serif;
+    background-color: var(--sky);
+    color: var(--text);
+    font-family: "Consolas", "DejaVu Sans Mono", monospace;
+}
+
+/* the map, and the notice about its data under it */
+#root {
+    display: flex;
+    flex-direction: column;
+}
+
+.stage {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .title {
     position: absolute;
-    top: 16px;
-    left: 20px;
-    color: #ffffff;
-    text-shadow: 0 2px 0 #2f6f9f;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-sizing: border-box;
+    width: max-content;
+    max-width: min(760px, calc(100vw - 24px));
+    padding: 8px 14px;
+    border: 1px solid var(--neon-dim);
+    border-radius: 6px;
+    background-color: var(--panel);
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.15);
+    text-align: center;
     pointer-events: none;
 }
 
 .title h1 {
     margin: 0;
-    font-size: 40px;
-    letter-spacing: 2px;
+    color: var(--neon);
+    font-size: 26px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    text-shadow: 0 0 8px var(--neon);
 }
 
 .title p {
-    margin: 0;
+    margin: 2px 0 0;
+    font-size: 15px;
+}
+
+.title p.hint {
+    margin-top: 4px;
+    color: rgba(200, 246, 255, 0.7);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.labels {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: var(--neon);
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    opacity: 0;
+}
+
+.label.village {
+    color: #7fe9c0;
+    font-size: 11px;
+}
+
+/* the names of places stand over their icons, in the colors of their
+   groups, see GROUPS in layers.ts */
+.label.landmark,
+.label.health,
+.label.public,
+.label.education,
+.label.food {
+    margin-top: -12px;
+    font-size: 11px;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.label.landmark {
+    color: #7df9ff;
+}
+
+.label.health {
+    color: #ff6b8a;
+}
+
+.label.public {
+    color: #b48cff;
+}
+
+.label.education {
+    color: #9dff7a;
+}
+
+.label.food {
+    color: #ffcf40;
+}
+
+.back {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 6px 14px;
+    border: 1px solid var(--neon);
+    border-radius: 6px;
+    background-color: var(--panel);
+    color: var(--neon);
+    font: inherit;
     font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.25);
+}
+
+.back:hover {
+    background-color: rgba(0, 229, 255, 0.15);
 }
 
 .message {
     max-width: 560px;
     margin: 0 auto;
     padding: 80px 20px;
-    color: #003333;
 }
 
 .message code {
     display: block;
     margin-top: 8px;
     padding: 8px;
-    background-color: #ffffff;
+    border: 1px solid var(--neon-dim);
+    color: var(--neon);
+}
+
+/* the notice about the map data, in a strip under the map */
+.license {
+    flex: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px 14px;
+    padding: 6px 16px;
+    border-top: 1px solid var(--neon-dim);
+    background-color: var(--panel);
+    font-size: 13px;
+    text-align: center;
+}
+
+.license p {
+    max-width: min(1200px, 100%);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.license a {
+    color: var(--neon);
+}
+
+.license button {
+    padding: 3px 14px;
+    border: 1px solid var(--neon);
+    border-radius: 6px;
+    background: none;
+    color: var(--neon);
+    font: inherit;
+    cursor: pointer;
+}
+
+.license button.credit {
+    padding: 0;
+    border: none;
+    color: rgba(200, 246, 255, 0.75);
+    font-size: 12px;
+}
+
+/* where the centered title would reach the corner, the button goes under */
+@media (max-width: 1100px) {
+    .back {
+        top: auto;
+        bottom: 12px;
+    }
 }

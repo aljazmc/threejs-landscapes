@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <title>office</title>
+    <rect x="12" y="8" width="40" height="48" rx="2"/>
+    <path d="M20 18h8M36 18h8M20 28h8M36 28h8M20 38h8M36 38h8"/>
+    <path d="M28 56v-8h8v8"/>
+</svg>

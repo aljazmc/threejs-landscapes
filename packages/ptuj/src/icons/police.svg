@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <title>police</title>
+    <path d="M32 6l22 8v14c0 14-10 24-22 30C20 52 10 42 10 28V14z"/>
+    <path d="M32 20l3.5 7 7.5 1-5.5 5.5 1.5 7.5-7-4-7 4 1.5-7.5L21 28l7.5-1z"/>
+</svg>

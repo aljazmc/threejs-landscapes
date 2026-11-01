@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <title>kindergarten</title>
+    <rect x="10" y="30" width="20" height="20" rx="2"/>
+    <path d="M16 36l8 8M24 36l-8 8"/>
+    <rect x="34" y="34" width="20" height="16" rx="2"/>
+    <path d="M20 30l6-16h12l6 20"/>
+</svg>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <title>monastery</title>
+    <path d="M6 56V32h52v24"/>
+    <path d="M6 32l8-8h36l8 8"/>
+    <path d="M26 24V12l6-6 6 6v12"/>
+    <path d="M32 10v-4"/>
+    <path d="M14 44h6M28 44h8M44 44h6"/>
+</svg>

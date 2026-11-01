@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 64 64" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <title>tower</title>
+    <path d="M20 56l3-36h18l3 36z"/>
+    <path d="M18 20h28l-14-14z"/>
+    <path d="M29 56v-8a3 3 0 0 1 6 0v8"/>
+    <path d="M29 32h6"/>
+</svg>
