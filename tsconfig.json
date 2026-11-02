@@ -18,12 +18,24 @@
         "target": "es2022",
         "verbatimModuleSyntax": true,
         "paths": {
+            "@aljazmc/bloodmoon": ["./packages/bloodmoon"],
+            "@aljazmc/hullbreach": ["./packages/hullbreach"],
+            "@aljazmc/moonshadow": ["./packages/moonshadow"],
             "@aljazmc/ptuj": ["./packages/ptuj"],
             "@aljazmc/starter": ["./packages/starter"]
         }
     },
     "exclude": ["*.config.ts", "**/dist", "**/tests"],
     "references": [
+        {
+            "path": "./packages/bloodmoon"
+        },
+        {
+            "path": "./packages/hullbreach"
+        },
+        {
+            "path": "./packages/moonshadow"
+        },
         {
             "path": "./packages/ptuj"
         },
