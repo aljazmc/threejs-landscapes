@@ -1,0 +1,39 @@
+html,
+body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+    background: #000;
+}
+
+#root {
+    position: fixed;
+    inset: 0;
+}
+
+/* the 960x540 view of the game, letterboxed in the window */
+.stage {
+    position: absolute;
+    overflow: hidden;
+    background: #020308;
+}
+
+.stage canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.stage .hud {
+    cursor: default;
+    /* fingers play the game: no scrolling, zooming or selecting */
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
