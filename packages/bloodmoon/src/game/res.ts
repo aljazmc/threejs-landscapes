@@ -58,6 +58,7 @@ const SOUNDS = [
     "flame",
     "dry",
     "splat",
+    "headshot",
     "shriek",
     "claw",
     "hurt",
@@ -93,7 +94,7 @@ export function image(name: string): HTMLImageElement {
     return get(images, name);
 }
 
-/** res/gothic-<name>.ogg. */
+/** res/gothic-<name>.ogg (or .mp3 or .wav, see soundFiles). */
 export function sound(name: string): AudioBuffer {
     return get(sounds, name);
 }
@@ -106,6 +107,39 @@ export function hasSound(name: string): boolean {
 /** res/gothic-map.txt. */
 export function mapText(): string {
     return map;
+}
+
+/** The music; the other sounds are effects. */
+const MUSIC = new Set(["theme", "combat", "victory", "defeat"]);
+
+/**
+ * The files to try for a sound, best first: each is written as .ogg, and
+ * for Safari, which decodes no Ogg Vorbis, the music as .mp3 and the
+ * effects as .wav (an MP3 would start them a little late).
+ */
+function soundFiles(name: string): string[] {
+    const other = `${name}.${MUSIC.has(name) ? "mp3" : "wav"}`;
+    const ogg = document
+        .createElement("audio")
+        .canPlayType('audio/ogg; codecs="vorbis"');
+    return ogg ? [`${name}.ogg`, other] : [other];
+}
+
+/** Fetches and decodes the first of the files the browser can play. */
+async function decodeSound(
+    audio: BaseAudioContext,
+    files: string[],
+): Promise<AudioBuffer> {
+    let error: unknown = null;
+    for (const file of files) {
+        try {
+            const response = await fetchOk(`${BASE}gothic-${file}`);
+            return await audio.decodeAudioData(await response.arrayBuffer());
+        } catch (e) {
+            error = e;
+        }
+    }
+    throw error;
 }
 
 async function fetchOk(url: string): Promise<Response> {
@@ -142,11 +176,9 @@ export async function preload(
         }),
         ...SOUNDS.map(async (name) => {
             try {
-                const response = await fetchOk(`${BASE}gothic-${name}.ogg`);
-                const data = await response.arrayBuffer();
-                sounds.set(name, await audio.decodeAudioData(data));
+                sounds.set(name, await decodeSound(audio, soundFiles(name)));
             } catch (e) {
-                console.warn(`bloodmoon: ${name}.ogg stays silent`, e);
+                console.warn(`bloodmoon: ${name} stays silent`, e);
             }
             tick();
         }),

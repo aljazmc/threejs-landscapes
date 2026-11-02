@@ -13,4 +13,4 @@ def shriek():
     voice = resonant(cry, pitch * 3, q=4.0) * envelope(duration, attack=0.03, decay=0.3, sustain=0.6, hold=0.6,
         release=0.4)
     ashes = highpass(noise(1.0, seed=8), 3000) * envelope(1.0, attack=0.3, decay=0.4, sustain=0.2, release=0.3)
-    return normalize(mix(drive(voice, 2.0), delayed(0.25 * ashes, 0.5)), 0.8)
+    return normalize(mix(drive(voice, 1.4), delayed(0.25 * ashes, 0.5)), 0.8)

@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import type { Castle } from "./castle";
 import { Flare, Fx } from "./fx";
-import { KINDS, Monster, RADIUS, START_HEALTH } from "./monster";
+import { KINDS, Monster, POST_REACH, RADIUS, startHealth } from "./monster";
 
 /**
  * The vampire hunter against the ten creatures of the night in the castle,
@@ -24,6 +24,16 @@ export const REVOLVER_DAMAGE = 40;
 export const REVOLVER_INTERVAL = 0.5;
 /** Per second. */
 export const FLAME_DAMAGE = 150;
+/** A bullet in the head does this many times the damage. */
+const HEADSHOT = 3;
+/** On the alert, this many of the nearest monsters (besides the small ones) rush the hunter. */
+const RUSHERS = 2;
+/** Monsters this near each other (m) gather in a pack. */
+const PACK_AREA = 10;
+/** The death shriek's loudness right beside the hunter (1: as recorded). */
+const SHRIEK_VOLUME = 0.4;
+/** Seconds the HEADSHOT text shows. */
+const HEADSHOT_TIME = 0.9;
 export const FLAME_REACH = 6;
 /** Radians to each side of the aim. */
 const FLAME_ARC = 0.3;
@@ -112,6 +122,8 @@ export class Game {
     private triggerBlocked = true;
     hurtTime = 0;
     hitTime = 0;
+    /** Counts down from HEADSHOT_TIME after a hit in the head. */
+    headshotTime = 0;
     /** true when won, false when lost. */
     result: boolean | null = null;
     /** Muzzles of the revolver and the flamethrower, as last drawn. */
@@ -128,12 +140,13 @@ export class Game {
         const a = THREE.MathUtils.degToRad(angle);
         const game = new Game(x, y, Math.atan2(-Math.cos(a), Math.sin(a)));
         castle.monsterStarts.forEach((s, i) => {
+            const kind = i % KINDS.length;
             const m = new Monster(
-                i % KINDS.length,
+                kind,
                 s.x,
                 s.y,
                 Math.random() * Math.PI * 2,
-                START_HEALTH,
+                startHealth(kind),
             );
             // if the start is in the way of a wall or prop, the nearest free cell
             if (!castle.circleFree(m.x, m.y, RADIUS)) {
@@ -157,6 +170,7 @@ export class Game {
         this.time += dt;
         this.hurtTime = Math.max(this.hurtTime - dt, 0);
         this.hitTime = Math.max(this.hitTime - dt, 0);
+        this.headshotTime = Math.max(this.headshotTime - dt, 0);
         this.shake = Math.max(this.shake - dt, 0);
         this.recoil = Math.max(this.recoil - dt * 1.5, 0);
         this.switchTime = Math.max(this.switchTime - dt, 0);
@@ -218,58 +232,66 @@ export class Game {
         const pack = m.pack;
         m.hurt(damage);
         if (pack) this.packCharge(pack);
-        this.alertArea(m);
-        if (m.dead() && !wasDead) this.soundAt("shriek", m.x, m.y, 0.9);
+        this.alertAll(m);
+        if (m.dead() && !wasDead)
+            this.soundAt("shriek", m.x, m.y, SHRIEK_VOLUME);
         else if (splat) this.soundAt("splat", m.x, m.y, 0.7);
     }
 
     // --- the monsters' plans ---------------------------------------------
 
     /**
-     * A monster was hurt: every other one in its room (or hall) still
-     * roaming turns hostile. The nearest to the hunter attacks at once, two
-     * or three of the others gather out of sight to charge together, and
-     * the rest lie in wait in covers the hunter can't see on his way.
+     * A monster was hurt: the whole map turns hostile. The small, fast ones
+     * and the two nearest of the others rush the hunter at once; the big
+     * ones lie in wait around corners on the hunter's way; the rest gather
+     * in packs of two or three at hidden spots and charge together, or lie
+     * in wait too when none is near enough to gather with.
      */
-    private alertArea(hit: Monster): void {
+    private alertAll(hit: Monster): void {
         const castle = this.castle;
         if (!castle) return;
-        const area = castle.area(Math.floor(hit.x), Math.floor(hit.y));
         const far = (m: Monster) =>
             Math.hypot(m.x - this.playerX, m.y - this.playerY);
-        const group = this.monsters
-            .filter(
-                (m) =>
-                    m !== hit &&
-                    !m.dead() &&
-                    !m.angry &&
-                    castle.area(Math.floor(m.x), Math.floor(m.y)) === area,
-            )
+        const calm = this.monsters
+            .filter((m) => m !== hit && !m.dead() && !m.angry)
             .sort((a, b) => far(a) - far(b));
-        const nearest = group.shift();
-        if (!nearest) return;
-        nearest.alert("charge", null, castle);
         const taken = new Set<number>();
-        if (group.length >= 2) {
-            const size = group.length >= 3 && Math.random() < 0.5 ? 3 : 2;
-            const pack = group.splice(0, size);
-            const id = ++this.packs;
-            const leader = pack[0]!;
-            const meet = castle.cover(
-                leader.x,
-                leader.y,
+        const cover = (m: Monster) =>
+            castle.cover(
+                m.x,
+                m.y,
                 this.playerX,
                 this.playerY,
                 taken,
+                POST_REACH,
             );
-            for (const m of pack) m.alert("pack", meet, castle, id);
+        const gatherers: Monster[] = [];
+        let rushers = 0;
+        for (const m of calm) {
+            if (m.size === "small" || rushers < RUSHERS) {
+                if (m.size !== "small") rushers++;
+                m.alert("charge", null, castle);
+            } else if (m.size === "big") m.alert("ambush", cover(m), castle);
+            else gatherers.push(m);
         }
-        for (const m of group)
-            m.alert(
-                "ambush",
-                castle.cover(m.x, m.y, this.playerX, this.playerY, taken),
-                castle,
-            );
+        while (gatherers.length > 0) {
+            const leader = gatherers.shift()!;
+            const near = gatherers
+                .filter(
+                    (m) =>
+                        Math.hypot(m.x - leader.x, m.y - leader.y) < PACK_AREA,
+                )
+                .slice(0, 2);
+            if (near.length === 0) {
+                leader.alert("ambush", cover(leader), castle);
+                continue;
+            }
+            for (const m of near) gatherers.splice(gatherers.indexOf(m), 1);
+            const id = ++this.packs;
+            const meet = cover(leader);
+            for (const m of [leader, ...near])
+                m.alert("pack", meet, castle, id);
+        }
     }
 
     /** The pack charges together. */
@@ -371,7 +393,7 @@ export class Game {
 
     hurtPlayer(damage: number): void {
         if (this.result !== null) return;
-        this.sounds.push(["hurt", 1]);
+        this.sounds.push(["hurt", 0.7]);
         this.health = Math.max(this.health - damage, 0);
         this.hurtTime = 0.5;
         this.shake = Math.max(this.shake, 0.12);
@@ -417,6 +439,12 @@ export class Game {
             this.fuel = Math.min(this.fuel + dt / REFUEL_TIME, 1);
             if (this.fuel >= RELIGHT) this.dry = false;
         }
+    }
+
+    /** A hit in the head: its sound and the HEADSHOT text. */
+    private headshot(): void {
+        this.sounds.push(["headshot", 0.8]);
+        this.headshotTime = HEADSHOT_TIME;
     }
 
     /** Distance along a ray to where it enters the monster's cylinder. */
@@ -481,7 +509,7 @@ export class Game {
     /** The revolver fires a silver bullet along the line of sight. */
     private shoot(castle: Castle): void {
         this.reload = REVOLVER_INTERVAL;
-        this.sounds.push(["revolver", 0.8]);
+        this.sounds.push(["revolver", 0.6]);
         this.recoil = 0.12;
         this.drumGoal += (Math.PI * 2) / 6;
         this.shake = Math.max(this.shake, 0.05);
@@ -495,7 +523,13 @@ export class Game {
         const { hit, dist } = this.monsterOnRay(e, f, wall);
         const at = e.clone().addScaledVector(f, dist - 0.05);
         if (hit) {
-            this.hurtMonster(hit, REVOLVER_DAMAGE, true);
+            const headshot = hit.headOnRay(e, f);
+            if (headshot) this.headshot();
+            this.hurtMonster(
+                hit,
+                REVOLVER_DAMAGE * (headshot ? HEADSHOT : 1),
+                true,
+            );
             this.fx.splash(at, 5);
             this.hitTime = 0.15;
         } else {

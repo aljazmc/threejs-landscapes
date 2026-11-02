@@ -57,6 +57,7 @@ const TEXTS: Record<string, [string, string, string]> = {
     "1 REVOLVER": ["1 REVOLVER", "1 REWOLWER", "1 REVOLVER"],
     "2 FLAMER": ["2 BRENNER", "2 MIOTACZ", "2 METALEC"],
     "HEALTH {0}": ["LEBEN {0}", "ZDROWIE {0}", "ZDRAVJE {0}"],
+    HEADSHOT: ["KOPFTREFFER", "STRZAŁ W GŁOWĘ", "ZADETEK V GLAVO"],
     "CREATURES {0}/{1}": [
         "KREATUREN {0}/{1}",
         "STWORY {0}/{1}",

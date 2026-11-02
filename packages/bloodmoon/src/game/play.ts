@@ -242,6 +242,18 @@ export class Play {
                         5,
                     );
         }
+        // a hit in the head: HEADSHOT under the aiming mark, fading out
+        if (game.headshotTime > 0) {
+            ctx.save();
+            ctx.globalAlpha = Math.min(game.headshotTime / 0.3, 1);
+            Ui.text(ctx, Lang.t("HEADSHOT"), W / 2, H / 2 + 34, {
+                size: 26,
+                color: css(GOLD),
+                align: "center",
+                shadow: true,
+            });
+            ctx.restore();
+        }
 
         const left = game.monsters.filter((m) => !m.dead()).length;
         Ui.frame(ctx, 12, 8, 250, 36, css(GOLD, 0.85));

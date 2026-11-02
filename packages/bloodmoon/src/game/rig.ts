@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { bendAxis, bendJoint, bendScale } from "./motion";
 import * as Res from "./res";
 
 /**
@@ -15,6 +16,8 @@ function animated(name: string): boolean {
             "Body",
             "ArmL",
             "ArmR",
+            "ArmL Elbow",
+            "ArmR Elbow",
             "Head",
             "WingL",
             "WingR",
@@ -42,6 +45,8 @@ export interface Rig {
     >;
     /** Model space (Y up) bounds of all its meshes. */
     bounds: THREE.Box3;
+    /** The axis of the natural bend of each knee and elbow, and how much it takes (see motion.ts). */
+    bends: Map<THREE.Object3D, { axis: THREE.Vector3; scale: number }>;
 }
 
 /** The name a node had in Blender (GLTFLoader replaces spaces by _). */
@@ -73,6 +78,7 @@ export function model(name: string): THREE.Object3D {
 export function rig(root: THREE.Object3D): Rig {
     const joints = new Map<string, THREE.Object3D>();
     const rest: Rig["rest"] = new Map();
+    const bends: Rig["bends"] = new Map();
     root.traverse((o) => {
         if (o === root) return;
         const name = nodeName(o);
@@ -83,6 +89,10 @@ export function rig(root: THREE.Object3D): Rig {
                 quaternion: o.quaternion.clone(),
                 scale: o.scale.clone(),
             });
+            const axis = / (Knee|Down|Elbow)$/.test(name)
+                ? bendAxis(o.quaternion)
+                : null;
+            if (axis) bends.set(o, { axis, scale: bendScale(name) });
         }
     });
     const position = root.position.clone();
@@ -94,7 +104,7 @@ export function rig(root: THREE.Object3D): Rig {
     if (bounds.isEmpty()) bounds.set(new THREE.Vector3(), new THREE.Vector3());
     root.position.copy(position);
     root.quaternion.copy(quaternion);
-    return { joints, rest, bounds };
+    return { joints, rest, bounds, bends };
 }
 
 /** The joints whose names start with prefix, sorted by name. */
@@ -122,4 +132,34 @@ export function turn(
     // glam's EulerRot::YXZ: Y, then X, then Z, like three.js' "YXZ"
     delta.setFromEuler(euler.set(ax, ay, az, "YXZ"));
     joint.quaternion.copy(rest.quaternion).multiply(delta);
+}
+
+/**
+ * The hips of the LegA or the LegB legs, sorted by name, each with the
+ * joint its leg bends at: its knee, or for an insect's leg the joint below.
+ */
+export function legs(
+    r: Rig,
+    group: "A" | "B",
+): { hip: THREE.Object3D; knee: THREE.Object3D | undefined }[] {
+    const hip = new RegExp(`^Leg${group} \\d+$`);
+    return [...r.joints.entries()]
+        .filter(([name]) => hip.test(name))
+        .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+        .map(([name, o]) => ({
+            hip: o,
+            knee: r.joints.get(`${name} Down`) ?? r.joints.get(`${name} Knee`),
+        }));
+}
+
+/** Bends a knee or an elbow by angle beyond its rest, along its natural bend. */
+export function bend(
+    r: Rig,
+    joint: THREE.Object3D | undefined,
+    angle: number,
+): void {
+    if (!joint) return;
+    const rest = r.rest.get(joint);
+    const b = r.bends.get(joint);
+    if (rest && b) bendJoint(joint, rest.quaternion, b.axis, angle * b.scale);
 }

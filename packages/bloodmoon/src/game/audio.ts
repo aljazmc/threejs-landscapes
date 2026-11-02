@@ -5,6 +5,32 @@ const MUSIC_VOLUME = 0.45;
 const FADE = 0.8;
 const FLAME_VOLUME = 0.6;
 
+/**
+ * Everything plays through a limiter: sounds that come together (a shot,
+ * the hit, a headshot and a dying cry) are turned down smoothly instead of
+ * adding up past full scale and clipping into distortion. The gain before
+ * it makes up for the limiter's own makeup gain, so single sounds keep
+ * their loudness.
+ */
+let output: AudioNode | null = null;
+
+function out(ctx: AudioContext): AudioNode {
+    if (!output) {
+        const limiter = ctx.createDynamicsCompressor();
+        limiter.threshold.value = -6;
+        limiter.knee.value = 3;
+        limiter.ratio.value = 20;
+        limiter.attack.value = 0.002;
+        limiter.release.value = 0.2;
+        limiter.connect(ctx.destination);
+        const trim = ctx.createGain();
+        trim.gain.value = 0.67;
+        trim.connect(limiter);
+        output = trim;
+    }
+    return output;
+}
+
 interface Channel {
     source: AudioBufferSourceNode;
     gain: GainNode;
@@ -40,7 +66,7 @@ export class Audio {
         source.loop = loop;
         const gain = ctx.createGain();
         gain.gain.value = volume;
-        source.connect(gain).connect(ctx.destination);
+        source.connect(gain).connect(out(ctx));
         source.start();
         return { source, gain };
     }

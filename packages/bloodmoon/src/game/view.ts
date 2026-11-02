@@ -5,7 +5,7 @@ import { type Game, SWITCH_TIME } from "./game";
 import { type Light, type LightPool, LUMENS } from "./lights";
 import { KINDS } from "./monster";
 import * as Res from "./res";
-import { jointsStarting, model, type Rig, rig, turn } from "./rig";
+import { bend, jointsStarting, legs, model, type Rig, rig, turn } from "./rig";
 
 /**
  * The game as seen: the monsters' models posed from their state, the
@@ -19,6 +19,48 @@ const FIRE_FRAMES = 16;
 interface Shown {
     obj: THREE.Object3D;
     rig: Rig;
+}
+
+/** A monster's model, with its head for headshots. */
+interface ShownMonster extends Shown {
+    /** The joint carrying the head, and the head's centre and size on it. */
+    head: THREE.Object3D;
+    headCentre: THREE.Vector3;
+    headRadius: number;
+}
+
+/** The smallest and the largest ball around a head, for headshots. */
+const HEAD_RADIUS = { min: 0.2, max: 0.4 };
+const scratch = new THREE.Vector3();
+
+/**
+ * The head of a model (in its rest pose), for headshots: the Head joint
+ * with the ball around its meshes, or for a model without one (the spider's
+ * head is part of its Body) a ball on its Body joint.
+ */
+function headOf(
+    obj: THREE.Object3D,
+    r: Rig,
+): { head: THREE.Object3D; headCentre: THREE.Vector3; headRadius: number } {
+    obj.updateMatrixWorld(true);
+    const joint = r.joints.get("Head");
+    if (!joint)
+        return {
+            head: r.joints.get("Body") ?? obj,
+            headCentre: new THREE.Vector3(),
+            headRadius: 0.3,
+        };
+    const box = new THREE.Box3().setFromObject(joint);
+    const size = box.getSize(new THREE.Vector3());
+    return {
+        head: joint,
+        headCentre: joint.worldToLocal(box.getCenter(new THREE.Vector3())),
+        headRadius: THREE.MathUtils.clamp(
+            Math.max(size.x, size.y, size.z) / 2,
+            HEAD_RADIUS.min,
+            HEAD_RADIUS.max,
+        ),
+    };
 }
 
 /** The size x size cells of a sheet, row by row, each its own texture. */
@@ -55,7 +97,7 @@ const weaponEuler = new THREE.Euler();
 export class View {
     private readonly root = new THREE.Group();
     private shownId: number | null = null;
-    private monsters: Shown[] = [];
+    private monsters: ShownMonster[] = [];
     private weapons: Shown[] = [];
     private readonly flares: THREE.Texture[];
     private readonly fire: THREE.Texture[];
@@ -97,7 +139,7 @@ export class View {
             );
             m.height = r.bounds.max.y;
             this.root.add(obj);
-            this.monsters.push({ obj, rig: r });
+            this.monsters.push({ obj, rig: r, ...headOf(obj, r) });
         }
         for (const name of ["revolver", "flamethrower"]) {
             const obj = model(name);
@@ -132,23 +174,24 @@ export class View {
             const { obj, rig: r } = shown;
             world(m.x, m.y, 0, obj.position);
             obj.rotation.set(0, m.angle, 0);
-            // the right arm strikes first
-            const arms = ["ArmR", "ArmL"]
-                .map((name) => r.joints.get(name))
-                .filter((o): o is THREE.Object3D => o !== undefined);
+            // the right arm strikes first; each with its elbow
+            const arms = (["ArmR", "ArmL"] as const).flatMap((name) => {
+                const arm = r.joints.get(name);
+                return arm
+                    ? [{ arm, elbow: r.joints.get(`${name} Elbow`) }]
+                    : [];
+            });
             const pose = m.pose(arms.length, r.joints.has("Hover"));
-            for (const leg of jointsStarting(r, "LegA "))
-                turn(r, leg, pose.legs, 0, 0);
-            for (const leg of jointsStarting(r, "LegB "))
-                turn(r, leg, -pose.legs, 0, 0);
+            for (const leg of legs(r, "A")) {
+                turn(r, leg.hip, pose.legs, 0, 0);
+                bend(r, leg.knee, pose.kneeA);
+            }
+            for (const leg of legs(r, "B")) {
+                turn(r, leg.hip, -pose.legs, 0, 0);
+                bend(r, leg.knee, pose.kneeB);
+            }
             jointsStarting(r, "Tail ").forEach((tail, k) => {
-                turn(
-                    r,
-                    tail,
-                    0,
-                    Math.sin(pose.tailTime * 3 + k * 0.7) * 0.18,
-                    0,
-                );
+                turn(r, tail, 0, pose.tail(k), 0);
             });
             ["WingL", "WingR"]
                 .map((name) => r.joints.get(name))
@@ -156,8 +199,10 @@ export class View {
                 .forEach((wing, k) => {
                     turn(r, wing, 0, 0, (k === 0 ? 1 : -1) * pose.wing);
                 });
-            arms.forEach((arm, k) => {
-                turn(r, arm, pose.arms[k] ?? 0, 0, 0);
+            arms.forEach(({ arm, elbow }, k) => {
+                const limb = pose.arms[k];
+                turn(r, arm, limb?.swing ?? 0, 0, 0);
+                bend(r, elbow, limb?.bend ?? 0);
             });
             const head = r.joints.get("Head");
             if (head) turn(r, head, pose.head.x, pose.head.y, pose.head.z);
@@ -168,6 +213,11 @@ export class View {
                 if (rest)
                     body.position.y = rest.position.y * pose.sink + pose.rise;
             }
+            // where the head is now, for the shots (the game's x, y, z)
+            obj.updateMatrixWorld(true);
+            shown.head.localToWorld(scratch.copy(shown.headCentre));
+            m.headAt.set(scratch.x, scratch.z, scratch.y);
+            m.headRadius = shown.headRadius;
         });
     }
 

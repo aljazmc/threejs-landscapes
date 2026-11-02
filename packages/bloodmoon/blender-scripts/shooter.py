@@ -410,7 +410,7 @@ def glow(canvas, cell_w, cell_h, radius=6, strength=1.2):
 
 # joints the game moves (see the creatures and props); the other empties
 # only placed parts while modeling
-ANIMATED = re.compile(r"^(Body|Leg[AB] \d+|Arm[LR]|Head|Tail \d+|Wing[LR]|Hover|"
+ANIMATED = re.compile(r"^(Body|Leg[AB] \d+|Leg[AB] \d+ (Knee|Down)|Arm[LR]|Arm[LR] Elbow|Head|Tail \d+|Wing[LR]|Hover|"
                       r"Spin[+-]? .*|Pump \d+|Flame \d+|Muzzle|Nock|Arrow|Drum)$")
 
 

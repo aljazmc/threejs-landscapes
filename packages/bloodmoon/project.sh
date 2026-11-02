@@ -37,16 +37,26 @@ graphics() {
 audio() {
 
     ## Writes fluidsynth-scripts/<theme>-<name>/<name>.py into src/res/<theme>-<name>.ogg:
-    ## sound effects synthesized with numpy, or music played by FluidSynth with a GM soundfont
-    require python3 fluidsynth
+    ## sound effects synthesized with numpy (and .wav), or music played by FluidSynth
+    ## with a GM soundfont (and .mp3); the WAV and MP3 for Safari, which decodes no
+    ## Ogg Vorbis
+    require python3 fluidsynth ffmpeg
     if ! python3 -c "import numpy" > /dev/null 2>&1; then
         echo "python3-numpy is required. Exiting..."
         exit 1
     fi
 
     for project in $(find fluidsynth-scripts -mindepth 1 -maxdepth 1 -type d ! -name __pycache__ ! -name '.*' -printf '%f\n' | sort); do
-        echo "Writing src/res/$project.ogg"
-        python3 fluidsynth-scripts/export.py "$project" || exit 1
+        if grep -qs 'Song(' "fluidsynth-scripts/$project/${project##*-}.py"; then
+            echo "Writing src/res/$project.ogg and .mp3"
+            python3 fluidsynth-scripts/export.py "$project" || exit 1
+            # Safari decodes no Ogg Vorbis: music is written as MP3 too
+            ffmpeg -hide_banner -loglevel error -y -i "src/res/$project.ogg" \
+                -c:a libmp3lame -q:a 4 "src/res/$project.mp3" || exit 1
+        else
+            echo "Writing src/res/$project.ogg and .wav"
+            python3 fluidsynth-scripts/export.py "$project" || exit 1
+        fi
     done
 
 }

@@ -4,12 +4,21 @@ joints, so their names matter:
     Body          everything else hangs from it; bobs while walking
     LegA <n>      hips swinging around X, half a step ahead of
     LegB <n>      these (alternating gait)
+    Leg<A|B> <n> Knee
+                  bends further to lift the foot as the leg swings forward
+    Leg<A|B> <n> Down
+                  (insect legs, below the knee) straightens to lift the foot
     ArmL, ArmR    shoulders of the striking arms; raised and swung down
                   (around X) in the attack, one after the other
+    Arm<L|R> Elbow
+                  cocks in the wind-up and straightens in the blow
     Head          nods into the attack
     Tail <n>      sways around Z, each segment a bit more
     WingL, WingR  flap around Y
     Hover         (instead of legs) the body floats and bobs
+
+The exported model keeps exactly these joints (shooter.py's ANIMATED);
+the meshes hanging from each are merged into one.
 
 A creature stands on the origin facing -Y.
 """
