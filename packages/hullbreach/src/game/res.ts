@@ -54,6 +54,7 @@ const SOUNDS = [
     "claw.wav",
     "click.wav",
     "explosion.wav",
+    "headshot.wav",
     "hurt.wav",
     "laser.wav",
     "launch.wav",
@@ -99,6 +100,36 @@ export function text(file: string): string {
     return get(texts, file);
 }
 
+/**
+ * The files to try for a sound, best first: music is written as both .ogg
+ * and .mp3, as Safari decodes no Ogg Vorbis.
+ */
+function soundFiles(file: string): string[] {
+    if (!file.endsWith(".ogg")) return [file];
+    const mp3 = file.replace(/\.ogg$/, ".mp3");
+    const ogg = document
+        .createElement("audio")
+        .canPlayType('audio/ogg; codecs="vorbis"');
+    return ogg ? [file, mp3] : [mp3];
+}
+
+/** Fetches and decodes the first of the files the browser can play. */
+async function decodeSound(
+    audio: BaseAudioContext,
+    files: string[],
+): Promise<AudioBuffer> {
+    let error: unknown = null;
+    for (const file of files) {
+        try {
+            const response = await fetchOk(`${BASE}shooter-${file}`);
+            return await audio.decodeAudioData(await response.arrayBuffer());
+        } catch (e) {
+            error = e;
+        }
+    }
+    throw error;
+}
+
 async function fetchOk(url: string): Promise<Response> {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`hullbreach: ${url}: ${response.status}`);
@@ -133,9 +164,7 @@ export async function preload(
         }),
         ...SOUNDS.map(async (file) => {
             try {
-                const response = await fetchOk(`${BASE}shooter-${file}`);
-                const data = await response.arrayBuffer();
-                const buffer = await audio.decodeAudioData(data);
+                const buffer = await decodeSound(audio, soundFiles(file));
                 sounds.set(file.replace(/\.[a-z]+$/, ""), buffer);
             } catch (e) {
                 console.warn(`hullbreach: ${file} stays silent`, e);

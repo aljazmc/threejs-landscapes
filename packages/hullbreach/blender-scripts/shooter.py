@@ -537,7 +537,7 @@ def gauge(name, radius, mat, needle, parent, location, rotation=(0, 0, 0),
 
 # joints the game moves (see aliens.py and the props); the other empties
 # only placed parts while modeling
-ANIMATED = re.compile(r"^(Body|Leg[AB] \d+|Claw[LR]|Head|Tail \d+|Hover|Spin[+-]? .*|"
+ANIMATED = re.compile(r"^(Body|Leg[AB] \d+|Leg[AB] \d+ (Knee|Down)|Claw[LR]|Claw[LR] Elbow|Head|Tail \d+|Hover|Spin[+-]? .*|"
                       r"Pump \d+|Muzzle|Drum)$")
 
 

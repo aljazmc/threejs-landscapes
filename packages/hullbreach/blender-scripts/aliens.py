@@ -7,11 +7,20 @@ An alien stands on the origin facing -Y. Its parts hang from empties
     Body          everything else hangs from it; bobs while walking
     LegA <n>      hips swinging around X, half a step ahead of
     LegB <n>      these (alternating gait)
+    Leg<A|B> <n> Knee
+                  bends further to lift the foot as the leg swings forward
+    Leg<A|B> <n> Down
+                  (insect legs, below the knee) straightens to lift the foot
     ClawL, ClawR  shoulders of the clawed arms; raised and slashed down
                   (around X) in the attack, one after the other
+    Claw<L|R> Elbow
+                  cocks in the wind-up and straightens in the blow
     Head          nods into the attack
     Tail <n>      sways around Z, each segment a bit more
     Hover         (instead of legs) the body floats and bobs
+
+The exported model keeps exactly these joints (shooter.py's ANIMATED);
+the meshes hanging from each are merged into one.
 
 Colors: a glossy skin, a darker chitin and one glowing color (eyes, veins)
 per species, in the neon spirit of the ship.

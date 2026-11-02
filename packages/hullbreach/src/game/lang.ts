@@ -73,6 +73,7 @@ const TEXTS: Record<string, [string, string, string]> = {
         ],
     FIRE: ["FEUER", "OGNIA", "OGENJ"],
     "HEALTH {0}": ["LEBEN {0}", "ZDROWIE {0}", "ZDRAVJE {0}"],
+    HEADSHOT: ["KOPFTREFFER", "STRZAŁ W GŁOWĘ", "ZADETEK V GLAVO"],
     "HOSTILES {0}/{1}": [
         "FEINDE {0}/{1}",
         "WROGOWIE {0}/{1}",

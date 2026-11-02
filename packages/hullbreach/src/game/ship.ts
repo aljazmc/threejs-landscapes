@@ -382,8 +382,8 @@ export class Ship {
     /**
      * A cell to lie in wait in for someone at (fromX, fromY): one the
      * commando at (px, py) can't see, close to his way (3 to 14 steps from
-     * him) and not far for the one hiding; none of the taken cells nor their
-     * neighbors. -1 when there is none.
+     * him) and at most reach steps for the one hiding; none of the taken
+     * cells nor their neighbors. -1 when there is none.
      */
     cover(
         fromX: number,
@@ -391,9 +391,14 @@ export class Ship {
         px: number,
         py: number,
         taken: Set<number>,
+        reach = 25,
     ): number {
         const toPlayer = this.distances(Math.floor(px), Math.floor(py), 14);
-        const fromMe = this.distances(Math.floor(fromX), Math.floor(fromY), 25);
+        const fromMe = this.distances(
+            Math.floor(fromX),
+            Math.floor(fromY),
+            reach,
+        );
         let best = -1;
         let bestScore = Number.MAX_VALUE;
         for (let i = 0; i < fromMe.length; i++) {

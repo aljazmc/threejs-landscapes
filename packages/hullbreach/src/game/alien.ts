@@ -1,8 +1,25 @@
 import * as THREE from "three";
-import { joint, jointRotation, joints, nodeName, place } from "../space";
+import {
+    fromThree,
+    joint,
+    jointRotation,
+    joints,
+    nodeName,
+    place,
+} from "../space";
 import { Audio } from "./audio";
 import type { Game } from "./game";
 import * as Gfx from "./gfx";
+import {
+    bendAxis,
+    bendJoint,
+    bendScale,
+    easeGait,
+    HEAVY,
+    heavyCooldown,
+    LIGHT,
+    motion,
+} from "./motion";
 import type { Ship } from "./ship";
 
 export const SPECIES = [
@@ -17,23 +34,61 @@ export const SPECIES = [
     "ghoul",
     "cyclops",
 ];
-export const HEALTH = 300;
-export const DAMAGE = 50;
+/** The starting health of one the size of the player (see startHealth). */
+const HEALTH = 300;
+/** The damage of the commando's laser (LASER_DAMAGE in game.ts). */
+const PLAYER_DAMAGE = 30;
+/**
+ * How big an alien is next to the commando: a small one strikes for a
+ * quarter of the laser's damage and moves twice as fast as the commando, one
+ * of the commando's size strikes as hard as the laser and moves as fast, and
+ * a big one strikes twice as hard at half the pace.
+ */
+export type Size = "small" | "player" | "big";
+const SIZE_DAMAGE: Record<Size, number> = { small: 0.25, player: 1, big: 2 };
+const SIZE_SPEED: Record<Size, number> = { small: 2, player: 1, big: 0.5 };
+/** A small one starts with half the health, a big one with double. */
+const SIZE_HEALTH: Record<Size, number> = { small: 0.5, player: 1, big: 2 };
+/** The size of each species, measured against the commando's 1.8 m. */
+const SIZES: Record<string, Size> = {
+    // small
+    crawler: "small",
+    raptor: "small",
+    // about the size of the player
+    stalker: "player",
+    squid: "player",
+    ghoul: "player",
+    arachnid: "player",
+    cyclops: "player",
+    // big
+    brute: "big",
+    mantis: "big",
+    scorpion: "big",
+};
+
+/** The health a species starts with, by its size. */
+export function startHealth(species: number): number {
+    const size = SIZES[SPECIES[species]!] ?? "player";
+    return HEALTH * SIZE_HEALTH[size];
+}
 /** For walking: fits through the cabin doors. */
 export const RADIUS = 0.35;
-const ATTACK_TIME = 0.7;
-/** Of the attack, when the claws land. */
-const STRIKE_AT = 0.4;
+/** Seconds after a blow before the next. */
 const ATTACK_INTERVAL = 1.2;
+/** The heavy blow lunges in from this much beyond its reach (m), this fast (m/s). */
+const LUNGE = 0.8;
+const LUNGE_SPEED = 4;
 const DEATH_TIME = 1.1;
 const TURN_SPEED = 8;
 /** Lying in wait, it springs out when the commando comes this near in sight. */
 const AMBUSH_SPOT = 5;
 /** Gathering, the pack charges when the commando comes this near in sight. */
 const PACK_SPOT = 7;
-/** Seconds of waiting before an ambusher or a pack attacks anyway. */
-const AMBUSH_TIME = 15;
-const PACK_TIME = 8;
+/** Steps an ambusher or a pack member may go to its post, across the ship. */
+export const POST_REACH = 100;
+/** Seconds (counted from the alert, the way there included) before an ambusher or a pack attacks anyway. */
+const AMBUSH_TIME = 30;
+const PACK_TIME = 20;
 
 /**
  * What a hostile alien does: attack at once, lie in wait in a cover the
@@ -62,6 +117,18 @@ export function wrapAngle(a: number): number {
 
 const delta = new THREE.Quaternion();
 
+/** A knee or an elbow, bent along the axis of its natural bend (see motion.ts). */
+interface Bend {
+    joint: THREE.Object3D;
+    rest: THREE.Quaternion;
+    axis: THREE.Vector3;
+    /** See bendScale. */
+    scale: number;
+}
+const scratch = new THREE.Vector3();
+/** The smallest and the largest ball around a head, for headshots. */
+const HEAD_RADIUS = { min: 0.2, max: 0.4 };
+
 /**
  * One of the ten alien boarders: its model (res/shooter-<species>.glb),
  * the animation of its joints (see blender-scripts/aliens.py for their
@@ -85,9 +152,17 @@ export class Alien {
     private readonly body: THREE.Object3D;
     private readonly bodyZ: number;
     private readonly head: THREE.Object3D | null;
+    /** The ball around its head for headshots: its centre on the head joint. */
+    private readonly headCentre = new THREE.Vector3();
+    private readonly headRadius: number = HEAD_RADIUS.max;
     private readonly claws: THREE.Object3D[] = [];
+    /** The elbow of each claw (null for a claw without one). */
+    private readonly elbows: (Bend | null)[] = [];
     private readonly legsA: THREE.Object3D[] = [];
     private readonly legsB: THREE.Object3D[] = [];
+    /** The knees of the LegA and of the LegB legs. */
+    private readonly kneesA: Bend[] = [];
+    private readonly kneesB: Bend[] = [];
     private readonly tails: THREE.Object3D[] = [];
     private hover = false;
     private readonly rest = new Map<THREE.Object3D, THREE.Quaternion>();
@@ -99,7 +174,12 @@ export class Alien {
     private time = Math.random() * 10;
     private walk = 0;
     private moving = 0;
+    /** The pace eased (see easeGait), for the animation. */
+    private gait = 0;
     private attackTime = -1;
+    /** Whether the blow under way is the heavy one. */
+    private heavy = false;
+    private heavyCooldown = heavyCooldown() / 2;
     private struck = false;
     private cooldown = 0;
     private deathTime = 0;
@@ -147,14 +227,44 @@ export class Alien {
         this.body = body;
         this.bodyZ = body.position.z;
         this.head = joint(this.obj, "Head");
+        if (this.head) {
+            const box = Gfx.bounds(this.head);
+            const size = box.getSize(new THREE.Vector3());
+            this.head.worldToLocal(box.getCenter(this.headCentre));
+            this.headRadius = THREE.MathUtils.clamp(
+                Math.max(size.x, size.y, size.z) / 2,
+                HEAD_RADIUS.min,
+                HEAD_RADIUS.max,
+            );
+        }
+        const bend = (name: string): Bend | null => {
+            const o = joint(this.obj, name);
+            const axis = o && bendAxis(o.quaternion);
+            return o && axis
+                ? {
+                      joint: o,
+                      rest: o.quaternion.clone(),
+                      axis,
+                      scale: bendScale(name),
+                  }
+                : null;
+        };
         for (const name of ["ClawR", "ClawL"]) {
             const claw = joint(this.obj, name);
-            if (claw) this.claws.push(claw);
+            if (!claw) continue;
+            this.claws.push(claw);
+            this.elbows.push(bend(`${name} Elbow`));
         }
         for (const o of joints(this.obj)) {
             const name = nodeName(o);
-            if (name.startsWith("LegA ")) this.legsA.push(o);
-            if (name.startsWith("LegB ")) this.legsB.push(o);
+            // the hips; an insect's leg bends below its knee
+            const leg = /^Leg([AB]) \d+$/.exec(name);
+            if (leg) {
+                (leg[1] === "A" ? this.legsA : this.legsB).push(o);
+                const knee = bend(`${name} Down`) ?? bend(`${name} Knee`);
+                if (knee)
+                    (leg[1] === "A" ? this.kneesA : this.kneesB).push(knee);
+            }
             if (name.startsWith("Tail ")) this.tails.push(o);
             if (name === "Hover") this.hover = true;
         }
@@ -171,6 +281,31 @@ export class Alien {
         this.pose();
     }
 
+    get size(): Size {
+        return SIZES[SPECIES[this.species]!] ?? "player";
+    }
+
+    /** The damage of its strike, by its size. */
+    get damage(): number {
+        return Math.round(PLAYER_DAMAGE * SIZE_DAMAGE[this.size]);
+    }
+
+    /** Its pace (m/s) next to the commando's, by its size. */
+    speed(game: Game): number {
+        return game.speed * SIZE_SPEED[this.size];
+    }
+
+    /** Whether the ray from o along d (a unit vector) goes through its head. */
+    headOnRay(o: THREE.Vector3, d: THREE.Vector3): boolean {
+        if (!this.head) return false;
+        const head = this.head.localToWorld(scratch.copy(this.headCentre));
+        const c = fromThree(head);
+        const v = c.sub(o);
+        const t = v.dot(d);
+        if (t < 0) return false;
+        return v.lengthSq() - t * t <= this.headRadius * this.headRadius;
+    }
+
     get dead(): boolean {
         return this.health <= 0;
     }
@@ -179,6 +314,11 @@ export class Alien {
     hurt(damage: number): void {
         if (this.dead) return;
         this.health -= damage;
+        if (this.dead) {
+            // drops where it stands: no more steps or strikes
+            this.moving = 0;
+            this.attackTime = -1;
+        }
         this.angry = true;
         this.charge();
         this.flash = 0.12;
@@ -198,7 +338,7 @@ export class Alien {
         this.toPost = ship.distances(
             post % ship.width,
             Math.trunc(post / ship.width),
-            40,
+            POST_REACH,
         );
         this.waited = 0;
         this.pack = pack;
@@ -239,16 +379,27 @@ export class Alien {
         const dist = Math.sqrt(dx * dx + dy * dy);
         const reach = RADIUS + game.playerRadius + 0.55;
 
+        if (this.heavyCooldown > 0 && this.angry) this.heavyCooldown -= dt;
         if (this.attackTime >= 0) {
-            // the strike lands if the player is still within reach
+            // the blow lands if the player is still within reach; the heavy
+            // one lunges in first, and hits twice as hard a bit further
+            const blow = this.heavy ? HEAVY : LIGHT;
             this.face(dx, dy, dt);
             this.attackTime += dt;
-            if (!this.struck && this.attackTime >= ATTACK_TIME * STRIKE_AT) {
-                this.struck = true;
-                if (dist <= reach + 0.3) game.hurtPlayer(DAMAGE);
-            }
-            if (this.attackTime >= ATTACK_TIME) this.attackTime = -1;
             this.moving = 0;
+            const u = this.attackTime / blow.time;
+            const close = RADIUS + game.playerRadius + 0.1;
+            if (this.heavy && u > 0.35 && u < blow.strikeAt && dist > close) {
+                const step = Math.min(dist - close, LUNGE_SPEED * dt);
+                game.moveCircle(this, (dx / dist) * step, (dy / dist) * step);
+            }
+            if (!this.struck && u >= blow.strikeAt) {
+                this.struck = true;
+                if (this.heavy) Audio.playAt("claw", dist);
+                if (dist <= reach + (this.heavy ? 0.6 : 0.3))
+                    game.hurtPlayer(this.damage * (this.heavy ? 2 : 1));
+            }
+            if (u >= 1) this.attackTime = -1;
             return;
         }
 
@@ -296,17 +447,23 @@ export class Alien {
         if (planned) {
             // on its way to its post
         } else if (this.angry) {
-            if (dist <= reach) {
+            // the heavy blow when it is ready (lunging in from a bit
+            // further), else the quick one
+            const heavy = this.heavyCooldown <= 0;
+            if (dist <= reach + (heavy ? LUNGE : 0)) {
                 this.face(dx, dy, dt);
                 this.moving = 0;
                 if (
                     this.cooldown <= 0 &&
                     Math.abs(this.angleTo(dx, dy)) < 0.6
                 ) {
-                    Audio.playAt("claw", dist);
+                    if (!heavy) Audio.playAt("claw", dist);
+                    this.heavy = heavy;
+                    if (heavy) this.heavyCooldown = heavyCooldown();
                     this.attackTime = 0;
                     this.struck = false;
-                    this.cooldown = ATTACK_INTERVAL;
+                    this.cooldown =
+                        ATTACK_INTERVAL + (heavy ? HEAVY.time - LIGHT.time : 0);
                 }
                 return;
             }
@@ -364,13 +521,13 @@ export class Alien {
             return;
         }
         this.face(gx, gy, dt);
-        const step = Math.min(len, game.speed * dt);
+        const step = Math.min(len, this.speed(game) * dt);
         const moved = game.moveCircle(
             this,
             (gx / len) * step,
             (gy / len) * step,
         );
-        this.moving = moved / (game.speed * dt);
+        this.moving = moved / (this.speed(game) * dt);
         // bumped into someone: go elsewhere
         if (moved < step * 0.2 && !this.angry) this.path = [];
     }
@@ -411,7 +568,8 @@ export class Alien {
     }
 
     private face(dx: number, dy: number, dt: number): void {
-        const turn = this.angleTo(dx, dy);
+        // turning at most TURN_SPEED, easing in at the end
+        const turn = this.angleTo(dx, dy) * Math.min(1, dt * 12);
         const most = TURN_SPEED * dt;
         this.angle += THREE.MathUtils.clamp(turn, -most, most);
     }
@@ -419,11 +577,16 @@ export class Alien {
     // --- animation ------------------------------------------------------
 
     update(dt: number): void {
-        this.time += dt;
-        if (this.dead)
-            this.deathTime = Math.min(DEATH_TIME, this.deathTime + dt);
-        this.walk += dt * 9 * this.moving;
         if (this.flash > 0) this.flash -= dt;
+        if (this.dead) {
+            // lies still: only its fall goes on
+            this.deathTime = Math.min(DEATH_TIME, this.deathTime + dt);
+        } else {
+            this.time += dt;
+            // steps start and stop softly; a faster one takes quicker steps
+            this.gait = easeGait(this.gait, this.moving, dt);
+            this.walk += dt * 9 * this.gait * SIZE_SPEED[this.size];
+        }
         this.pose();
     }
 
@@ -440,55 +603,53 @@ export class Alien {
         o.quaternion.copy(rest).multiply(jointRotation(ax, ay, az, delta));
     }
 
+    /** Bends a knee or an elbow beyond its rest. */
+    private bend(b: Bend | null | undefined, angle: number): void {
+        if (b) bendJoint(b.joint, b.rest, b.axis, angle * b.scale);
+    }
+
     private pose(): void {
         place(this.obj, this.x, this.y, 0, this.angle);
-
-        const swing = Math.sin(this.walk) * 0.55 * Math.min(1, this.moving);
-        for (const l of this.legsA) this.turn(l, swing, 0, 0);
-        for (const l of this.legsB) this.turn(l, -swing, 0, 0);
-        this.tails.forEach((t, i) => {
-            this.turn(t, 0, 0, Math.sin(this.time * 3 + i * 0.7) * 0.18);
+        const m = motion({
+            time: this.time,
+            walk: this.walk,
+            gait: this.gait,
+            attackTime: this.attackTime,
+            heavy: this.heavy,
+            arms: this.claws.length,
+            hover: this.hover,
         });
-        const bob = this.hover
-            ? 0.12 * Math.sin(this.time * 2.2)
-            : Math.abs(Math.cos(this.walk)) * 0.05 * this.moving;
-        this.body.position.z = this.bodyZ + bob;
 
-        // claws: raised forward and up, then slashed down, the second a bit later
-        let lean = 0;
+        for (const l of this.legsA) this.turn(l, m.hips, 0, 0);
+        for (const l of this.legsB) this.turn(l, -m.hips, 0, 0);
+        for (const k of this.kneesA) this.bend(k, m.kneeA);
+        for (const k of this.kneesB) this.bend(k, m.kneeB);
+        this.tails.forEach((t, k) => {
+            this.turn(t, 0, 0, m.tail(k));
+        });
         this.claws.forEach((claw, i) => {
-            let a = 0;
-            if (this.attackTime >= 0) {
-                const u = this.attackTime / ATTACK_TIME - i * 0.12;
-                a =
-                    u < 0
-                        ? 0
-                        : u < STRIKE_AT
-                          ? (-2.0 * u) / STRIKE_AT
-                          : -2.0 + 2.6 * Math.min(1, (u - STRIKE_AT) / 0.25);
-                lean = Math.max(
-                    lean,
-                    Math.sin(
-                        Math.min(1, this.attackTime / ATTACK_TIME) * Math.PI,
-                    ) * 0.25,
-                );
-            } else a = Math.sin(this.time * 1.7 + i) * 0.08 - swing * 0.3;
-            this.turn(claw, a, 0, 0);
+            const arm = m.arms[i]!;
+            this.turn(claw, arm.swing, 0, 0);
+            this.bend(this.elbows[i], arm.bend);
         });
-        this.turn(this.head, lean, 0, Math.sin(this.time * 0.8) * 0.25);
-        this.turn(this.body, lean * 0.5, 0, 0);
+        this.turn(this.head, m.nod, 0, m.look);
+        this.turn(this.body, m.lean, m.roll, 0);
+        this.body.position.z = this.bodyZ + m.rise;
 
         if (this.deathTime > 0) {
-            // keels over to its side and sinks
+            // keels over to its side and sinks, limbs going slack
             const u = this.deathTime / DEATH_TIME;
             const fall = Math.min(1, u * 1.6);
             this.turn(this.body, 0, (fall * fall * Math.PI) / 2, 0);
             this.body.position.z = this.bodyZ * (1 - 0.55 * fall) - 0.15 * u;
-            for (const c of this.claws) this.turn(c, -0.8 * fall, 0, 0);
+            this.claws.forEach((c, i) => {
+                this.turn(c, -0.8 * fall, 0, 0);
+                this.bend(this.elbows[i], 0.4 * fall);
+            });
         }
 
         const f = this.flash > 0 ? 2.6 : 1.0;
-        for (const m of this.materials) m.color.setScalar(f);
+        for (const mat of this.materials) mat.color.setScalar(f);
     }
 
     getState(): AlienData {

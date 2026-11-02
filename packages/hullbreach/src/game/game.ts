@@ -3,9 +3,10 @@ import { fromThree, joint, jointRotation, toThree, vecToThree } from "../space";
 import {
     Alien,
     type AlienData,
-    HEALTH as ALIEN_HEALTH,
+    POST_REACH,
     RADIUS as ALIEN_RADIUS,
     SPECIES,
+    startHealth,
 } from "./alien";
 import { Audio } from "./audio";
 import { Flare, Fx } from "./fx";
@@ -47,6 +48,14 @@ export const PLAYER_RADIUS = 0.3;
 export const PLAYER_HEIGHT = 1.8;
 const EYE = 1.65;
 export const LASER_DAMAGE = 30;
+/** A shot or a grenade in the head does this many times the damage. */
+const HEADSHOT = 3;
+/** On the alert, this many of the nearest aliens (besides the small ones) rush the commando. */
+const RUSHERS = 2;
+/** Aliens this near each other (m) gather in a pack. */
+const PACK_AREA = 10;
+/** Seconds the HEADSHOT text shows. */
+const HEADSHOT_TIME = 0.9;
 const LASER_INTERVAL = 0.5;
 const LASER_RANGE = 80;
 const GRENADE_DAMAGE = 500;
@@ -54,6 +63,10 @@ const GRENADE_INTERVAL = 3;
 const BLAST_RADIUS = 5 * PLAYER_HEIGHT;
 const GRENADE_SPEED = 24;
 const GRENADE_GRAVITY = 5;
+/** The explosion's loudness right beside the commando (1: as recorded). */
+const EXPLOSION_VOLUME = 0.4;
+/** The death screech's loudness right beside the commando (1: as recorded). */
+const SCREECH_VOLUME = 0.4;
 /** Radians per pixel. */
 const MOUSE_SPEED = 0.0025;
 const MAX_PITCH = 1.45;
@@ -123,6 +136,7 @@ export class Game extends Screen {
 
     private hurtTime = 0;
     private hitTime = 0;
+    private headshotTime = 0;
     /** The joystick's tilt, up to 1 each way: x to the right, y down. */
     private stick = { x: 0, y: 0 };
     private touchFire = false;
@@ -145,12 +159,13 @@ export class Game extends Screen {
             const a = (start.angle * Math.PI) / 180;
             this.yaw = Math.atan2(-Math.cos(a), Math.sin(a));
             ship.alienStarts.forEach((s, i) => {
+                const species = i % SPECIES.length;
                 const alien = new Alien(
-                    i % SPECIES.length,
+                    species,
                     s.x,
                     s.y,
                     Math.random() * Math.PI * 2,
-                    ALIEN_HEALTH,
+                    startHealth(species),
                     this.root,
                 );
                 // if the start is in the way of a wall or prop, the nearest free cell
@@ -358,60 +373,58 @@ export class Game extends Screen {
         const pack = a.pack;
         a.hurt(damage);
         if (pack) this.packCharge(pack);
-        this.alertArea(a);
+        this.alertAll(a);
         Audio.playAt(
             a.dead ? "screech" : "splat",
             this.distanceTo(a.x, a.y),
-            a.dead ? 0.8 : 0.6,
+            a.dead ? SCREECH_VOLUME : 0.6,
         );
     }
 
     // --- the aliens' plans -----------------------------------------------
 
     /**
-     * An alien was hurt: every other one in its room (or hall) still
-     * roaming turns hostile. The nearest to the commando attacks at once,
-     * two or three of the others gather out of sight to charge together,
-     * and the rest lie in wait in covers he can't see on his way.
+     * An alien was hurt: the whole ship turns hostile. The small, fast ones
+     * and the two nearest of the others rush the commando at once; the big
+     * ones lie in wait around corners on his way; the rest gather in packs
+     * of two or three at hidden spots and charge together, or lie in wait
+     * too when none is near enough to gather with.
      */
-    private alertArea(hit: Alien): void {
+    private alertAll(hit: Alien): void {
         const ship = this.ship;
-        const area = ship.area(Math.floor(hit.x), Math.floor(hit.y));
-        const group = this.aliens
-            .filter(
-                (a) =>
-                    a !== hit &&
-                    !a.dead &&
-                    !a.angry &&
-                    ship.area(Math.floor(a.x), Math.floor(a.y)) === area,
-            )
-            .sort(
-                (a, b) => this.distanceTo(a.x, a.y) - this.distanceTo(b.x, b.y),
-            );
-        const nearest = group.shift();
-        if (!nearest) return;
-        nearest.alert("charge", -1, ship);
+        const far = (a: Alien) => this.distanceTo(a.x, a.y);
+        const calm = this.aliens
+            .filter((a) => a !== hit && !a.dead && !a.angry)
+            .sort((a, b) => far(a) - far(b));
         const taken = new Set<number>();
-        if (group.length >= 2) {
-            const size = group.length >= 3 && Math.random() < 0.5 ? 3 : 2;
-            const pack = group.splice(0, size);
-            const id = ++this.packs;
-            const leader = pack[0]!;
-            const meet = ship.cover(
-                leader.x,
-                leader.y,
-                this.playerX,
-                this.playerY,
-                taken,
-            );
-            for (const a of pack) a.alert("pack", meet, ship, id);
+        const cover = (a: Alien) =>
+            ship.cover(a.x, a.y, this.playerX, this.playerY, taken, POST_REACH);
+        const gatherers: Alien[] = [];
+        let rushers = 0;
+        for (const a of calm) {
+            if (a.size === "small" || rushers < RUSHERS) {
+                if (a.size !== "small") rushers++;
+                a.alert("charge", -1, ship);
+            } else if (a.size === "big") a.alert("ambush", cover(a), ship);
+            else gatherers.push(a);
         }
-        for (const a of group)
-            a.alert(
-                "ambush",
-                ship.cover(a.x, a.y, this.playerX, this.playerY, taken),
-                ship,
-            );
+        while (gatherers.length > 0) {
+            const leader = gatherers.shift()!;
+            const near = gatherers
+                .filter(
+                    (a) =>
+                        Math.hypot(a.x - leader.x, a.y - leader.y) < PACK_AREA,
+                )
+                .slice(0, 2);
+            if (near.length === 0) {
+                leader.alert("ambush", cover(leader), ship);
+                continue;
+            }
+            for (const a of near) gatherers.splice(gatherers.indexOf(a), 1);
+            const id = ++this.packs;
+            const meet = cover(leader);
+            for (const a of [leader, ...near]) a.alert("pack", meet, ship, id);
+        }
     }
 
     /** The pack charges together. */
@@ -612,7 +625,9 @@ export class Game extends Screen {
         this.fx.beam(this.muzzle(), p, 0x30f0ff);
         Audio.play("laser", 0.7);
         if (hit.alien) {
-            this.hurtAlien(hit.alien, LASER_DAMAGE);
+            const headshot = hit.alien.headOnRay(o, d);
+            if (headshot) this.headshot();
+            this.hurtAlien(hit.alien, LASER_DAMAGE * (headshot ? HEADSHOT : 1));
             this.fx.splash(p.x, p.y, p.z, 5);
             this.hitTime = 0.15;
         }
@@ -651,7 +666,7 @@ export class Game extends Screen {
         });
         this.fx.flare(Flare.LauncherFlash, m.x, m.y, m.z, 0.6, 0.1);
         this.fx.light(m.x, m.y, m.z, 0xff8040, 2, 0.12);
-        Audio.play("launch");
+        Audio.play("launch", 0.7);
     }
 
     private updateGrenades(dt: number): void {
@@ -667,8 +682,9 @@ export class Game extends Screen {
             const wall = this.ship.raycast(g.x, g.y, g.z, d.x, d.y, d.z, step);
             const hit = this.alienOnRay(o, d, wall);
             if (hit.alien || wall < step || g.age > 6) {
+                const headshot = hit.alien?.headOnRay(o, d) ?? false;
                 const p = o.addScaledVector(d, Math.max(0, hit.dist - 0.1));
-                this.explode(p, hit.alien);
+                this.explode(p, hit.alien, headshot);
                 g.obj.removeFromParent();
                 this.grenades.splice(i, 1);
                 continue;
@@ -684,17 +700,28 @@ export class Game extends Screen {
     }
 
     /**
-     * The target (the alien hit, if any) takes the full damage; every other
-     * alien within the blast radius the more, the nearer it is.
+     * The target (the alien hit, if any) takes the full damage, three times
+     * that in the head; every other alien within the blast radius the more,
+     * the nearer it is.
      */
-    private explode(p: THREE.Vector3, target: Alien | null): void {
+    private explode(
+        p: THREE.Vector3,
+        target: Alien | null,
+        headshot = false,
+    ): void {
         this.fx.explode(p.x, p.y, Math.max(0, p.z - 0.4));
-        Audio.playAt("explosion", this.distanceTo(p.x, p.y) * 0.5);
+        Audio.playAt(
+            "explosion",
+            this.distanceTo(p.x, p.y) * 0.5,
+            EXPLOSION_VOLUME,
+        );
         for (const a of this.aliens) {
             if (a.dead) continue;
             let damage = 0;
-            if (a === target) damage = GRENADE_DAMAGE;
-            else {
+            if (a === target) {
+                damage = GRENADE_DAMAGE * (headshot ? HEADSHOT : 1);
+                if (headshot) this.headshot();
+            } else {
                 const horizontal = Math.max(
                     0,
                     Math.sqrt(
@@ -864,6 +891,13 @@ export class Game extends Screen {
     private fadeHud(dt: number): void {
         this.hurtTime = Math.max(0, this.hurtTime - dt);
         this.hitTime = Math.max(0, this.hitTime - dt);
+        this.headshotTime = Math.max(0, this.headshotTime - dt);
+    }
+
+    /** A hit in the head: its sound and the HEADSHOT text. */
+    private headshot(): void {
+        Audio.play("headshot", 0.8);
+        this.headshotTime = HEADSHOT_TIME;
     }
 
     /** Neon frame with cut corners. */
@@ -996,6 +1030,15 @@ export class Game extends Screen {
                 }
             ctx.stroke();
         }
+        // a hit in the head: HEADSHOT under the crosshair, fading out
+        if (this.headshotTime > 0)
+            Ui.text(ctx, Lang.t("HEADSHOT"), W / 2, H / 2 + 34, {
+                scale: 2,
+                color: 0xffd23a,
+                align: "center",
+                shadow: SHADOW,
+                alpha: Math.min(1, this.headshotTime / 0.3),
+            });
 
         label(
             Lang.t("HEALTH {0}", [Math.ceil(this.health)]),
