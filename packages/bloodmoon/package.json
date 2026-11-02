@@ -1,7 +1,7 @@
 {
     "name": "@aljazmc/bloodmoon",
     "version": "0.2.0",
-    "description": "Bloodmoon Manor: a first person shooter against ten creatures of the night in a vampire's castle",
+    "description": "A small first person shooter in Victorian gothic style",
     "author": "aljazmc",
     "license": "MIT",
     "private": true,

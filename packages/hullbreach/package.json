@@ -1,7 +1,7 @@
 {
     "name": "@aljazmc/hullbreach",
     "version": "0.2.0",
-    "description": "Hull Breach: a first person shooter against ten alien boarders of a spaceship",
+    "description": "A small first person shooter in cyberpunk style",
     "author": "aljazmc",
     "license": "MIT",
     "private": true,

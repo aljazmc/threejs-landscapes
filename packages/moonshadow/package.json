@@ -1,7 +1,7 @@
 {
     "name": "@aljazmc/moonshadow",
     "version": "0.2.0",
-    "description": "Moonshadow Keep: a first person shooter against ten monsters in an elven keep",
+    "description": "A small first person shooter in elven fantasy style",
     "author": "aljazmc",
     "license": "MIT",
     "private": true,
