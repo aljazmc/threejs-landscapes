@@ -1,6 +1,6 @@
 # Bloodmoon Manor
 
-A small first person shooter in Victorian gothic style in three.js.
+A small first person shooter in Victorian gothic style.
 
 | | Vampire hunter | Creatures |
 | --- | --- | --- |

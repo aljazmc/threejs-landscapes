@@ -1,6 +1,6 @@
 # Hull Breach
 
-A small first person shooter in cyberpunk style in three.js.
+A small first person shooter in cyberpunk style.
 
 | | Space commando | Aliens |
 | --- | --- | --- |

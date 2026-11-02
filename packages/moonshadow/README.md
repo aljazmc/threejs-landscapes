@@ -1,6 +1,6 @@
 # Moonshadow Keep
 
-A small first person shooter in elven fantasy style in three.js.
+A small first person shooter in elven fantasy style.
 
 | | Elf | Monsters |
 | --- | --- | --- |
