@@ -43,6 +43,18 @@ interface Group {
 
 const turn = new THREE.Quaternion();
 
+/** How near a prop may come to a cell's center before paths avoid the cell. */
+const PATH_CLEARANCE = 0.3;
+
+/** The space a prop fills: a box standing on the floor, in game coordinates. */
+interface Blocker {
+    x0: number;
+    y0: number;
+    x1: number;
+    y1: number;
+    top: number;
+}
+
 /**
  * The spaceship of res/shooter-map.txt (written by
  * blender-scripts/exportmap.py): walls, floors and ceilings built from the
@@ -62,8 +74,10 @@ export class Ship {
     readonly root = new THREE.Group();
 
     private readonly rows: string[] = [];
-    /** Per cell, 0 where no prop stands. */
+    /** Per cell, 0 where no prop stands (for paths, see free). */
     private propHeight: number[] = [];
+    /** The boxes of the props that can't be walked through (for collisions and rays). */
+    private readonly blockers: Blocker[] = [];
     /** The room of each cell (see area). */
     private areas: number[] = [];
     private readonly spinners: { obj: THREE.Object3D; speed: number }[] = [];
@@ -183,12 +197,12 @@ export class Ship {
     circleFree(x: number, y: number, r: number): boolean {
         for (let cy = Math.floor(y - r); cy <= Math.floor(y + r); cy++)
             for (let cx = Math.floor(x - r); cx <= Math.floor(x + r); cx++) {
-                if (this.free(cx, cy)) continue;
-                const nx = THREE.MathUtils.clamp(x, cx, cx + 1);
-                const ny = THREE.MathUtils.clamp(y, cy, cy + 1);
-                if ((nx - x) * (nx - x) + (ny - y) * (ny - y) < r * r)
+                if (this.isFloor(cx, cy)) continue;
+                if (boxDistSq(x, y, cx, cy, cx + 1, cy + 1) < r * r)
                     return false;
             }
+        for (const b of this.blockers)
+            if (boxDistSq(x, y, b.x0, b.y0, b.x1, b.y1) < r * r) return false;
         return true;
     }
 
@@ -197,6 +211,24 @@ export class Ship {
      * (dx, dy, dz) to the first wall, floor, ceiling or prop, or maxDist.
      */
     raycast(
+        ox: number,
+        oy: number,
+        oz: number,
+        dx: number,
+        dy: number,
+        dz: number,
+        maxDist: number,
+    ): number {
+        let dist = this.hullRaycast(ox, oy, oz, dx, dy, dz, maxDist);
+        for (const b of this.blockers) {
+            const t = rayBox(ox, oy, oz, dx, dy, dz, b);
+            if (t < dist) dist = t;
+        }
+        return dist;
+    }
+
+    /** Like raycast, but only walls, floors and ceilings stop the ray. */
+    private hullRaycast(
         ox: number,
         oy: number,
         oz: number,
@@ -223,11 +255,6 @@ export class Ship {
             if (z > top || z < 0) return t; // a lintel or a step in the ceiling
             if (dz < 0 && oz + dz * exit < 0) return -oz / dz;
             if (dz > 0 && oz + dz * exit > top) return (top - oz) / dz;
-            const prop = this.propHeight[cy * this.width + cx]!;
-            if (prop > 0) {
-                if (z < prop) return t;
-                if (dz < 0 && oz + dz * exit < prop) return (prop - oz) / dz;
-            }
             if (exit >= maxDist) return maxDist;
             if (nextX < nextY) {
                 cx += stepX;
@@ -657,18 +684,9 @@ export class Ship {
     private placeProps(): void {
         for (const p of this.props) {
             const obj = Gfx.model(p.name);
-            const bounds = Gfx.bounds(obj);
             place(obj, p.x, p.y, 0, (p.angle * Math.PI) / 180);
+            if (p.blocked) this.block(Gfx.bounds(obj));
             this.root.add(obj);
-            if (p.blocked) {
-                const [x0 = 0, y0 = 0, x1 = -1, y1 = -1] = p.blocked;
-                const top = Math.max(bounds.max.z, 0.1);
-                for (let y = y0; y <= y1; y++)
-                    for (let x = x0; x <= x1; x++) {
-                        const i = y * this.width + x;
-                        this.propHeight[i] = Math.max(this.propHeight[i]!, top);
-                    }
-            }
             for (const o of joints(obj)) {
                 const name = nodeName(o);
                 if (name.startsWith("Spin"))
@@ -686,6 +704,33 @@ export class Ship {
                     });
             }
         }
+    }
+
+    /**
+     * Makes the box of a placed prop (three.js coordinates) solid: exactly
+     * for collisions and rays, and for paths every cell whose center it
+     * comes near. The map's blocked cells only say that the prop is solid,
+     * the model itself says how much room it takes.
+     */
+    private block(box: THREE.Box3): void {
+        const b: Blocker = {
+            x0: box.min.x,
+            y0: -box.max.y,
+            x1: box.max.x,
+            y1: -box.min.y,
+            top: Math.max(box.max.z, 0.1),
+        };
+        this.blockers.push(b);
+        const m = PATH_CLEARANCE;
+        for (let y = Math.floor(b.y0 - m); y <= Math.floor(b.y1 + m); y++)
+            for (let x = Math.floor(b.x0 - m); x <= Math.floor(b.x1 + m); x++) {
+                if (x < 0 || y < 0 || x >= this.width || y >= this.height)
+                    continue;
+                if (boxDistSq(x + 0.5, y + 0.5, b.x0, b.y0, b.x1, b.y1) >= m * m)
+                    continue;
+                const i = y * this.width + x;
+                this.propHeight[i] = Math.max(this.propHeight[i]!, b.top);
+            }
     }
 
     /** Lamps under the ceilings and the glow of the big machines. */
@@ -755,4 +800,49 @@ export class Ship {
             ),
         );
     }
+}
+
+/** The squared distance from (x, y) to the rectangle (x0, y0)-(x1, y1). */
+function boxDistSq(
+    x: number,
+    y: number,
+    x0: number,
+    y0: number,
+    x1: number,
+    y1: number,
+): number {
+    const dx = x - THREE.MathUtils.clamp(x, x0, x1);
+    const dy = y - THREE.MathUtils.clamp(y, y0, y1);
+    return dx * dx + dy * dy;
+}
+
+/**
+ * Distance along the ray from (ox, oy, oz) in the direction (dx, dy, dz) to
+ * the box of a prop, 0 from inside it, Infinity when it misses.
+ */
+function rayBox(
+    ox: number,
+    oy: number,
+    oz: number,
+    dx: number,
+    dy: number,
+    dz: number,
+    b: Blocker,
+): number {
+    let near = 0;
+    let far = Infinity;
+    const slab = (from: number, dir: number, lo: number, hi: number): boolean => {
+        if (dir === 0) return from >= lo && from <= hi;
+        let t0 = (lo - from) / dir;
+        let t1 = (hi - from) / dir;
+        if (t0 > t1) [t0, t1] = [t1, t0];
+        if (t0 > near) near = t0;
+        if (t1 < far) far = t1;
+        return near <= far;
+    };
+    return slab(ox, dx, b.x0, b.x1) &&
+        slab(oy, dy, b.y0, b.y1) &&
+        slab(oz, dz, 0, b.top)
+        ? near
+        : Infinity;
 }

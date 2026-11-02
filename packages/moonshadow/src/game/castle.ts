@@ -40,6 +40,20 @@ export function facing(dx: number, dy: number): number {
     return Math.atan2(dx, dy);
 }
 
+/** How near a prop may come to a cell's center before paths avoid the cell. */
+const PATH_CLEARANCE = 0.3;
+/** Up to how high above the floor the parts of a prop stand in the way (not a tree's crown). */
+const FOOT_HEIGHT = 2;
+
+/** The space a prop fills: a box standing on the floor, in map coordinates. */
+interface Blocker {
+    x0: number;
+    y0: number;
+    x1: number;
+    y1: number;
+    top: number;
+}
+
 export interface Prop {
     name: string;
     x: number;
@@ -76,8 +90,10 @@ export class Castle {
     readonly props: Prop[] = [];
     playerStart = { x: 0, y: 0, angle: 0 };
     readonly monsterStarts: { x: number; y: number }[] = [];
-    /** Height of the prop standing on each cell, 0 where there is none. */
+    /** Height of the prop standing on each cell, 0 where there is none (for paths, see free). */
     private propHeight: number[] = [];
+    /** The boxes of the props that can't be walked through (for collisions and rays). */
+    private readonly blockers: Blocker[] = [];
     /** The room of each cell (see area). */
     private areas: number[] = [];
 
@@ -132,22 +148,6 @@ export class Castle {
         this.height = this.rows.length;
         this.width = this.rows[0]?.length ?? 0;
         this.propHeight = new Array<number>(this.width * this.height).fill(0);
-    }
-
-    /** Sets how high the i-th prop reaches on the cells it blocks. */
-    private setPropHeight(i: number, height: number): void {
-        const b = this.props[i]?.blocked;
-        if (!b) return;
-        for (let y = b[1]; y <= b[3]; y++)
-            for (let x = b[0]; x <= b[2]; x++)
-                if (x >= 0 && y >= 0 && x < this.width && y < this.height) {
-                    const c = y * this.width + x;
-                    this.propHeight[c] = Math.max(
-                        this.propHeight[c]!,
-                        height,
-                        0.1,
-                    );
-                }
     }
 
     charAt(x: number, y: number): string {
@@ -205,12 +205,12 @@ export class Castle {
     circleFree(x: number, y: number, r: number): boolean {
         for (let cy = Math.floor(y - r); cy <= Math.floor(y + r); cy++)
             for (let cx = Math.floor(x - r); cx <= Math.floor(x + r); cx++) {
-                if (this.free(cx, cy)) continue;
-                const nx = THREE.MathUtils.clamp(x, cx, cx + 1);
-                const ny = THREE.MathUtils.clamp(y, cy, cy + 1);
-                if ((nx - x) * (nx - x) + (ny - y) * (ny - y) < r * r)
+                if (this.isFloor(cx, cy)) continue;
+                if (boxDistSq(x, y, cx, cy, cx + 1, cy + 1) < r * r)
                     return false;
             }
+        for (const b of this.blockers)
+            if (boxDistSq(x, y, b.x0, b.y0, b.x1, b.y1) < r * r) return false;
         return true;
     }
 
@@ -219,6 +219,20 @@ export class Castle {
      * coordinates) to the first wall, floor, ceiling or prop, or maxDist.
      */
     raycast(o: THREE.Vector3, d: THREE.Vector3, maxDist: number): number {
+        let dist = this.hullRaycast(o, d, maxDist);
+        for (const b of this.blockers) {
+            const t = rayBox(o, d, b);
+            if (t < dist) dist = t;
+        }
+        return dist;
+    }
+
+    /** Like raycast, but only walls, floors and ceilings stop the ray. */
+    private hullRaycast(
+        o: THREE.Vector3,
+        d: THREE.Vector3,
+        maxDist: number,
+    ): number {
         let cx = Math.floor(o.x);
         let cy = Math.floor(o.y);
         const stepX = d.x > 0 ? 1 : -1;
@@ -239,12 +253,6 @@ export class Castle {
             if (z > top || z < 0) return t; // an arch or a step in the ceiling
             if (d.z < 0 && o.z + d.z * exit < 0) return -o.z / d.z;
             if (d.z > 0 && o.z + d.z * exit > top) return (top - o.z) / d.z;
-            const prop = this.propHeight[cy * this.width + cx]!;
-            if (prop > 0) {
-                if (z < prop) return t;
-                if (d.z < 0 && o.z + d.z * exit < prop)
-                    return (prop - o.z) / d.z;
-            }
             if (exit >= maxDist) return maxDist;
             if (nextX < nextY) {
                 cx += stepX;
@@ -680,14 +688,13 @@ export class Castle {
     }
 
     private placeProps(): void {
-        this.props.forEach((p, i) => {
+        for (const p of this.props) {
             const obj = model(p.name);
             const r: Rig = rig(obj);
-            // how high the props reach, for the shots flying over them
-            this.setPropHeight(i, r.bounds.max.y);
             const a = THREE.MathUtils.degToRad(p.angle);
             world(p.x, p.y, 0, obj.position);
             obj.rotation.set(0, facing(Math.sin(a), -Math.cos(a)), 0);
+            if (p.blocked) this.block(footprint(obj));
             this.root.add(obj);
             for (const [name, joint] of r.joints) {
                 if (name.startsWith("Spin"))
@@ -715,7 +722,36 @@ export class Castle {
                         phase: Math.random() * 10,
                     });
             }
-        });
+        }
+    }
+
+    /**
+     * Makes the box of a placed prop (three.js coordinates) solid: exactly
+     * for collisions and rays (and the shots flying over it), and for paths
+     * every cell whose center it comes near. The map's blocked cells only
+     * say that the prop is solid, the model itself says how much room it
+     * takes.
+     */
+    private block(box: THREE.Box3): void {
+        if (box.isEmpty()) return;
+        const b: Blocker = {
+            x0: box.min.x,
+            y0: box.min.z,
+            x1: box.max.x,
+            y1: box.max.z,
+            top: Math.max(box.max.y, 0.1),
+        };
+        this.blockers.push(b);
+        const m = PATH_CLEARANCE;
+        for (let y = Math.floor(b.y0 - m); y <= Math.floor(b.y1 + m); y++)
+            for (let x = Math.floor(b.x0 - m); x <= Math.floor(b.x1 + m); x++) {
+                if (x < 0 || y < 0 || x >= this.width || y >= this.height)
+                    continue;
+                if (boxDistSq(x + 0.5, y + 0.5, b.x0, b.y0, b.x1, b.y1) >= m * m)
+                    continue;
+                const c = y * this.width + x;
+                this.propHeight[c] = Math.max(this.propHeight[c]!, b.top);
+            }
     }
 
     /** What moves on the props: turning, bobbing and flickering joints. */
@@ -778,4 +814,64 @@ export class Castle {
         for (const y of [6.5, 10.5, 14.5]) light(79.5, y, 2.5, moon, 0.9, 8);
         light(74, 10.5, 3, fire, 0.6, 8);
     }
+}
+
+/**
+ * The box (three.js coordinates) of the parts of a placed model lower than
+ * FOOT_HEIGHT, reaching up to the model's top.
+ */
+function footprint(obj: THREE.Object3D): THREE.Box3 {
+    obj.updateMatrixWorld(true);
+    const box = new THREE.Box3();
+    const v = new THREE.Vector3();
+    let top = 0;
+    obj.traverse((o) => {
+        const mesh = o as THREE.Mesh;
+        if (!mesh.isMesh) return;
+        const pos = mesh.geometry.getAttribute("position");
+        for (let i = 0; i < pos.count; i++) {
+            v.fromBufferAttribute(pos, i).applyMatrix4(mesh.matrixWorld);
+            if (v.y > top) top = v.y;
+            if (v.y < FOOT_HEIGHT) box.expandByPoint(v);
+        }
+    });
+    if (!box.isEmpty()) box.max.y = Math.max(box.max.y, top);
+    return box;
+}
+
+/** The squared distance from (x, y) to the rectangle (x0, y0)-(x1, y1). */
+function boxDistSq(
+    x: number,
+    y: number,
+    x0: number,
+    y0: number,
+    x1: number,
+    y1: number,
+): number {
+    const dx = x - THREE.MathUtils.clamp(x, x0, x1);
+    const dy = y - THREE.MathUtils.clamp(y, y0, y1);
+    return dx * dx + dy * dy;
+}
+
+/**
+ * Distance along the ray from o in the direction d (map coordinates) to the
+ * box of a prop, 0 from inside it, Infinity when it misses.
+ */
+function rayBox(o: THREE.Vector3, d: THREE.Vector3, b: Blocker): number {
+    let near = 0;
+    let far = Infinity;
+    const slab = (from: number, dir: number, lo: number, hi: number): boolean => {
+        if (dir === 0) return from >= lo && from <= hi;
+        let t0 = (lo - from) / dir;
+        let t1 = (hi - from) / dir;
+        if (t0 > t1) [t0, t1] = [t1, t0];
+        if (t0 > near) near = t0;
+        if (t1 < far) far = t1;
+        return near <= far;
+    };
+    return slab(o.x, d.x, b.x0, b.x1) &&
+        slab(o.y, d.y, b.y0, b.y1) &&
+        slab(o.z, d.z, 0, b.top)
+        ? near
+        : Infinity;
 }
