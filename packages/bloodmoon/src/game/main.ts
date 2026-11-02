@@ -11,9 +11,18 @@ import { Lang } from "./lang";
 import { LightPool } from "./lights";
 import { Menu } from "./menu";
 import { Play } from "./play";
+import { FrameMeter, initialQuality, LOW, type Quality } from "./quality";
 import * as Res from "./res";
 import * as Ui from "./ui";
 import { View } from "./view";
+
+/** The longest step of the game (s): nobody passes through a wall in it. */
+const MAX_STEP = 1 / 30;
+/**
+ * The longest frame (s) the game catches up on in steps; after a longer
+ * stall (or a hidden tab) it rather slows down.
+ */
+const MAX_FRAME = 0.25;
 
 /** Where the paused game is saved. */
 const SAVE_KEY = "bloodmoon.savegame";
@@ -65,6 +74,8 @@ export class Main {
     private readonly hud = document.createElement("canvas");
     private readonly ctx: CanvasRenderingContext2D;
     private hudScale = 1;
+    private quality: Quality = initialQuality();
+    private readonly meter = new FrameMeter();
     private last = 0;
     private elapsed = 0;
     private onMouseMove: ((dx: number, dy: number) => void) | null = null;
@@ -87,11 +98,7 @@ export class Main {
 
         // bloom on the flames, eyes and blood glow, in the scene's own light
         // before the tone mapping
-        const target = new THREE.WebGLRenderTarget(1, 1, {
-            type: THREE.HalfFloatType,
-            samples: 4,
-        });
-        this.composer = new EffectComposer(renderer, target);
+        this.composer = new EffectComposer(renderer, this.viewTarget());
         this.composer.addPass(new RenderPass(this.scene, this.camera));
         this.bloom = new UnrealBloomPass(
             new THREE.Vector2(1, 1),
@@ -116,6 +123,7 @@ export class Main {
         pmrem.dispose();
 
         this.lights = new LightPool(this.scene);
+        this.lights.setLimit(this.quality.lights);
         this.input = new Input(this.hud, (cx, cy) => {
             const r = this.hud.getBoundingClientRect();
             return {
@@ -211,15 +219,40 @@ export class Main {
             top: `${Math.round((window.innerHeight - h) / 2)}px`,
         });
         const dpr = window.devicePixelRatio || 1;
-        // phones have 3x screens and small GPUs: the 3D view at most 2x
-        const ratio = Math.min(dpr, 2);
+        // phones have 3x screens and small GPUs: the views at most at the
+        // quality's pixel ratios
+        const ratio = Math.min(dpr, this.quality.pixelRatio);
         this.renderer.setPixelRatio(ratio);
         this.renderer.setSize(w, h, false);
         this.composer.setPixelRatio(ratio);
         this.composer.setSize(w, h);
-        this.hud.width = Math.round(w * dpr);
-        this.hud.height = Math.round(h * dpr);
+        const bloom = this.quality.bloomScale;
+        if (bloom < 1)
+            this.bloom.setSize(
+                Math.max(1, Math.round(w * ratio * bloom)),
+                Math.max(1, Math.round(h * ratio * bloom)),
+            );
+        const hudRatio = Math.min(dpr, this.quality.hudRatio);
+        this.hud.width = Math.round(w * hudRatio);
+        this.hud.height = Math.round(h * hudRatio);
         this.hudScale = this.hud.width / Ui.WIDTH;
+    }
+
+    /** The HDR target of the 3D view, multisampled as the quality says. */
+    private viewTarget(): THREE.WebGLRenderTarget {
+        return new THREE.WebGLRenderTarget(1, 1, {
+            type: THREE.HalfFloatType,
+            samples: this.quality.samples,
+        });
+    }
+
+    /** Switches to the low quality, on a device too slow for the high one. */
+    private lowerQuality(): void {
+        if (this.quality === LOW) return;
+        this.quality = LOW;
+        this.composer.reset(this.viewTarget());
+        this.lights.setLimit(LOW.lights);
+        this.resize();
     }
 
     // --- screens --------------------------------------------------------
@@ -342,14 +375,22 @@ export class Main {
     // --- the frame ------------------------------------------------------
 
     private frame(now: number): void {
-        // a stalled frame mustn't push anyone through a wall
-        const dt = Math.min(Math.max((now - this.last) / 1000, 0), 1 / 30);
+        const real = Math.max((now - this.last) / 1000, 0);
         this.last = now;
+        // a long frame (a slow phone) is played in steps short enough that
+        // nobody passes through a wall, so the game keeps its speed
+        const dt = Math.min(real, MAX_FRAME);
+        const steps = Math.max(1, Math.ceil(dt / MAX_STEP));
         this.elapsed += dt;
-        const screen = this.screen;
-        if (screen instanceof Play) screen.update(dt, this.castle);
-        else screen?.update();
-        this.input.endFrame();
+        for (let i = 0; i < steps; i++) {
+            const screen = this.screen;
+            if (screen instanceof Play) screen.update(dt / steps, this.castle);
+            else if (i === 0) screen?.update();
+            // presses, clicks and finger moves count in the first step only
+            this.input.endFrame();
+        }
+        if (this.screen instanceof Play && this.meter.slow(real))
+            this.lowerQuality();
 
         // the game's sounds and music, and the flamethrower's roar (not
         // while the menu covers a paused game)

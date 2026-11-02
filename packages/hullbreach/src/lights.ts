@@ -51,6 +51,7 @@ export class LightPool {
 
     readonly sources = new Set<Light>();
     private readonly lights: THREE.PointLight[] = [];
+    private limit = LightPool.SIZE;
 
     constructor(parent: THREE.Object3D) {
         for (let i = 0; i < LightPool.SIZE; i++) {
@@ -58,6 +59,17 @@ export class LightPool {
             parent.add(light);
             this.lights.push(light);
         }
+    }
+
+    /**
+     * Uses only the first n of the point lights. The others are hidden,
+     * which three.js leaves out of the shaders (recompiling them once).
+     */
+    setLimit(n: number): void {
+        this.limit = Math.max(0, Math.min(n, LightPool.SIZE));
+        this.lights.forEach((light, i) => {
+            light.visible = i < this.limit;
+        });
     }
 
     add(light: Light): Light {
@@ -94,7 +106,7 @@ export class LightPool {
         scored.sort((a, b) => b.score - a.score);
         for (let i = 0; i < this.lights.length; i++) {
             const target = this.lights[i]!;
-            const source = scored[i]?.light;
+            const source = i < this.limit ? scored[i]?.light : undefined;
             if (!source) {
                 target.intensity = 0;
                 continue;

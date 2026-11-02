@@ -5,10 +5,19 @@ import { Game, type SaveData } from "./game";
 import { Input } from "./input";
 import { Lang } from "./lang";
 import { Menu } from "./menu";
+import { FrameMeter, initialQuality, LOW, type Quality } from "./quality";
 import * as Res from "./res";
 import type { Screen } from "./screen";
 import { Ship } from "./ship";
 import * as Ui from "./ui";
+
+/** The longest step of the game (s): nothing passes through a wall in it. */
+const MAX_STEP = 1 / 30;
+/**
+ * The longest frame (s) the game catches up on in steps; after a longer
+ * stall (or a hidden tab) it rather slows down.
+ */
+const MAX_FRAME = 0.25;
 
 /** Where the paused game is saved. */
 const SAVE_KEY = "hullbreach.savegame";
@@ -38,6 +47,8 @@ export class Main {
     private readonly hud = document.createElement("canvas");
     private readonly ctx: CanvasRenderingContext2D;
     private hudScale = 1;
+    private quality: Quality = initialQuality();
+    private readonly meter = new FrameMeter();
     private last = 0;
     private onMouseMove: ((dx: number, dy: number) => void) | null = null;
 
@@ -48,7 +59,11 @@ export class Main {
 
         this.stage.className = "stage";
         root.appendChild(this.stage);
-        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        // antialiasing is set with the context: off on phones and tablets
+        // from the start, kept if the game drops to the low quality later
+        this.renderer = new THREE.WebGLRenderer({
+            antialias: this.quality.samples > 0,
+        });
         this.renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
         this.renderer.setClearColor(0x020308);
         this.stage.appendChild(this.renderer.domElement);
@@ -60,6 +75,7 @@ export class Main {
             new THREE.AmbientLight(new THREE.Color(0.1, 0.1, 0.16), Math.PI),
         );
         this.lights = new LightPool(this.scene);
+        this.lights.setLimit(this.quality.lights);
         this.camera.up.set(0, 0, 1);
 
         this.input = new Input(this.hud, (cx, cy) => {
@@ -146,12 +162,22 @@ export class Main {
             top: `${Math.round((window.innerHeight - h) / 2)}px`,
         });
         const dpr = window.devicePixelRatio || 1;
-        // phones have 3x screens and small GPUs: the 3D view at most 2x
-        this.renderer.setPixelRatio(Math.min(dpr, 2));
+        // phones have 3x screens and small GPUs: the views at most at the
+        // quality's pixel ratios
+        this.renderer.setPixelRatio(Math.min(dpr, this.quality.pixelRatio));
         this.renderer.setSize(w, h, false);
-        this.hud.width = Math.round(w * dpr);
-        this.hud.height = Math.round(h * dpr);
+        const hudRatio = Math.min(dpr, this.quality.hudRatio);
+        this.hud.width = Math.round(w * hudRatio);
+        this.hud.height = Math.round(h * hudRatio);
         this.hudScale = this.hud.width / Ui.WIDTH;
+    }
+
+    /** Switches to the low quality, on a device too slow for the high one. */
+    private lowerQuality(): void {
+        if (this.quality === LOW) return;
+        this.quality = LOW;
+        this.lights.setLimit(LOW.lights);
+        this.resize();
     }
 
     private setScreen(next: Screen): void {
@@ -268,13 +294,20 @@ export class Main {
     }
 
     private frame(now: number): void {
-        const dt = (now - this.last) / 1000;
+        const real = Math.max((now - this.last) / 1000, 0);
         this.last = now;
-        const screen = this.screen;
-        if (!screen) return;
-        // cap the step so a stalled frame can't push anything through a wall
-        screen.update(Math.min(Math.max(dt, 0), 1 / 30));
-        this.input.endFrame();
+        if (!this.screen) return;
+        // a long frame (a slow phone) is played in steps short enough that
+        // nothing passes through a wall, so the game keeps its speed
+        const dt = Math.min(real, MAX_FRAME);
+        const steps = Math.max(1, Math.ceil(dt / MAX_STEP));
+        for (let i = 0; i < steps; i++) {
+            this.screen.update(dt / steps);
+            // presses, clicks and finger moves count in the first step only
+            this.input.endFrame();
+        }
+        if (this.screen instanceof Game && this.meter.slow(real))
+            this.lowerQuality();
 
         this.lights.update(this.camera.position);
         this.renderer.render(this.scene, this.camera);
