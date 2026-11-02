@@ -1,0 +1,107 @@
+name: PUBLISH BLOODMOON
+run-name: Publish package bloodmoon ${{ inputs.version }} by @${{ github.actor }}
+
+on:
+    # pull requests only build the package
+    pull_request:
+        branches: [ main ]
+        paths: [ ".github/workflows/publish-bloodmoon.yml", "packages/bloodmoon/**" ]
+    # started by ci.yml when the version of bloodmoon is not in bloodmoon-preview yet, or by hand
+    workflow_dispatch:
+        inputs:
+            version:
+                description: Version to publish, built from its tag @aljazmc/bloodmoon@<version>; empty publishes the branch with its package.json version
+                type: string
+                default: ""
+            force:
+                description: Publish even if the version is already in bloodmoon-preview
+                type: boolean
+                default: false
+
+permissions:
+    contents: read
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event_name }}
+    cancel-in-progress: false
+
+env:
+    NODE_ENV: development
+    NODE_OPTIONS: "--experimental-vm-modules"
+    NODE_NO_WARNINGS: "1"
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ inputs.version && format('refs/tags/@aljazmc/bloodmoon@{0}', inputs.version) || '' }}
+                  persist-credentials: false
+
+            - name: Setup NodeJS
+              uses: actions/setup-node@v6
+              with:
+                  cache-dependency-path: "packages/bloodmoon"
+                  node-version: "latest"
+                  cache: "yarn"
+
+            - name: Install package manager
+              run: |
+                  corepack enable
+                  corepack install
+                  yarn install --mode update-lockfile
+
+            - name: Install dependencies
+              run: yarn install --immutable
+
+            - name: Build package bloodmoon
+              run: yarn bp:bloodmoon
+
+            # a build without the game or its resources is not worth publishing
+            - name: Check the game
+              run: |
+                  for file in index.html index.js index.css res/gothic-map.txt; do
+                      if [ ! -s "packages/bloodmoon/dist/$file" ]; then
+                          echo "::error::packages/bloodmoon/dist/$file is missing"
+                          exit 1
+                      fi
+                  done
+                  models=$(find packages/bloodmoon/dist/res -name "*.glb" 2>/dev/null | wc -l)
+                  if [ "$models" -eq 0 ]; then
+                      echo "::error::packages/bloodmoon/dist/res has no models"
+                      exit 1
+                  fi
+                  echo "Bloodmoon Manor and $models models in packages/bloodmoon/dist."
+
+            - name: Configure git, commit, tag and force push
+              if: github.event_name == 'workflow_dispatch'
+              env:
+                  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+                  FORCE: ${{ inputs.force }}
+              run: |
+                  if [ -z "$GH_TOKEN" ]; then
+                      echo "::error::GH_TOKEN secret is empty or not available to this run"
+                      exit 1
+                  fi
+                  version=$(node -p "require('./packages/bloodmoon/package.json').version")
+                  repository="https://x-access-token:${GH_TOKEN}@github.com/aljazmc/bloodmoon-preview.git"
+                  if [ "$FORCE" != "true" ] && [ -n "$(git ls-remote --tags "$repository" "refs/tags/v$version")" ]; then
+                      echo "::notice::@aljazmc/bloodmoon@$version is already in bloodmoon-preview."
+                      exit 0
+                  fi
+                  cd packages/bloodmoon/dist
+                  # the package's documentation for the preview repository
+                  cp ../README.md .
+                  git config --global user.name aljazmc
+                  git config --global user.email aljazmc@users.noreply.github.com
+                  git config --global init.defaultBranch main
+                  git config --global --type bool push.autoSetupRemote true
+                  git init
+                  git checkout -b main
+                  git add .
+                  git commit -m "feat: new package bloodmoon v$version"
+                  git tag -a "v$version" -m "version: @aljazmc/bloodmoon v$version"
+                  git push -f "$repository" main "refs/tags/v$version"
