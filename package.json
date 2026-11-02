@@ -17,10 +17,10 @@
         "@aljazmc/starter": "workspace:*"
     },
     "devDependencies": {
-        "@aljazmc/formatero": "^0.4.0",
-        "@aljazmc/lintero": "^0.4.0",
-        "@aljazmc/monorepo": "^0.3.0",
-        "@aljazmc/testero": "^0.3.0",
+        "@aljazmc/formatero": "^0.7.0",
+        "@aljazmc/lintero": "^0.7.0",
+        "@aljazmc/monorepo": "^0.5.2",
+        "@aljazmc/testero": "^0.4.2",
         "esbuild": "0.28.2",
         "typescript": "^7.0.2",
         "unrs-resolver": "^1.12.2"
