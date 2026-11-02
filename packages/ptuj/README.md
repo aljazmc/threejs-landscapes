@@ -1,6 +1,6 @@
 # Ptuj
 
-A neon vector map of the Municipality of Ptuj in three.js with: 
+A neon vector map of the Municipality of Ptuj with: 
 
 1) its real outline,
 2) quarters, 
