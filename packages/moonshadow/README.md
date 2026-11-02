@@ -2,36 +2,36 @@
 
 A small first person shooter in elven fantasy style.
 
-| | Elf | Monsters |
-| --- | --- | --- |
-| health | 500 | 300 |
-| moving speed | 4 m/s | 4 m/s |
-| attack | sword or bow with explosive arrows | blows, 50 damage, at most every 1.2 s |
+|              | Elf                                | Monsters                              |
+| ------------ | ---------------------------------- | ------------------------------------- |
+| health       | 500                                | 300                                   |
+| moving speed | 4 m/s                              | 4 m/s                                 |
+| attack       | sword or bow with explosive arrows | blows, 50 damage, at most every 1.2 s |
 
-| Weapon | Damage | Between attacks | Hits |
-| --- | --- | --- | --- |
-| 1 sword (default) | 75 | 0.6 s | the nearest monster within 2.2 m in front of the elf (about 45° to each side) |
-| 2 bow | 500 | 3 s | the arrow flies at 30 m/s, falling slightly, and explodes where it hits: the monster hit takes all 500, every other monster within 9 m less, by its distance |
+| Weapon            | Damage | Between attacks | Hits                                                                                                                                                         |
+| ----------------- | ------ | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1 sword (default) | 75     | 0.6 s           | the nearest monster within 2.2 m in front of the elf (about 45° to each side)                                                                                |
+| 2 bow             | 500    | 3 s             | the arrow flies at 30 m/s, falling slightly, and explodes where it hits: the monster hit takes all 500, every other monster within 9 m less, by its distance |
 
-| Mouse / key | Action |
-| --- | --- |
-| mouse | look around (click into the view to capture the mouse) |
-| W A S D, arrow keys | move |
-| Space, left click | strike or shoot (hold to keep attacking) |
-| 1, 2 | sword, bow |
-| Esc | pause to the main menu |
+| Mouse / key         | Action                                                 |
+| ------------------- | ------------------------------------------------------ |
+| mouse               | look around (click into the view to capture the mouse) |
+| W A S D, arrow keys | move                                                   |
+| Space, left click   | strike or shoot (hold to keep attacking)               |
+| 1, 2                | sword, bow                                             |
+| Esc                 | pause to the main menu                                 |
 
 On a phone or tablet the game goes fullscreen and sideways where the browser allows it (not on iPhones):
 
-| Touch | Action |
-| --- | --- |
-| left half | a joystick where the thumb lands: walk in any direction, slower when tilted less |
-| right half | drag to look around |
-| ATTACK button | strike or shoot (hold to keep attacking) |
-| the weapon panels | choose the sword or the bow |
-| II at the top | pause to the main menu |
+| Touch             | Action                                                                           |
+| ----------------- | -------------------------------------------------------------------------------- |
+| left half         | a joystick where the thumb lands: walk in any direction, slower when tilted less |
+| right half        | drag to look around                                                              |
+| ATTACK button     | strike or shoot (hold to keep attacking)                                         |
+| the weapon panels | choose the sword or the bow                                                      |
+| II at the top     | pause to the main menu                                                           |
 
-The main menu has *Play*, *Save*, *Load* and *Language* (English, Deutsch, Polski, Slovenščina); the saved game and the language are kept in the browser's local storage.
+The main menu has _Play_, _Save_, _Load_ and _Language_ (English, Deutsch, Polski, Slovenščina); the saved game and the language are kept in the browser's local storage.
 
 ```
 yarn s:moonshadow    # dev server

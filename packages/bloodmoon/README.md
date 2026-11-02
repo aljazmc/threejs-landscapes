@@ -2,36 +2,36 @@
 
 A small first person shooter in Victorian gothic style.
 
-| | Vampire hunter | Creatures |
-| --- | --- | --- |
-| health | 500 | 300 |
-| moving speed | 4 m/s | 4 m/s |
-| attack | revolver or steampunk flamethrower | blows, 50 damage, at most every 1.2 s |
+|              | Vampire hunter                     | Creatures                             |
+| ------------ | ---------------------------------- | ------------------------------------- |
+| health       | 500                                | 300                                   |
+| moving speed | 4 m/s                              | 4 m/s                                 |
+| attack       | revolver or steampunk flamethrower | blows, 50 damage, at most every 1.2 s |
 
-| Weapon | Damage | Firing | Hits |
-| --- | --- | --- | --- |
-| 1 revolver (default) | 40 | a silver bullet every 0.5 s | only the first creature in the line of fire |
-| 2 flamethrower | 150 per second | while the trigger is held and the tank has fuel: a full tank burns 4 s and refills in 8 s; once dry, it fires again at a quarter | every creature within 6 m in its cone of fire, not through walls |
+| Weapon               | Damage         | Firing                                                                                                                           | Hits                                                             |
+| -------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| 1 revolver (default) | 40             | a silver bullet every 0.5 s                                                                                                      | only the first creature in the line of fire                      |
+| 2 flamethrower       | 150 per second | while the trigger is held and the tank has fuel: a full tank burns 4 s and refills in 8 s; once dry, it fires again at a quarter | every creature within 6 m in its cone of fire, not through walls |
 
-| Mouse / key | Action |
-| --- | --- |
-| mouse | look around (click into the view to capture the mouse) |
-| W A S D, arrow keys | move |
-| Space, left click | fire (hold to keep firing) |
-| 1, 2 | revolver, flamethrower |
-| Esc | pause to the main menu |
+| Mouse / key         | Action                                                 |
+| ------------------- | ------------------------------------------------------ |
+| mouse               | look around (click into the view to capture the mouse) |
+| W A S D, arrow keys | move                                                   |
+| Space, left click   | fire (hold to keep firing)                             |
+| 1, 2                | revolver, flamethrower                                 |
+| Esc                 | pause to the main menu                                 |
 
 On a phone or tablet the game goes fullscreen and sideways where the browser allows it (not on iPhones):
 
-| Touch | Action |
-| --- | --- |
-| left half | a joystick where the thumb lands: walk in any direction, slower when tilted less |
-| right half | drag to look around |
-| FIRE button | fire (hold to keep firing) |
-| the weapon panels | choose the revolver or the flamethrower |
-| II at the top | pause to the main menu |
+| Touch             | Action                                                                           |
+| ----------------- | -------------------------------------------------------------------------------- |
+| left half         | a joystick where the thumb lands: walk in any direction, slower when tilted less |
+| right half        | drag to look around                                                              |
+| FIRE button       | fire (hold to keep firing)                                                       |
+| the weapon panels | choose the revolver or the flamethrower                                          |
+| II at the top     | pause to the main menu                                                           |
 
-The main menu has *Play*, *Save*, *Load* and *Language* (English, Deutsch, Polski, Slovenščina); the saved game and the language are kept in the browser's local storage.
+The main menu has _Play_, _Save_, _Load_ and _Language_ (English, Deutsch, Polski, Slovenščina); the saved game and the language are kept in the browser's local storage.
 
 ```
 yarn s:bloodmoon    # dev server

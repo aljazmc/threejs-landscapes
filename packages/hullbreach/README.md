@@ -2,36 +2,36 @@
 
 A small first person shooter in cyberpunk style.
 
-| | Space commando | Aliens |
-| --- | --- | --- |
-| health | 500 | 300 |
-| moving speed | 4 m/s | 4 m/s |
-| attack | laser gun or grenade launcher | claws, 50 damage, at most every 1.2 s |
+|              | Space commando                | Aliens                                |
+| ------------ | ----------------------------- | ------------------------------------- |
+| health       | 500                           | 300                                   |
+| moving speed | 4 m/s                         | 4 m/s                                 |
+| attack       | laser gun or grenade launcher | claws, 50 damage, at most every 1.2 s |
 
-| Weapon | Damage | Between shots | Hits |
-| --- | --- | --- | --- |
-| 1 laser gun (default) | 30 | 0.5 s | only the first alien in the line of fire |
-| 2 grenade launcher | 500 | 3 s | where the grenade hits: the alien hit takes all 500, every other alien within 9 m less, by its distance |
+| Weapon                | Damage | Between shots | Hits                                                                                                    |
+| --------------------- | ------ | ------------- | ------------------------------------------------------------------------------------------------------- |
+| 1 laser gun (default) | 30     | 0.5 s         | only the first alien in the line of fire                                                                |
+| 2 grenade launcher    | 500    | 3 s           | where the grenade hits: the alien hit takes all 500, every other alien within 9 m less, by its distance |
 
-| Mouse / key | Action |
-| --- | --- |
-| mouse | look around (click into the view to capture the mouse) |
-| W A S D, arrow keys | move |
-| Space, left click | fire (hold to keep firing) |
-| 1, 2 | laser gun, grenade launcher |
-| Esc | pause to the main menu |
+| Mouse / key         | Action                                                 |
+| ------------------- | ------------------------------------------------------ |
+| mouse               | look around (click into the view to capture the mouse) |
+| W A S D, arrow keys | move                                                   |
+| Space, left click   | fire (hold to keep firing)                             |
+| 1, 2                | laser gun, grenade launcher                            |
+| Esc                 | pause to the main menu                                 |
 
 On a phone or tablet the game goes fullscreen and sideways where the browser allows it (not on iPhones):
 
-| Touch | Action |
-| --- | --- |
-| left half | a joystick where the thumb lands: walk in any direction, slower when tilted less |
-| right half | drag to look around |
-| FIRE button | fire (hold to keep firing) |
-| the weapon panels | choose the laser gun or the grenade launcher |
-| II at the top | pause to the main menu |
+| Touch             | Action                                                                           |
+| ----------------- | -------------------------------------------------------------------------------- |
+| left half         | a joystick where the thumb lands: walk in any direction, slower when tilted less |
+| right half        | drag to look around                                                              |
+| FIRE button       | fire (hold to keep firing)                                                       |
+| the weapon panels | choose the laser gun or the grenade launcher                                     |
+| II at the top     | pause to the main menu                                                           |
 
-The main menu has *Play*, *Save*, *Load* and *Language* (English, Deutsch, Polski, Slovenščina); the saved game and the language are kept in the browser's local storage.
+The main menu has _Play_, _Save_, _Load_ and _Language_ (English, Deutsch, Polski, Slovenščina); the saved game and the language are kept in the browser's local storage.
 
 ```
 yarn s:hullbreach    # dev server

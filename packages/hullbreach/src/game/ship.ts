@@ -726,7 +726,10 @@ export class Ship {
             for (let x = Math.floor(b.x0 - m); x <= Math.floor(b.x1 + m); x++) {
                 if (x < 0 || y < 0 || x >= this.width || y >= this.height)
                     continue;
-                if (boxDistSq(x + 0.5, y + 0.5, b.x0, b.y0, b.x1, b.y1) >= m * m)
+                if (
+                    boxDistSq(x + 0.5, y + 0.5, b.x0, b.y0, b.x1, b.y1) >=
+                    m * m
+                )
                     continue;
                 const i = y * this.width + x;
                 this.propHeight[i] = Math.max(this.propHeight[i]!, b.top);
@@ -831,7 +834,12 @@ function rayBox(
 ): number {
     let near = 0;
     let far = Infinity;
-    const slab = (from: number, dir: number, lo: number, hi: number): boolean => {
+    const slab = (
+        from: number,
+        dir: number,
+        lo: number,
+        hi: number,
+    ): boolean => {
         if (dir === 0) return from >= lo && from <= hi;
         let t0 = (lo - from) / dir;
         let t1 = (hi - from) / dir;
