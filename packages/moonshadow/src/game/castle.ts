@@ -409,8 +409,8 @@ export class Castle {
     /**
      * A cell to lie in wait in for someone at (fromX, fromY): one the player
      * at (px, py) can't see, close to the player's way (3 to 14 steps from
-     * the player) and not far for the one hiding; none of the taken cells
-     * nor their neighbors. null when there is none.
+     * the player) and at most reach steps for the one hiding; none of the
+     * taken cells nor their neighbors. null when there is none.
      */
     cover(
         fromX: number,
@@ -418,9 +418,14 @@ export class Castle {
         px: number,
         py: number,
         taken: Set<number>,
+        reach = 25,
     ): { x: number; y: number } | null {
         const toPlayer = this.distances(Math.floor(px), Math.floor(py), 14);
-        const fromMe = this.distances(Math.floor(fromX), Math.floor(fromY), 25);
+        const fromMe = this.distances(
+            Math.floor(fromX),
+            Math.floor(fromY),
+            reach,
+        );
         let best: { x: number; y: number } | null = null;
         let bestScore = Number.MAX_VALUE;
         for (let i = 0; i < fromMe.length; i++) {

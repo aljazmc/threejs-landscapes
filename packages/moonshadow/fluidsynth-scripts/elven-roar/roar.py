@@ -16,4 +16,4 @@ def roar():
         release=0.2), q=4.0)
     breath = lowpass(noise(duration, seed=10), 1500) * 0.3
     shape = envelope(duration, attack=0.08, decay=0.4, sustain=0.6, hold=0.5, release=0.35)
-    return normalize(drive(mix(throat, breath) * shape, 2.5), 0.8)
+    return normalize(drive(mix(throat, breath) * shape, 1.6), 0.8)

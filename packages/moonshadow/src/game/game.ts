@@ -1,7 +1,14 @@
 import * as THREE from "three";
 import type { Castle } from "./castle";
 import { Flare, Fx } from "./fx";
-import { KINDS, Monster, RADIUS, START_HEALTH, wrap } from "./monster";
+import {
+    KINDS,
+    Monster,
+    POST_REACH,
+    RADIUS,
+    startHealth,
+    wrap,
+} from "./monster";
 
 /**
  * The elf against the ten monsters in the keep, in first person. Distances
@@ -30,10 +37,22 @@ export const SWING_TIME = 0.3;
 /** Into the swing, when the blade bites. */
 const STRIKE_AT = 0.12;
 const ARROW_DAMAGE = 500;
+/** A blow or an arrow to the head does this many times the damage. */
+const HEADSHOT = 3;
+/** On the alert, this many of the nearest monsters (besides the small ones) rush the elf. */
+const RUSHERS = 2;
+/** Monsters this near each other (m) gather in a pack. */
+const PACK_AREA = 10;
+/** Seconds the HEADSHOT text shows. */
+const HEADSHOT_TIME = 0.9;
 export const BOW_INTERVAL = 3;
 const BLAST_RADIUS = 5 * PLAYER_HEIGHT;
 const ARROW_SPEED = 30;
 const ARROW_GRAVITY = 4;
+/** The blast's loudness right beside the elf (1: as recorded). */
+const BLAST_VOLUME = 0.4;
+/** The dying roar's loudness right beside the elf (1: as recorded). */
+const ROAR_VOLUME = 0.4;
 /** Radians per pixel. */
 const MOUSE_SPEED = 0.0025;
 const MAX_PITCH = 1.45;
@@ -109,6 +128,8 @@ export class Game {
     private triggerBlocked = true;
     hurtTime = 0;
     hitTime = 0;
+    /** Counts down from HEADSHOT_TIME after a hit in the head. */
+    headshotTime = 0;
     /** true when won, false when lost. */
     result: boolean | null = null;
     /** The bow's muzzle, as last drawn. */
@@ -126,12 +147,13 @@ export class Game {
         const a = THREE.MathUtils.degToRad(angle);
         const game = new Game(x, y, Math.atan2(-Math.cos(a), Math.sin(a)));
         castle.monsterStarts.forEach((s, i) => {
+            const kind = i % KINDS.length;
             const m = new Monster(
-                i % KINDS.length,
+                kind,
                 s.x,
                 s.y,
                 Math.random() * Math.PI * 2,
-                START_HEALTH,
+                startHealth(kind),
             );
             // if the start is in the way of a wall or prop, the nearest free cell
             if (!castle.circleFree(m.x, m.y, RADIUS)) {
@@ -155,6 +177,7 @@ export class Game {
         this.time += dt;
         this.hurtTime = Math.max(this.hurtTime - dt, 0);
         this.hitTime = Math.max(this.hitTime - dt, 0);
+        this.headshotTime = Math.max(this.headshotTime - dt, 0);
         this.fx.update(dt);
         if (this.result !== null) {
             for (const m of this.monsters) m.update(dt);
@@ -216,57 +239,69 @@ export class Game {
         const pack = m.pack;
         m.hurt(damage);
         if (pack) this.packCharge(pack);
-        this.alertArea(m);
-        this.soundAt(m.dead() ? "roar" : hit, m.x, m.y, m.dead() ? 0.9 : 0.7);
+        this.alertAll(m);
+        this.soundAt(
+            m.dead() ? "roar" : hit,
+            m.x,
+            m.y,
+            m.dead() ? ROAR_VOLUME : 0.7,
+        );
     }
 
     // --- the monsters' plans ---------------------------------------------
 
     /**
-     * A monster was hurt: every other one in its room (or hall) still
-     * roaming turns hostile. The nearest to the elf attacks at once, two
-     * or three of the others gather out of sight to charge together, and
-     * the rest lie in wait in covers the elf can't see on its way.
+     * A monster was hurt: the whole map turns hostile. The small, fast ones
+     * and the two nearest of the others rush the elf at once; the big
+     * ones lie in wait around corners on the elf's way; the rest gather
+     * in packs of two or three at hidden spots and charge together, or lie
+     * in wait too when none is near enough to gather with.
      */
-    private alertArea(hit: Monster): void {
+    private alertAll(hit: Monster): void {
         const castle = this.castle;
         if (!castle) return;
-        const area = castle.area(Math.floor(hit.x), Math.floor(hit.y));
         const far = (m: Monster) =>
             Math.hypot(m.x - this.playerX, m.y - this.playerY);
-        const group = this.monsters
-            .filter(
-                (m) =>
-                    m !== hit &&
-                    !m.dead() &&
-                    !m.angry &&
-                    castle.area(Math.floor(m.x), Math.floor(m.y)) === area,
-            )
+        const calm = this.monsters
+            .filter((m) => m !== hit && !m.dead() && !m.angry)
             .sort((a, b) => far(a) - far(b));
-        const nearest = group.shift();
-        if (!nearest) return;
-        nearest.alert("charge", null, castle);
         const taken = new Set<number>();
-        if (group.length >= 2) {
-            const size = group.length >= 3 && Math.random() < 0.5 ? 3 : 2;
-            const pack = group.splice(0, size);
-            const id = ++this.packs;
-            const leader = pack[0]!;
-            const meet = castle.cover(
-                leader.x,
-                leader.y,
+        const cover = (m: Monster) =>
+            castle.cover(
+                m.x,
+                m.y,
                 this.playerX,
                 this.playerY,
                 taken,
+                POST_REACH,
             );
-            for (const m of pack) m.alert("pack", meet, castle, id);
+        const gatherers: Monster[] = [];
+        let rushers = 0;
+        for (const m of calm) {
+            if (m.size === "small" || rushers < RUSHERS) {
+                if (m.size !== "small") rushers++;
+                m.alert("charge", null, castle);
+            } else if (m.size === "big") m.alert("ambush", cover(m), castle);
+            else gatherers.push(m);
         }
-        for (const m of group)
-            m.alert(
-                "ambush",
-                castle.cover(m.x, m.y, this.playerX, this.playerY, taken),
-                castle,
-            );
+        while (gatherers.length > 0) {
+            const leader = gatherers.shift()!;
+            const near = gatherers
+                .filter(
+                    (m) =>
+                        Math.hypot(m.x - leader.x, m.y - leader.y) < PACK_AREA,
+                )
+                .slice(0, 2);
+            if (near.length === 0) {
+                leader.alert("ambush", cover(leader), castle);
+                continue;
+            }
+            for (const m of near) gatherers.splice(gatherers.indexOf(m), 1);
+            const id = ++this.packs;
+            const meet = cover(leader);
+            for (const m of [leader, ...near])
+                m.alert("pack", meet, castle, id);
+        }
     }
 
     /** The pack charges together. */
@@ -368,7 +403,7 @@ export class Game {
 
     hurtPlayer(damage: number): void {
         if (this.result !== null) return;
-        this.sounds.push(["hurt", 1]);
+        this.sounds.push(["hurt", 0.8]);
         this.health = Math.max(this.health - damage, 0);
         this.hurtTime = 0.5;
         this.shake = Math.max(this.shake, 0.12);
@@ -426,6 +461,12 @@ export class Game {
             this.swing = 0;
             this.struck = false;
         } else this.loose(castle);
+    }
+
+    /** A hit in the head: its sound and the HEADSHOT text. */
+    private headshot(): void {
+        this.sounds.push(["headshot", 0.8]);
+        this.headshotTime = HEADSHOT_TIME;
     }
 
     /** Distance along a ray to where it enters the monster's cylinder. */
@@ -528,7 +569,14 @@ export class Game {
             best.y,
             Math.min(best.height * 0.6, EYE),
         ).addScaledVector(away, -best.hitRadius);
-        this.hurtMonster(best, SWORD_DAMAGE, "sword");
+        // aimed at its head: a headshot
+        const headshot = best.headOnRay(this.eye(), f);
+        if (headshot) this.headshot();
+        this.hurtMonster(
+            best,
+            SWORD_DAMAGE * (headshot ? HEADSHOT : 1),
+            "sword",
+        );
         this.fx.add(Flare.Slash, at, 0.9, 0.18);
         this.fx.splash(at, 5);
         this.hitTime = 0.15;
@@ -573,6 +621,7 @@ export class Game {
                 this.explode(
                     a.at.clone().addScaledVector(d, Math.max(0, dist - 0.1)),
                     hit,
+                    hit?.headOnRay(a.at, d) ?? false,
                 );
                 this.arrows.splice(i, 1);
                 continue;
@@ -583,17 +632,27 @@ export class Game {
     }
 
     /**
-     * The target (the monster hit, if any) takes the full damage; every other
-     * monster within the blast radius the more, the nearer it is.
+     * The target (the monster hit, if any) takes the full damage, three times
+     * that in the head; every other monster within the blast radius the
+     * more, the nearer it is.
      */
-    private explode(p: THREE.Vector3, target: Monster | null): void {
+    private explode(
+        p: THREE.Vector3,
+        target: Monster | null,
+        headshot = false,
+    ): void {
         this.fx.explode(new THREE.Vector3(p.x, p.y, Math.max(0, p.z - 0.4)));
-        this.sounds.push(["blast", heard(this.distanceTo(p.x, p.y) * 0.5)]);
+        this.sounds.push([
+            "blast",
+            BLAST_VOLUME * heard(this.distanceTo(p.x, p.y) * 0.5),
+        ]);
         for (const m of this.monsters) {
             if (m.dead()) continue;
             let damage = 0;
-            if (m === target) damage = ARROW_DAMAGE;
-            else {
+            if (m === target) {
+                damage = ARROW_DAMAGE * (headshot ? HEADSHOT : 1);
+                if (headshot) this.headshot();
+            } else {
                 const horizontal = Math.max(
                     0,
                     Math.hypot(m.x - p.x, m.y - p.y) - m.hitRadius,

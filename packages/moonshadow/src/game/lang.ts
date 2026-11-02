@@ -55,6 +55,7 @@ const TEXTS: Record<string, [string, string, string]> = {
             "WASD / puščice: premik   Miška: merjenje   Preslednica / levi klik: udarec, strel   1: meč   2: lok   Esc: meni",
         ],
     "HEALTH {0}": ["LEBEN {0}", "ZDROWIE {0}", "ZDRAVJE {0}"],
+    HEADSHOT: ["KOPFTREFFER", "STRZAŁ W GŁOWĘ", "ZADETEK V GLAVO"],
     "MONSTERS {0}/{1}": [
         "MONSTER {0}/{1}",
         "POTWORY {0}/{1}",

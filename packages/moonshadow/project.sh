@@ -38,8 +38,9 @@ audio() {
 
     ## Writes fluidsynth-scripts/<theme>-<name>/<name>.py into src/res/<theme>-<name>.wav
     ## (sound effects synthesized with numpy) or, for projects returning a Song,
-    ## src/res/<theme>-<name>.ogg (music played by FluidSynth with a GM soundfont)
-    require python3 fluidsynth
+    ## src/res/<theme>-<name>.ogg and .mp3 (music played by FluidSynth with a GM
+    ## soundfont; the MP3 for Safari, which decodes no Ogg Vorbis)
+    require python3 fluidsynth ffmpeg
     if ! python3 -c "import numpy" > /dev/null 2>&1; then
         echo "python3-numpy is required. Exiting..."
         exit 1
@@ -50,6 +51,12 @@ audio() {
         grep -qs 'Song(' "fluidsynth-scripts/$project/${project##*-}.py" && format=ogg
         echo "Writing src/res/$project.$format"
         python3 fluidsynth-scripts/export.py "$project" || exit 1
+        # Safari decodes no Ogg Vorbis: music is written as MP3 too
+        if [[ "$format" == ogg ]]; then
+            echo "Writing src/res/$project.mp3"
+            ffmpeg -hide_banner -loglevel error -y -i "src/res/$project.ogg" \
+                -c:a libmp3lame -q:a 4 "src/res/$project.mp3" || exit 1
+        fi
     done
 
 }

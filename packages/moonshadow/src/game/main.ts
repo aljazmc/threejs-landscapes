@@ -307,9 +307,25 @@ export class Main {
      * browser allows it (not on iPhones, which play in the page).
      */
     private fullscreen(): void {
-        const root = document.documentElement;
-        if (document.fullscreenElement || !root.requestFullscreen) return;
-        root.requestFullscreen({ navigationUI: "hide" })
+        // Safari before 16.4, and on the iPad, only knows the webkit names;
+        // the iPhone has no fullscreen for pages at all
+        const root = document.documentElement as HTMLElement & {
+            webkitRequestFullscreen?: () => Promise<void> | undefined;
+        };
+        const doc = document as Document & {
+            webkitFullscreenElement?: Element | null;
+        };
+        if (document.fullscreenElement || doc.webkitFullscreenElement) return;
+        let request: Promise<void> | undefined;
+        try {
+            if (root.requestFullscreen)
+                request = root.requestFullscreen({ navigationUI: "hide" });
+            else request = root.webkitRequestFullscreen?.();
+        } catch {
+            return;
+        }
+        if (!(request instanceof Promise)) return;
+        request
             .then(() => {
                 const orientation = screen.orientation as ScreenOrientation & {
                     lock?: (o: string) => Promise<void>;

@@ -267,6 +267,18 @@ export class Play {
                 }
             ctx.stroke();
         }
+        // a hit in the head: HEADSHOT under the aiming mark, fading out
+        if (game.headshotTime > 0) {
+            ctx.save();
+            ctx.globalAlpha = Math.min(game.headshotTime / 0.3, 1);
+            Ui.text(ctx, Lang.t("HEADSHOT"), W / 2, H / 2 + 34, {
+                size: 26,
+                outline: 6,
+                align: "center",
+                color: rgba(1, 0.85, 0.4),
+            });
+            ctx.restore();
+        }
 
         if (!over)
             Ui.tile(

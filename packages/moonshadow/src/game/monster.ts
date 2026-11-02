@@ -1,6 +1,14 @@
 import * as THREE from "three";
 import { type Castle, facing } from "./castle";
 import type { Game } from "./game";
+import {
+    easeGait,
+    HEAVY,
+    heavyCooldown,
+    LIGHT,
+    type Limb,
+    motion,
+} from "./motion";
 
 /**
  * One of the ten monsters in the keep: its mind and the pose of its joints
@@ -22,23 +30,28 @@ export const KINDS = [
     "wraith",
     "golem",
 ];
-export const START_HEALTH = 300;
-export const DAMAGE = 50;
+/** The starting health of one the size of the player (see startHealth). */
+const START_HEALTH = 300;
 /** For walking: fits through the chamber doors. */
 export const RADIUS = 0.35;
-const ATTACK_TIME = 0.7;
-/** Of the attack, when the blow lands. */
-const STRIKE_AT = 0.4;
+/** Seconds after a blow before the next. */
 const ATTACK_INTERVAL = 1.2;
+/** The heavy blow lunges in from this much beyond its reach (m), this fast (m/s). */
+const LUNGE = 0.8;
+const LUNGE_SPEED = 4;
+/** The sound of a blow. */
+const STRIKE_SOUND = "strike";
 const DEATH_TIME = 1.1;
 const TURN_SPEED = 8;
 /** Lying in wait, it springs out when the elf comes this near in sight. */
 const AMBUSH_SPOT = 5;
 /** Gathering, the pack charges when the elf comes this near in sight. */
 const PACK_SPOT = 7;
-/** Seconds of waiting before an ambusher or a pack attacks anyway. */
-const AMBUSH_TIME = 15;
-const PACK_TIME = 8;
+/** Seconds (counted from the alert, the way there included) before an ambusher or a pack attacks anyway. */
+const AMBUSH_TIME = 30;
+const PACK_TIME = 20;
+/** Steps an ambusher or a pack member may go to its post, across the map. */
+export const POST_REACH = 100;
 
 /**
  * What a hostile monster does: attack at once, lie in wait in a cover the
@@ -47,7 +60,43 @@ const PACK_TIME = 8;
  */
 export type Role = "charge" | "ambush" | "pack";
 
+/** The elf's pace (SPEED in game.ts). */
 const SPEED = 4;
+/** The damage of the elf's sword (SWORD_DAMAGE in game.ts). */
+const PLAYER_DAMAGE = 75;
+/**
+ * How big a monster is next to the elf: a small one strikes for a
+ * quarter of the sword's damage and moves twice as fast as the elf, one
+ * of the elf's size strikes as hard as the sword and moves as fast, and
+ * a big one strikes twice as hard at half the pace.
+ */
+export type Size = "small" | "player" | "big";
+const SIZE_DAMAGE: Record<Size, number> = { small: 0.25, player: 1, big: 2 };
+const SIZE_SPEED: Record<Size, number> = { small: 2, player: 1, big: 0.5 };
+/** A small one starts with half the health, a big one with double. */
+const SIZE_HEALTH: Record<Size, number> = { small: 0.5, player: 1, big: 2 };
+/** The size of each kind, measured against the elf's 1.8 m. */
+const SIZES: Record<string, Size> = {
+    // small
+    goblin: "small",
+    // about the size of the player
+    orc: "player",
+    skeleton: "player",
+    wraith: "player",
+    warg: "player",
+    spider: "player",
+    // big
+    troll: "big",
+    ogre: "big",
+    minotaur: "big",
+    golem: "big",
+};
+
+/** The health a kind starts with, by its size. */
+export function startHealth(kind: number): number {
+    const size = SIZES[KINDS[kind]!] ?? "player";
+    return START_HEALTH * SIZE_HEALTH[size];
+}
 const PLAYER_RADIUS = 0.3;
 
 export function wrap(a: number): number {
@@ -57,15 +106,20 @@ export function wrap(a: number): number {
 
 /** The turns (radians around their own X, Y and Z) of the joints and the rise of the body. */
 export interface Pose {
-    /** LegA joints swing forward by this, LegB back. */
+    /** LegA hips swing by this, LegB the opposite way (see motion.ts). */
     legs: number;
-    arms: number[];
+    /** The knees of LegA and of LegB bend further by these. */
+    kneeA: number;
+    kneeB: number;
+    /** Each arm, the right one first. */
+    arms: Limb[];
     head: THREE.Vector3;
     body: THREE.Vector3;
     /** Added to the body's rest height, after multiplying that by sink. */
     rise: number;
     sink: number;
-    tailTime: number;
+    /** The sway of tail segment k. */
+    tail: (k: number) => number;
     wing: number;
 }
 
@@ -76,10 +130,19 @@ export class Monster {
     /** Size for the arrows and blows: a standing cylinder, measured from the model. */
     hitRadius = 0.45;
     height = 1.8;
+    /** Its head for headshots: a ball here, set by the view. */
+    readonly headAt = new THREE.Vector3();
+    /** 0 until the view has placed the head. */
+    headRadius = 0;
     time = Math.random() * 10;
     walk = 0;
     moving = 0;
+    /** The pace eased (see easeGait), for the animation. */
+    gait = 0;
     attackTime = -1;
+    /** Whether the blow under way is the heavy one. */
+    heavy = false;
+    private heavyCooldown = heavyCooldown() / 2;
     private struck = false;
     private cooldown = 0;
     deathTime: number;
@@ -106,6 +169,29 @@ export class Monster {
         this.deathTime = health <= 0 ? DEATH_TIME : 0;
     }
 
+    get size(): Size {
+        return SIZES[KINDS[this.kind]!] ?? "player";
+    }
+
+    /** The damage of its strike, by its size. */
+    get damage(): number {
+        return Math.round(PLAYER_DAMAGE * SIZE_DAMAGE[this.size]);
+    }
+
+    /** Its pace (m/s), by its size. */
+    get speed(): number {
+        return SPEED * SIZE_SPEED[this.size];
+    }
+
+    /** Whether the ray from o along d (a unit vector) goes through its head. */
+    headOnRay(o: THREE.Vector3, d: THREE.Vector3): boolean {
+        if (this.headRadius <= 0) return false;
+        const v = this.headAt.clone().sub(o);
+        const t = v.dot(d);
+        if (t < 0) return false;
+        return v.lengthSq() - t * t <= this.headRadius * this.headRadius;
+    }
+
     dead(): boolean {
         return this.health <= 0;
     }
@@ -114,6 +200,11 @@ export class Monster {
     hurt(damage: number): void {
         if (this.dead()) return;
         this.health -= damage;
+        if (this.dead()) {
+            // drops where it stands: no more steps or strikes
+            this.moving = 0;
+            this.attackTime = -1;
+        }
         this.angry = true;
         this.charge();
         this.flash = 0.12;
@@ -135,7 +226,7 @@ export class Monster {
         }
         this.role = role;
         this.post = post;
-        this.toPost = castle.distances(post.x, post.y, 40);
+        this.toPost = castle.distances(post.x, post.y, POST_REACH);
         this.waited = 0;
         this.pack = pack;
     }
@@ -174,16 +265,32 @@ export class Monster {
         const dist = Math.sqrt(dx * dx + dy * dy);
         const reach = RADIUS + PLAYER_RADIUS + 0.55;
 
+        if (this.heavyCooldown > 0 && this.angry) this.heavyCooldown -= dt;
         if (this.attackTime >= 0) {
-            // the blow lands if the elf is still within reach
+            // the blow lands if the elf is still within reach; the heavy
+            // one lunges in first, and hits twice as hard a bit further
+            const blow = this.heavy ? HEAVY : LIGHT;
             this.face(dx, dy, dt);
             this.attackTime += dt;
             this.moving = 0;
-            const strike =
-                !this.struck && this.attackTime >= ATTACK_TIME * STRIKE_AT;
+            const u = this.attackTime / blow.time;
+            const close = RADIUS + PLAYER_RADIUS + 0.1;
+            if (this.heavy && u > 0.35 && u < blow.strikeAt && dist > close) {
+                const step = Math.min(dist - close, LUNGE_SPEED * dt);
+                game.moveMonster(
+                    this,
+                    (dx / dist) * step,
+                    (dy / dist) * step,
+                    castle,
+                );
+            }
+            const strike = !this.struck && u >= blow.strikeAt;
             if (strike) this.struck = true;
-            if (this.attackTime >= ATTACK_TIME) this.attackTime = -1;
-            if (strike && dist <= reach + 0.3) game.hurtPlayer(DAMAGE);
+            if (u >= 1) this.attackTime = -1;
+            if (strike && this.heavy)
+                game.soundAt(STRIKE_SOUND, this.x, this.y, 1);
+            if (strike && dist <= reach + (this.heavy ? 0.6 : 0.3))
+                game.hurtPlayer(this.damage * (this.heavy ? 2 : 1));
             return;
         }
 
@@ -228,17 +335,23 @@ export class Monster {
         if (planned) {
             // on its way to its post
         } else if (this.angry) {
-            if (dist <= reach) {
+            // the heavy blow when it is ready (lunging in from a bit
+            // further), else the quick one
+            const heavy = this.heavyCooldown <= 0;
+            if (dist <= reach + (heavy ? LUNGE : 0)) {
                 this.face(dx, dy, dt);
                 this.moving = 0;
                 if (
                     this.cooldown <= 0 &&
                     Math.abs(this.angleTo(dx, dy)) < 0.6
                 ) {
-                    game.soundAt("strike", this.x, this.y, 1);
+                    if (!heavy) game.soundAt(STRIKE_SOUND, this.x, this.y, 1);
+                    this.heavy = heavy;
+                    if (heavy) this.heavyCooldown = heavyCooldown();
                     this.attackTime = 0;
                     this.struck = false;
-                    this.cooldown = ATTACK_INTERVAL;
+                    this.cooldown =
+                        ATTACK_INTERVAL + (heavy ? HEAVY.time - LIGHT.time : 0);
                 }
                 return;
             }
@@ -292,14 +405,14 @@ export class Monster {
             return;
         }
         this.face(gx, gy, dt);
-        const step = Math.min(len, SPEED * dt);
+        const step = Math.min(len, this.speed * dt);
         const moved = game.moveMonster(
             this,
             (gx / len) * step,
             (gy / len) * step,
             castle,
         );
-        this.moving = moved / (SPEED * dt);
+        this.moving = moved / (this.speed * dt);
         // bumped into someone: go elsewhere
         if (moved < step * 0.2 && !this.angry) this.path = [];
     }
@@ -337,66 +450,60 @@ export class Monster {
     }
 
     private face(dx: number, dy: number, dt: number): void {
+        // turning at most TURN_SPEED, easing in at the end
         const most = TURN_SPEED * dt;
-        this.angle += THREE.MathUtils.clamp(this.angleTo(dx, dy), -most, most);
+        const turn = this.angleTo(dx, dy) * Math.min(dt * 12, 1);
+        this.angle += THREE.MathUtils.clamp(turn, -most, most);
     }
 
     // --- animation ------------------------------------------------------
 
     update(dt: number): void {
-        this.time += dt;
-        if (this.dead())
+        if (this.dead()) {
+            // lies still: only its fall goes on
             this.deathTime = Math.min(this.deathTime + dt, DEATH_TIME);
-        this.walk += dt * 9 * this.moving;
+        } else {
+            this.time += dt;
+            // steps start and stop softly; a faster one takes quicker steps
+            this.gait = easeGait(this.gait, this.moving, dt);
+            this.walk += dt * 9 * this.gait * SIZE_SPEED[this.size];
+        }
         this.flash = Math.max(this.flash - dt, 0);
     }
 
     pose(arms: number, hover: boolean): Pose {
-        const swing = Math.sin(this.walk) * 0.55 * Math.min(this.moving, 1);
-        const bob = hover
-            ? 0.12 * Math.sin(this.time * 2.2)
-            : Math.abs(Math.cos(this.walk)) * 0.05 * this.moving;
-        // arms: raised forward and up, then swung down, the second a bit later
-        const armTurns: number[] = [];
-        for (let i = 0; i < arms; i++) {
-            if (this.attackTime >= 0) {
-                const u = this.attackTime / ATTACK_TIME - i * 0.12;
-                armTurns.push(
-                    u < 0
-                        ? 0
-                        : u < STRIKE_AT
-                          ? (-2.0 * u) / STRIKE_AT
-                          : -2.0 + 2.6 * Math.min((u - STRIKE_AT) / 0.25, 1),
-                );
-            } else
-                armTurns.push(
-                    Math.sin(this.time * 1.7 + i) * 0.08 - swing * 0.3,
-                );
-        }
-        const lean =
-            this.attackTime >= 0
-                ? Math.sin(
-                      Math.min(this.attackTime / ATTACK_TIME, 1) * Math.PI,
-                  ) * (arms === 0 ? 0.6 : 0.25)
-                : 0;
+        const m = motion({
+            time: this.time,
+            walk: this.walk,
+            gait: this.gait,
+            attackTime: this.attackTime,
+            heavy: this.heavy,
+            arms,
+            hover,
+        });
         const pose: Pose = {
-            legs: swing,
-            arms: armTurns,
-            head: new THREE.Vector3(lean, Math.sin(this.time * 0.8) * 0.25, 0),
-            body: new THREE.Vector3(lean * 0.5, 0, 0),
-            rise: bob,
+            legs: m.hips,
+            kneeA: m.kneeA,
+            kneeB: m.kneeB,
+            arms: m.arms,
+            head: new THREE.Vector3(m.nod, m.look, 0),
+            body: new THREE.Vector3(m.lean, 0, m.roll),
+            rise: m.rise,
             sink: 1,
-            tailTime: this.time,
-            wing: Math.sin(this.time * 9) * 0.5,
+            tail: m.tail,
+            wing: m.wing,
         };
         if (this.deathTime > 0) {
-            // keels over to its side and sinks
+            // keels over to its side and sinks, limbs going slack
             const u = this.deathTime / DEATH_TIME;
             const fall = Math.min(u * 1.6, 1);
             pose.body = new THREE.Vector3(0, 0, (-fall * fall * Math.PI) / 2);
             pose.sink = 1 - 0.55 * fall;
             pose.rise = -0.15 * u;
-            pose.arms = pose.arms.map(() => -0.8 * fall);
+            pose.arms = pose.arms.map(() => ({
+                swing: -0.8 * fall,
+                bend: 0.4 * fall,
+            }));
         }
         return pose;
     }
