@@ -1,4 +1,4 @@
-import { createRoot } from "react-dom/client";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import React, {
     useCallback,
     useEffect,
@@ -6,12 +6,12 @@ import React, {
     useRef,
     useState,
 } from "react";
+import { createRoot } from "react-dom/client";
 import * as THREE from "three";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { loadMap, type MapData } from "./map";
 import { buildMap, PALETTE } from "./layers";
-import { Traffic } from "./traffic";
+import { loadMap, type MapData } from "./map";
 import { placeKey, Quarters } from "./quarters";
+import { Traffic } from "./traffic";
 import { Bloom, Controls, createView, fit, type View } from "./view";
 
 function Ptuj({

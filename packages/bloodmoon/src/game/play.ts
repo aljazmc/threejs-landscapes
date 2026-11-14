@@ -12,7 +12,7 @@ import { Lang } from "./lang";
 import type { Main } from "./main";
 import * as Res from "./res";
 import * as Ui from "./ui";
-import { BAR_BACK, GOLD, SILVER, css, rgba } from "./ui";
+import { BAR_BACK, css, GOLD, rgba, SILVER } from "./ui";
 
 /**
  * The playing screen: the controls driving the game, the HUD drawn over

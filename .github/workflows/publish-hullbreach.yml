@@ -4,8 +4,12 @@ run-name: Publish package hullbreach ${{ inputs.version }} by @${{ github.actor 
 on:
     # pull requests only build the package
     pull_request:
-        branches: [ main ]
-        paths: [ ".github/workflows/publish-hullbreach.yml", "packages/hullbreach/**" ]
+        branches: [main]
+        paths:
+            [
+                ".github/workflows/publish-hullbreach.yml",
+                "packages/hullbreach/**",
+            ]
     # started by ci.yml when the version of hullbreach is not in hullbreach-preview yet, or by hand
     workflow_dispatch:
         inputs:

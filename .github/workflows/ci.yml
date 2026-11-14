@@ -3,9 +3,9 @@ run-name: Testing quickie by @${{ github.actor }}
 
 on:
     push:
-        branches: [ main ]
+        branches: [main]
     pull_request:
-        branches: [ main ]
+        branches: [main]
     # run by hand from the Actions tab
     workflow_dispatch:
         inputs:
@@ -38,7 +38,7 @@ jobs:
 
         strategy:
             matrix:
-                node-version: [ 24.x, 25.x, 26.x ]
+                node-version: [24.x, 25.x, 26.x]
 
         steps:
             - name: Checkout code

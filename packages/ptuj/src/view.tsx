@@ -1,12 +1,12 @@
-import * as THREE from "three";
-import { useEffect, useMemo } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
+import { useEffect, useMemo } from "react";
+import * as THREE from "three";
 import { MOUSE, TOUCH } from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
-import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 
 // how the camera looks down at the map at first: from the south, tilted
 const VIEW = new THREE.Vector3(0, Math.cos(0.45), Math.sin(0.45));

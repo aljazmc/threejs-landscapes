@@ -1,10 +1,10 @@
-import * as THREE from "three";
-import React, { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
+import React, { useEffect, useMemo, useRef } from "react";
+import * as THREE from "three";
 import type { LineMaterial } from "three/addons/lines/LineMaterial.js";
-import { inPolygon } from "./map";
 import { ICON_PIXELS, type Icons } from "./icons";
 import { ORDER, PALETTE, type Place, type Quarter } from "./layers";
+import { inPolygon } from "./map";
 import type { View } from "./view";
 
 // below these distances of the camera the landmarks and the other places

@@ -1,10 +1,10 @@
 import * as THREE from "three";
 import { fromThree, joint, jointRotation, toThree, vecToThree } from "../space";
 import {
+    RADIUS as ALIEN_RADIUS,
     Alien,
     type AlienData,
     POST_REACH,
-    RADIUS as ALIEN_RADIUS,
     SPECIES,
     startHealth,
 } from "./alien";

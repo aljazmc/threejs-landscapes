@@ -3,7 +3,7 @@ import { LineMaterial } from "three/addons/lines/LineMaterial.js";
 import { LineSegments2 } from "three/addons/lines/LineSegments2.js";
 import { LineSegmentsGeometry } from "three/addons/lines/LineSegmentsGeometry.js";
 import { Icons } from "./icons";
-import { ground, type MapData, pairs, type Polygon } from "./map";
+import { ground, type MapData, type Polygon, pairs } from "./map";
 
 /** The neon colors of the map on its dark ground. */
 export const PALETTE = {

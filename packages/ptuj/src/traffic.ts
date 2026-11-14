@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import type { MapData, Network } from "./map";
 import { PALETTE, TRAFFIC_ORDER } from "./layers";
+import type { MapData, Network } from "./map";
 
 // the traffic runs this many times faster than real, so it shows on a map
 // many kilometers wide

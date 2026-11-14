@@ -1,7 +1,7 @@
-import type * as THREE from "three";
-import { createRoot } from "react-dom/client";
+import { Canvas, type ThreeElements, useFrame } from "@react-three/fiber";
 import React, { useRef, useState } from "react";
-import { Canvas, useFrame, type ThreeElements } from "@react-three/fiber";
+import { createRoot } from "react-dom/client";
+import type * as THREE from "three";
 
 function Box(props: ThreeElements["mesh"]) {
     const meshRef = useRef<THREE.Mesh>(null!);
