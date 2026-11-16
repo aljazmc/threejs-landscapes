@@ -1,11 +1,9 @@
 :root {
-    --sky: #02050b;
+    --sky: #010508;
     --panel: rgba(4, 16, 26, 0.82);
     --neon: #00e5ff;
     --neon-dim: rgba(0, 229, 255, 0.35);
     --text: #c8f6ff;
-    --amber: #ffcf40;
-    --magenta: #ff5cf4;
 }
 
 html,
@@ -89,41 +87,41 @@ body,
 }
 
 .label.village {
-    color: #7fe9c0;
+    color: #4fd8e8;
     font-size: 11px;
 }
 
-/* the names of places stand over their icons, in the colors of their
-   groups, see GROUPS in layers.ts */
+/* the names of places stand over their 3D icons (ICON_PIXELS high, see
+   icons.ts), in the colors of GROUPS in layers.ts */
 .label.landmark,
 .label.health,
 .label.public,
 .label.education,
 .label.food {
-    margin-top: -12px;
+    margin-top: -34px;
     font-size: 11px;
     letter-spacing: 0;
     text-transform: none;
 }
 
 .label.landmark {
-    color: #7df9ff;
+    color: #e6ffff;
 }
 
 .label.health {
-    color: #ff6b8a;
+    color: #5ff0ff;
 }
 
 .label.public {
-    color: #b48cff;
+    color: #5ff0ff;
 }
 
 .label.education {
-    color: #9dff7a;
+    color: #5ff0ff;
 }
 
 .label.food {
-    color: #ffcf40;
+    color: #5ff0ff;
 }
 
 .back {
@@ -207,4 +205,62 @@ body,
         top: auto;
         bottom: 12px;
     }
+}
+
+/* what is known of the place pointed at, beside the pointer */
+.card {
+    position: fixed;
+    z-index: 5;
+    box-sizing: border-box;
+    max-width: 320px;
+    padding: 10px 14px 12px;
+    border: 1px solid var(--neon-dim);
+    border-radius: 6px;
+    background-color: var(--panel);
+    box-shadow: 0 0 14px rgba(0, 229, 255, 0.25);
+    pointer-events: none;
+}
+
+.card h2 {
+    margin: 0;
+    color: var(--neon);
+    font-size: 14px;
+    font-weight: normal;
+    text-shadow: 0 0 6px var(--neon);
+}
+
+.card .kind {
+    margin: 2px 0 8px;
+    color: rgba(200, 246, 255, 0.6);
+    font-size: 11px;
+}
+
+.card dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 3px 10px;
+    margin: 0;
+    font-size: 12px;
+}
+
+.card dt {
+    color: rgba(200, 246, 255, 0.5);
+}
+
+.card dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+/* the tiny note of a ban on employing foreigners */
+.card .ban {
+    margin: 9px 0 0;
+    padding-top: 6px;
+    border-top: 1px solid var(--neon-dim);
+    color: rgba(200, 246, 255, 0.55);
+    font-size: 10px;
+}
+
+.card .ban.active {
+    color: var(--neon);
 }

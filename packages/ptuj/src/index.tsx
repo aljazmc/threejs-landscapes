@@ -9,28 +9,45 @@ import React, {
 import { createRoot } from "react-dom/client";
 import * as THREE from "three";
 import { buildMap, PALETTE } from "./layers";
-import { loadMap, type MapData } from "./map";
+import { banned, loadMap, type MapData, type PlaceInfo } from "./map";
+import { WIRE } from "./models";
 import { placeKey, Quarters } from "./quarters";
+import { loadTerrain, Terrain, type TerrainData } from "./terrain";
 import { Traffic } from "./traffic";
 import { Bloom, Controls, createView, fit, type View } from "./view";
 
 function Ptuj({
     map,
+    terrain,
     view,
     labels,
     onHover,
     onSelect,
+    onPoint,
 }: {
     map: MapData;
+    terrain: Terrain;
     view: View;
     labels: React.RefObject<Map<string, HTMLDivElement>>;
     onHover: (name: string | null) => void;
     onSelect: (name: string | null) => void;
+    onPoint: (place: number | null, x: number, y: number) => void;
 }) {
     const camera = useThree((state) => state.camera) as THREE.PerspectiveCamera;
+    const gl = useThree((state) => state.gl);
     const dpr = useThree((state) => state.viewport.dpr);
-    const scene = useMemo(() => buildMap(map, dpr), [map, dpr]);
-    const traffic = useMemo(() => new Traffic(map, dpr), [map, dpr]);
+    // the areas' texture: some 4 m a pixel, less where a finger points,
+    // as on phones
+    const size = Math.min(
+        gl.capabilities.maxTextureSize,
+        window.matchMedia("(pointer: coarse)").matches ? 2048 : 4096,
+    );
+    const scene = useMemo(
+        () => buildMap(map, terrain, dpr, size),
+        [map, terrain, dpr, size],
+    );
+    useEffect(() => () => scene.ground.dispose(), [scene]);
+    const traffic = useMemo(() => new Traffic(map, terrain), [map, terrain]);
     if (!view.overview) {
         const target = scene.bounds.getCenter(new THREE.Vector3());
         view.overview = {
@@ -39,10 +56,19 @@ function Ptuj({
             turn: true,
         };
     }
-    useFrame((_, delta) => traffic.update(delta));
+    const viewport = useThree((state) => state.size);
+    useFrame(({ clock }, delta) => {
+        // the wireframes' symbol size and spin
+        WIRE.perPixel.value =
+            (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2)) /
+            Math.max(viewport.height, 1);
+        WIRE.time.value = clock.elapsedTime;
+        scene.ground.update(gl);
+        traffic.update(delta);
+    });
     return (
         <>
-            <Controls view={view} />
+            <Controls view={view} terrain={terrain} />
             <Bloom />
             <primitive object={scene.group} />
             <primitive object={traffic.group} />
@@ -50,10 +76,12 @@ function Ptuj({
                 quarters={scene.quarters}
                 places={scene.places}
                 icons={scene.icons}
+                terrain={terrain}
                 view={view}
                 labels={labels}
                 onHover={onHover}
                 onSelect={onSelect}
+                onPoint={onPoint}
             />
         </>
     );
@@ -64,7 +92,7 @@ function Ptuj({
  * waters, roads, railway and land use are OpenStreetMap data, which the
  * Open Database License asks to credit wherever it is shown.
  */
-function License() {
+function License({ listed }: { listed: string | undefined }) {
     const [open, setOpen] = useState(true);
     return (
         <div className={`license${open ? " open" : ""}`}>
@@ -88,7 +116,34 @@ function License() {
                         >
                             Open Database License (ODbL)
                         </a>
-                        . The borders of the quarters are approximate and the
+                        . The heights of the ground, raised twice, are from{" "}
+                        <a
+                            href="https://registry.opendata.aws/terrain-tiles/"
+                            target="_blank"
+                            rel="noreferrer"
+                        >
+                            Mapzen Terrain Tiles
+                        </a>
+                        : Europe terrain data produced using Copernicus data and
+                        information funded by the European Union - EU-DEM
+                        layers; SRTM and GMTED2010 terrain data courtesy of the
+                        U.S. Geological Survey.
+                        {listed && (
+                            <>
+                                {" "}
+                                The bans on employing foreigners are from the{" "}
+                                <a
+                                    href="https://www.ess.gov.si/delodajalci/zaposlovanje-tujcev/"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    list of the Employment Service of Slovenia
+                                </a>{" "}
+                                of {date(listed)}, matched to the places by
+                                their address and name.
+                            </>
+                        )}{" "}
+                        The borders of the quarters are approximate and the
                         traffic is simulated.
                     </p>
                     <button type="button" onClick={() => setOpen(false)}>
@@ -110,15 +165,151 @@ function License() {
 
 const KINDS = { quarter: "mestna četrt", village: "naselje" };
 
+/** The kinds of places, by their icons, in Slovene. */
+const PLACE_KINDS: Record<string, string> = {
+    museum: "muzej",
+    office: "urad",
+    church: "cerkev",
+    tower: "stolp",
+    monument: "spomenik",
+    monastery: "samostan",
+    restaurant: "restavracija",
+    stadium: "stadion",
+    station: "železniška postaja",
+    hospital: "bolnišnica",
+    clinic: "ambulanta",
+    pharmacy: "lekarna",
+    police: "policija",
+    fire: "gasilski dom",
+    court: "sodišče",
+    post: "pošta",
+    library: "knjižnica",
+    theatre: "gledališče",
+    community: "dom krajanov, kulturni center",
+    school: "šola",
+    kindergarten: "vrtec",
+    bar: "bar",
+    cafe: "kavarna",
+};
+
+/** yyyy-mm-dd as a Slovene date, d. m. yyyy. */
+function date(day: string) {
+    const [y, m, d] = day.split("-").map(Number);
+    return `${d}. ${m}. ${y}`;
+}
+
+/**
+ * What is known of the place pointed at, beside the pointer: its name and
+ * kind, address, operator, opening hours, phone and website, and for an
+ * employer banned from employing foreigners, a note of until when.
+ */
+function PlaceCard({
+    place,
+    x,
+    y,
+}: {
+    place: {
+        name: string;
+        icon: string;
+        landmark: boolean;
+        info?: PlaceInfo;
+        ban?: string;
+    };
+    x: number;
+    y: number;
+}) {
+    const info = place.info ?? {};
+    const kind = PLACE_KINDS[place.icon] ?? "";
+    const rows: [string, string | undefined][] = [
+        ["naslov", info.address],
+        ["upravlja", info.operator !== place.name ? info.operator : undefined],
+        ["odprto", info.hours],
+        ["telefon", info.phone],
+        ["splet", info.website?.replace(/^https?:\/\/(www\.)?/, "")],
+    ];
+    // beside the pointer, kept inside the window
+    const left = Math.min(x + 18, window.innerWidth - 340);
+    const top = Math.min(y + 18, window.innerHeight - 220);
+    return (
+        <div className="card" style={{ left, top }}>
+            <h2>{place.name}</h2>
+            <p className="kind">
+                {place.landmark ? `znamenitost · ${kind}` : kind}
+            </p>
+            <dl>
+                {rows
+                    .filter((row): row is [string, string] => !!row[1])
+                    .map(([label, value]) => (
+                        <React.Fragment key={label}>
+                            <dt>{label}</dt>
+                            <dd>{value}</dd>
+                        </React.Fragment>
+                    ))}
+            </dl>
+            {place.ban && (
+                <p className={`ban${banned(place.ban) ? " active" : ""}`}>
+                    ☠ Prepoved zaposlovanja tujcev do {date(place.ban)}
+                </p>
+            )}
+        </div>
+    );
+}
+
 function App() {
     const view = useMemo(createView, []);
     const labels = useRef(new Map<string, HTMLDivElement>());
     const [map, setMap] = useState<MapData | null>(null);
+    const [terrain, setTerrain] = useState<Terrain | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [hovered, setHovered] = useState<string | null>(null);
     const [selected, setSelected] = useState<string | null>(null);
+    const [pointed, setPointed] =
+        useState<{
+            place: number;
+            x: number;
+            y: number;
+        } | null>(null);
+    const point = useCallback(
+        (place: number | null, x: number, y: number) =>
+            setPointed(place === null ? null : { place, x, y }),
+        [],
+    );
+    // the places with icons, in the order of the map's scene
+    const placeList = useMemo(
+        () =>
+            map
+                ? [
+                      ...map.landmarks.map(({ name, icon }) => ({
+                          name,
+                          icon,
+                          landmark: true,
+                      })),
+                      ...(map.pois ?? []).map(({ name, icon, info, ban }) => ({
+                          name,
+                          icon,
+                          landmark: false,
+                          ...(info ? { info } : {}),
+                          ...(ban ? { ban } : {}),
+                      })),
+                  ]
+                : [],
+        [map],
+    );
+    const card = pointed ? placeList[pointed.place] : undefined;
     useEffect(() => {
-        loadMap().then(setMap, (reason: Error) => setError(reason.message));
+        Promise.all([
+            loadMap(),
+            loadTerrain().catch((reason: Error): TerrainData | null => {
+                console.warn(reason.message);
+                return null;
+            }),
+        ]).then(
+            ([data, ground]) => {
+                setTerrain(new Terrain(ground));
+                setMap(data);
+            },
+            (reason: Error) => setError(reason.message),
+        );
     }, []);
     const back = useCallback(() => {
         view.selected = null;
@@ -146,9 +337,9 @@ function App() {
                           kind: kind as string,
                       })),
                       ...[
-                          ...map.landmarks.map(({ name, group }) => ({
+                          ...map.landmarks.map(({ name }) => ({
                               name,
-                              kind: group ?? "landmark",
+                              kind: "landmark",
                           })),
                           ...(map.pois ?? []).map(({ name, group }) => ({
                               name,
@@ -177,7 +368,7 @@ function App() {
     return (
         <>
             <div className="stage">
-                {map && (
+                {map && terrain && (
                     <Canvas
                         // sharp enough on dense screens without drawing
                         // every pixel
@@ -187,15 +378,19 @@ function App() {
                             stencil: true,
                         }}
                         camera={{ fov: 45, near: 1, far: 60000 }}
-                        style={{ cursor: hovered ? "pointer" : "grab" }}
+                        style={{
+                            cursor: hovered || pointed ? "pointer" : "grab",
+                        }}
                     >
                         <color attach="background" args={[PALETTE.sky]} />
                         <Ptuj
                             map={map}
+                            terrain={terrain}
                             view={view}
                             labels={labels}
                             onHover={setHovered}
                             onSelect={setSelected}
+                            onPoint={point}
                         />
                     </Canvas>
                 )}
@@ -224,9 +419,11 @@ function App() {
                             : "Mestna občina Ptuj"}
                     </p>
                     <p className="hint">
-                        drag to move · right drag to turn and tilt · scroll to
-                        zoom to the pointer · click a spot to center it, double
-                        click to zoom in · Esc for the whole map
+                        click a spot to look at it, scroll to zoom to it · drag
+                        to look around · right drag to move · W A S D to walk, E
+                        Q up and down, Shift faster · double click to fly nearer
+                        · point at an icon for what is known of it · Esc for the
+                        whole map
                     </p>
                 </div>
                 {selected && (
@@ -234,8 +431,11 @@ function App() {
                         ← vsa občina
                     </button>
                 )}
+                {card && pointed && (
+                    <PlaceCard place={card} x={pointed.x} y={pointed.y} />
+                )}
             </div>
-            <License />
+            <License listed={map?.bans?.listed} />
         </>
     );
 }

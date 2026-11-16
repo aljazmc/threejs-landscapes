@@ -2,32 +2,44 @@ import * as THREE from "three";
 import { LineMaterial } from "three/addons/lines/LineMaterial.js";
 import { LineSegments2 } from "three/addons/lines/LineSegments2.js";
 import { LineSegmentsGeometry } from "three/addons/lines/LineSegmentsGeometry.js";
+import { Ground } from "./ground";
 import { Icons } from "./icons";
-import { ground, type MapData, type Polygon, pairs } from "./map";
+import { type MapData, type Polygon, pairs } from "./map";
+import { FALLBACK, MODELS, reach } from "./models";
+import { LIFT, type Terrain } from "./terrain";
 
-/** The neon colors of the map on its dark ground. */
+/**
+ * The colors of the map, all cyan on a dark ground, as on the vector
+ * screens of the 80s and 90s.
+ */
 export const PALETTE = {
-    sky: "#02050b",
-    grid: "#0b3442",
-    land: "#061520",
-    woods: "#0a3a2a",
-    vineyards: "#2a1640",
-    parks: "#0c3a30",
-    water: "#062a56",
-    shore: "#2f9bff",
-    stream: "#1e7bff",
-    road: "#ffb000",
-    major: "#ffcf40",
-    rail: "#ff3df0",
+    sky: "#010508",
+    wireframe: "#0a6f82",
+    shade: "#03202a",
+    land: "#03141b",
+    woods: "#05303a",
+    vineyards: "#062731",
+    parks: "#073a44",
+    water: "#06495e",
+    shore: "#3ff4ff",
+    stream: "#1aa9c4",
+    road: "#00c8ec",
+    major: "#7ff6ff",
+    rail: "#8ffaff",
     outline: "#00e5ff",
     border: "#00e5ff",
-    car: "#fff2b0",
-    train: "#ff5cf4",
+    car: "#3fd8ee",
+    train: "#e0ffff",
+    icon: "#5ff0ff",
+    landmark: "#e6ffff",
 };
 
-// layers drawn bottom up; the map is flat, so the order decides, not depth
+// layers drawn bottom up: the areas flat into the ground's texture, where
+// the order decides; over the hills, the ground hides what lies behind it,
+// and among the lines and points on it, the order decides
 const ORDER = {
-    grid: 0,
+    ground: -1,
+    wireframe: 0,
     land: 1,
     cover: 2,
     water: 3,
@@ -44,7 +56,6 @@ const ORDER = {
 // major roads and the minor ones by the kinds of the map
 const MAJOR = ["motorway", "trunk", "primary"];
 const MEDIUM = ["secondary", "tertiary"];
-const GRID = 1000; // meters between the lines of the grid
 
 export interface Quarter {
     name: string;
@@ -62,13 +73,13 @@ export interface Quarter {
     box: THREE.Box2;
 }
 
-/** The kinds of places with icons, each in its color. */
+/** The kinds of places with icons; the landmarks shine brightest. */
 export const GROUPS = {
-    landmark: "#7df9ff",
-    health: "#ff6b8a",
-    public: "#b48cff",
-    education: "#9dff7a",
-    food: "#ffcf40",
+    landmark: PALETTE.landmark,
+    health: PALETTE.icon,
+    public: PALETTE.icon,
+    education: PALETTE.icon,
+    food: PALETTE.icon,
 } as const;
 export type Group = keyof typeof GROUPS;
 
@@ -86,16 +97,43 @@ export interface MapScene {
     places: Place[];
     icons: Icons;
     bounds: THREE.Box3;
+    ground: Ground;
 }
 
-/** Segments along a line of points, for LineSegmentsGeometry. */
-function segments(flat: number[], closed = false, out: number[] = []) {
+/**
+ * Segments along a line of points, for LineSegmentsGeometry, lying on the
+ * ground: cut into pieces no longer than a quarter of the grid of the
+ * terrain, so they follow its flat triangles over the hills.
+ */
+function segments(
+    terrain: Terrain,
+    flat: number[],
+    closed = false,
+    out: number[] = [],
+) {
     const points = pairs(flat);
     const count = closed ? points.length : points.length - 1;
+    const most = terrain.step / 4;
+    const lift = LIFT.lines;
     for (let k = 0; k < count; k++) {
         const [ax, ay] = points[k]!;
         const [bx, by] = points[(k + 1) % points.length]!;
-        out.push(ax, 0, -ay, bx, 0, -by);
+        const pieces = Math.max(
+            1,
+            Math.ceil(Math.hypot(bx - ax, by - ay) / most),
+        );
+        let x = ax;
+        let y = ay;
+        let h = terrain.heightAt(x, y) + lift;
+        for (let i = 1; i <= pieces; i++) {
+            const nx = ax + ((bx - ax) * i) / pieces;
+            const ny = ay + ((by - ay) * i) / pieces;
+            const nh = terrain.heightAt(nx, ny) + lift;
+            out.push(x, h, -y, nx, nh, -ny);
+            x = nx;
+            y = ny;
+            h = nh;
+        }
     }
     return out;
 }
@@ -130,7 +168,6 @@ function neon(
         linewidth: width * dpr,
         transparent: true,
         opacity,
-        depthTest: false,
         depthWrite: false,
         blending: glow ? THREE.AdditiveBlending : THREE.NormalBlending,
     });
@@ -156,7 +193,7 @@ function shapes(polygons: Polygon[]) {
     });
 }
 
-/** Flat filled areas, lying on the ground. */
+/** Flat filled areas, to draw into the texture of the ground. */
 function fill(
     polygons: Polygon[],
     color: string,
@@ -182,34 +219,111 @@ function fill(
 
 const rings = (list: number[][]) => list.map((outer) => ({ outer, holes: [] }));
 
+// meters left between the icons set apart
+const ICON_GAP = 3;
+
 /**
- * The map as neon lines on a dark ground: a faint grid, the land of the
- * municipality with its woods, vineyards and waters, the streams, roads,
- * railway, the borders of the quarters and the bright outline, and the
- * icons of the landmarks and other places.
+ * Where the icons of places stand, in the map's x and y: where they are,
+ * but places so near each other that their models would touch, turning
+ * at their real size (several in one building), are set apart, evenly
+ * round a ring about their middle, in the order they lie round it.
  */
-export function buildMap(map: MapData, dpr: number): MapScene {
+function spread(places: { at: [number, number]; icon: string }[]) {
+    const reaches = places.map(({ icon }) => reach(MODELS[icon] ?? FALLBACK));
+    // gather the places that touch, and those touching them, into groups
+    const group = places.map((_, k) => k);
+    const root = (k: number): number =>
+        group[k] === k ? k : (group[k] = root(group[k]!));
+    places.forEach((a, i) => {
+        for (let j = i + 1; j < places.length; j++) {
+            const b = places[j]!;
+            const apart = Math.hypot(b.at[0] - a.at[0], b.at[1] - a.at[1]);
+            if (apart < reaches[i]! + reaches[j]! + ICON_GAP) {
+                group[root(j)] = root(i);
+            }
+        }
+    });
+    const members = new Map<number, number[]>();
+    places.forEach((_, k) => {
+        const r = root(k);
+        members.set(r, [...(members.get(r) ?? []), k]);
+    });
+    const result = places.map(({ at }): [number, number] => [at[0], at[1]]);
+    for (const list of members.values()) {
+        if (list.length < 2) {
+            continue;
+        }
+        const n = list.length;
+        const mx = list.reduce((sum, k) => sum + places[k]!.at[0], 0) / n;
+        const my = list.reduce((sum, k) => sum + places[k]!.at[1], 0) / n;
+        // neighbors on the ring as far apart as the widest two need
+        const widest = Math.max(...list.map((k) => reaches[k]!));
+        const radius = (widest + ICON_GAP / 2) / Math.sin(Math.PI / n);
+        const angle = (k: number) =>
+            Math.atan2(places[k]!.at[1] - my, places[k]!.at[0] - mx);
+        const round = [...list].sort((a, b) => angle(a) - angle(b));
+        const start = angle(round[0]!);
+        round.forEach((k, i) => {
+            const a = start + (i / n) * Math.PI * 2;
+            result[k] = [mx + radius * Math.cos(a), my + radius * Math.sin(a)];
+        });
+    }
+    return result;
+}
+
+/**
+ * The map as cyan vector lines over the low poly hills of a dark ground:
+ * the wireframe of the ground, the land of the municipality with its woods, vineyards and waters, the
+ * streams, roads, railway, the borders of the quarters and the bright
+ * outline, and the icons of the landmarks and other places. size is the
+ * width in pixels of the texture the areas are drawn into.
+ */
+export function buildMap(
+    map: MapData,
+    terrain: Terrain,
+    dpr: number,
+    size: number,
+): MapScene {
     const group = new THREE.Group();
+    const ground = new Ground(
+        terrain,
+        PALETTE.sky,
+        PALETTE.shade,
+        { ground: ORDER.ground, veil: ORDER.veil },
+        size,
+    );
+    group.add(ground.group);
     const outline = { outer: map.outline, holes: [] };
+    const line = (flat: number[], closed = false, out: number[] = []) =>
+        segments(terrain, flat, closed, out);
 
     const bounds = new THREE.Box3();
     for (const [x, y] of pairs(map.outline)) {
-        bounds.expandByPoint(ground(x, y));
+        bounds.expandByPoint(terrain.ground(x, y));
     }
 
-    // a faint grid round the municipality, a kilometer apart
-    const grid: number[] = [];
-    const x0 = Math.floor(bounds.min.x / GRID - 3) * GRID;
-    const x1 = Math.ceil(bounds.max.x / GRID + 3) * GRID;
-    const z0 = Math.floor(bounds.min.z / GRID - 3) * GRID;
-    const z1 = Math.ceil(bounds.max.z / GRID + 3) * GRID;
-    for (let x = x0; x <= x1; x += GRID) {
-        grid.push(x, 0, z0, x, 0, z1);
-    }
-    for (let z = z0; z <= z1; z += GRID) {
-        grid.push(x0, 0, z, x1, 0, z);
-    }
-    group.add(neon(grid, PALETTE.grid, 1, 0.8, ORDER.grid, dpr));
+    // the low poly ground as a faint wireframe of its triangles, and a light
+    // from the north west, high up, to shade its faces
+    const wireframe = new THREE.LineSegments(
+        new THREE.BufferGeometry().setAttribute(
+            "position",
+            new THREE.Float32BufferAttribute(
+                terrain.wireframe(LIFT.wireframe),
+                3,
+            ),
+        ),
+        new THREE.LineBasicMaterial({
+            color: PALETTE.wireframe,
+            transparent: true,
+            opacity: 0.35,
+            depthWrite: false,
+        }),
+    );
+    wireframe.renderOrder = ORDER.wireframe;
+    group.add(wireframe);
+    const light = new THREE.DirectionalLight(0xffffff, 1.6);
+    light.position.set(-0.6, 1, -0.5);
+    group.add(light);
 
     // the land, marking the stencil, which keeps what is drawn on it inside
     const land = fill([outline], PALETTE.land, 1, ORDER.land);
@@ -219,7 +333,7 @@ export function buildMap(map: MapData, dpr: number): MapScene {
         stencilFunc: THREE.AlwaysStencilFunc,
         stencilZPass: THREE.ReplaceStencilOp,
     });
-    group.add(land);
+    ground.areas.add(land);
     for (const [list, color, opacity] of [
         [map.woods, PALETTE.woods, 0.7],
         [map.vineyards, PALETTE.vineyards, 0.6],
@@ -227,18 +341,18 @@ export function buildMap(map: MapData, dpr: number): MapScene {
     ] as const) {
         const cover = fill(rings(list), color, opacity, ORDER.cover);
         insideLand(cover.material);
-        group.add(cover);
+        ground.areas.add(cover);
     }
     const water = fill(map.water, PALETTE.water, 1, ORDER.water);
     insideLand(water.material);
-    group.add(water);
+    ground.areas.add(water);
 
     // the lines on the land
     const shore: number[] = [];
     for (const { outer, holes } of map.water) {
-        segments(outer, true, shore);
+        line(outer, true, shore);
         for (const hole of holes) {
-            segments(hole, true, shore);
+            line(hole, true, shore);
         }
     }
     const shoreLines = neon(shore, PALETTE.shore, 1.5, 0.9, ORDER.lines, dpr);
@@ -246,7 +360,7 @@ export function buildMap(map: MapData, dpr: number): MapScene {
     group.add(shoreLines);
     const streams: number[] = [];
     for (const stream of map.streams) {
-        segments(stream, false, streams);
+        line(stream, false, streams);
     }
     group.add(neon(streams, PALETTE.stream, 1, 0.6, ORDER.lines, dpr));
 
@@ -263,14 +377,14 @@ export function buildMap(map: MapData, dpr: number): MapScene {
             : MEDIUM.includes(kind)
               ? roads.medium
               : roads.minor;
-        segments(edge[3] as number[], false, layer);
+        line(edge[3] as number[], false, layer);
     }
     group.add(neon(roads.minor, PALETTE.road, 1, 0.28, ORDER.lines, dpr));
     group.add(neon(roads.medium, PALETTE.road, 1.3, 0.55, ORDER.lines, dpr));
     group.add(neon(roads.major, PALETTE.major, 1.8, 0.8, ORDER.lines, dpr));
     const rails: number[] = [];
     for (const edge of map.rails.edges) {
-        segments(edge[2] as number[], false, rails);
+        line(edge[2] as number[], false, rails);
     }
     group.add(neon(rails, PALETTE.rail, 1.8, 0.85, ORDER.lines, dpr));
 
@@ -281,21 +395,22 @@ export function buildMap(map: MapData, dpr: number): MapScene {
         const lines: number[] = [];
         const box = new THREE.Box2();
         for (const { outer, holes } of quarter.shapes) {
-            segments(outer, true, lines);
+            line(outer, true, lines);
             for (const hole of holes) {
-                segments(hole, true, lines);
+                line(hole, true, lines);
             }
             for (const [x, y] of pairs(outer)) {
                 box.expandByPoint(new THREE.Vector2(x, y));
             }
         }
         const border = neon(lines, PALETTE.border, 1, 0.2, ORDER.lines, dpr);
-        group.add(fillMesh, border);
+        ground.veils.add(fillMesh);
+        group.add(border);
         return {
             name: quarter.name,
             kind: quarter.kind,
             shapes: quarter.shapes,
-            label: ground(...quarter.label),
+            label: terrain.ground(...quarter.label, LIFT.icons),
             fill: fillMesh,
             border,
             box,
@@ -303,36 +418,37 @@ export function buildMap(map: MapData, dpr: number): MapScene {
     });
 
     // the outline, bright, over a wide soft glow
-    const edge = segments(map.outline, true);
+    const edge = line(map.outline, true);
     group.add(neon(edge, PALETTE.outline, 4, 0.05, ORDER.outline, dpr, true));
     group.add(neon(edge, PALETTE.outline, 1.3, 0.65, ORDER.outline, dpr));
 
-    // the icons of the landmarks first, then of the other places; a
-    // landmark with the icon of a kind of place is drawn in its color
+    // the icons of the landmarks first, brighter, then of the other places,
+    // set apart where they would touch
+    const all = [...map.landmarks, ...(map.pois ?? [])];
+    const spots = spread(all);
     const places: Place[] = [
-        ...map.landmarks.map(({ name, at }) => ({
+        ...map.landmarks.map(({ name }) => ({
             name,
             group: "landmark" as Group,
-            at: ground(...at),
         })),
-        ...(map.pois ?? []).map(({ name, group, at }) => ({
-            name,
-            group,
-            at: ground(...at),
-        })),
-    ];
+        ...(map.pois ?? []).map(({ name, group }) => ({ name, group })),
+    ].map((place, k) => ({
+        ...place,
+        at: terrain.ground(...spots[k]!, LIFT.icons),
+    }));
     const icons = new Icons(
-        [...map.landmarks, ...(map.pois ?? [])].map(({ icon, group }, k) => ({
-            icon,
+        all.map((place, k) => ({
+            icon: place.icon,
             at: places[k]!.at,
-            color: GROUPS[group ?? places[k]!.group],
+            bright: places[k]!.group === "landmark",
+            ban: (place as { ban?: string }).ban,
         })),
-        dpr,
+        { bright: PALETTE.landmark, dim: PALETTE.icon },
         ORDER.icons,
     );
-    group.add(icons.points);
+    group.add(icons.group);
 
-    return { group, quarters, places, icons, bounds };
+    return { group, quarters, places, icons, bounds, ground };
 }
 
 export { ORDER };

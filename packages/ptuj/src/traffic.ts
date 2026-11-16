@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import { PALETTE, TRAFFIC_ORDER } from "./layers";
 import type { MapData, Network } from "./map";
+import { CAR, heading, WAGON as WAGON_MODEL, wire } from "./models";
+import { LIFT, type Terrain } from "./terrain";
 
 // the traffic runs this many times faster than real, so it shows on a map
 // many kilometers wide
@@ -122,55 +124,6 @@ class Graph {
     }
 }
 
-/** Glowing points, round or square, as many pixels wide at any zoom. */
-function glowing(count: number, color: string, size: number, square: boolean) {
-    const geometry = new THREE.BufferGeometry();
-    const positions = new THREE.BufferAttribute(new Float32Array(count * 3), 3);
-    positions.setUsage(THREE.DynamicDrawUsage);
-    const alphas = new THREE.BufferAttribute(new Float32Array(count), 1);
-    alphas.setUsage(THREE.DynamicDrawUsage);
-    geometry.setAttribute("position", positions);
-    geometry.setAttribute("alpha", alphas);
-    const material = new THREE.ShaderMaterial({
-        uniforms: {
-            color: { value: new THREE.Color(color) },
-            size: { value: size },
-        },
-        vertexShader: `
-            attribute float alpha;
-            uniform float size;
-            varying float vAlpha;
-            void main() {
-                vAlpha = alpha;
-                gl_Position = projectionMatrix * modelViewMatrix *
-                    vec4(position, 1.0);
-                gl_PointSize = size;
-            }`,
-        fragmentShader: `
-            uniform vec3 color;
-            varying float vAlpha;
-            void main() {
-                vec2 p = gl_PointCoord - 0.5;
-                float d = ${square ? "max(abs(p.x), abs(p.y))" : "length(p)"};
-                // a crisp core with only a faint rim of glow, kept dim
-                // enough that the bloom hardly takes it up
-                float core = 1.0 - smoothstep(0.3, 0.38, d);
-                float glow = (1.0 - smoothstep(0.3, 0.5, d)) * 0.12;
-                float light = (core * 0.7 + glow) * vAlpha;
-                if (light < 0.01) discard;
-                gl_FragColor = vec4(color * light, light);
-            }`,
-        transparent: true,
-        depthTest: false,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-    });
-    const points = new THREE.Points(geometry, material);
-    points.frustumCulled = false; // they move all over the map
-    points.renderOrder = TRAFFIC_ORDER;
-    return { points, positions, alphas };
-}
-
 function pick<T>(items: T[], weight: (item: T) => number) {
     let total = 0;
     for (const item of items) {
@@ -187,14 +140,16 @@ function pick<T>(items: T[], weight: (item: T) => number) {
 }
 
 /**
- * Cars as glowing dots driving the roads at their speeds, keeping right,
- * turning at random where roads meet, rather onto the bigger roads, and
+ * Cars as little wireframe cars driving the roads at their speeds,
+ * keeping right, turning at random where roads meet, rather onto the
+ * bigger roads, and
  * leaving and entering the municipality where its roads cross its border.
  */
 class Cars {
-    readonly points: THREE.Points;
-    private readonly positions: THREE.BufferAttribute;
-    private readonly alphas: THREE.BufferAttribute;
+    readonly object: THREE.LineSegments;
+    private readonly positions: THREE.InstancedBufferAttribute;
+    private readonly headings: THREE.InstancedBufferAttribute;
+    private readonly alphas: THREE.InstancedBufferAttribute;
     private readonly edge: Int32Array;
     private readonly s: Float32Array;
     private readonly forward: Uint8Array;
@@ -204,12 +159,19 @@ class Cars {
 
     constructor(
         private readonly graph: Graph,
+        private readonly terrain: Terrain,
         count: number,
-        dpr: number,
     ) {
-        const made = glowing(count, PALETTE.car, 4 * dpr, false);
-        this.points = made.points;
-        this.positions = made.positions;
+        // dim, and small from afar, so the hundreds of them don't glare
+        const made = wire(CAR, count, {
+            color: PALETTE.car,
+            pixels: 4,
+            opacity: 0.6,
+            fade: { near: 400, far: 3000, floor: 0.08 },
+        });
+        this.object = made.object;
+        this.positions = made.offsets;
+        this.headings = made.headings;
         this.alphas = made.alphas;
         this.edge = new Int32Array(count);
         this.s = new Float32Array(count);
@@ -284,16 +246,20 @@ class Cars {
             }
             graph.sample(edge, this.s[car]!, this.forward[car] === 1, sample);
             // keep right: the right of heading (dx, dz) is (-dz, dx)
+            const x = sample[0]! - sample[3]! * KEEP_RIGHT;
+            const z = sample[1]! + sample[2]! * KEEP_RIGHT;
             this.positions.setXYZ(
                 car,
-                sample[0]! - sample[3]! * KEEP_RIGHT,
-                0,
-                sample[1]! + sample[2]! * KEEP_RIGHT,
+                x,
+                this.terrain.under(x, z) + LIFT.traffic,
+                z,
             );
+            this.headings.setX(car, heading(sample[2]!, sample[3]!));
             this.fade[car] = Math.min(this.fade[car]! + delta * 2, 1);
             this.alphas.setX(car, this.fade[car]!);
         }
         this.positions.needsUpdate = true;
+        this.headings.needsUpdate = true;
         this.alphas.needsUpdate = true;
     }
 }
@@ -314,26 +280,32 @@ interface Train {
 }
 
 /**
- * Trains as glowing squares, a locomotive and its wagons, running the
+ * Trains as wireframe wagons one after the other, running the
  * railway straight through its switches, slowing down to stop at the
  * station of Ptuj, and leaving and entering the municipality at its ends.
  */
 class Trains {
-    readonly points: THREE.Points;
-    private readonly positions: THREE.BufferAttribute;
-    private readonly alphas: THREE.BufferAttribute;
+    readonly object: THREE.LineSegments;
+    private readonly positions: THREE.InstancedBufferAttribute;
+    private readonly headings: THREE.InstancedBufferAttribute;
+    private readonly alphas: THREE.InstancedBufferAttribute;
     private readonly trains: Train[];
     private readonly sample = new Float32Array(4);
     private readonly other = new Float32Array(4);
 
     constructor(
         private readonly graph: Graph,
+        private readonly terrain: Terrain,
         private readonly station: THREE.Vector3 | undefined,
-        dpr: number,
     ) {
-        const made = glowing(TRAINS * WAGONS, PALETTE.train, 7 * dpr, true);
-        this.points = made.points;
-        this.positions = made.positions;
+        const made = wire(WAGON_MODEL, TRAINS * WAGONS, {
+            color: PALETTE.train,
+            pixels: 22,
+            fade: { near: 600, far: 4000, floor: 0.06 },
+        });
+        this.object = made.object;
+        this.positions = made.offsets;
+        this.headings = made.headings;
         this.alphas = made.alphas;
         this.trains = Array.from({ length: TRAINS }, (_, k) => {
             const train = this.enter();
@@ -458,7 +430,10 @@ class Trains {
                     trail.splice(0, trail.length - 2 * 120);
                 }
             }
-            // the wagons follow the trail of the head
+            // the wagons follow the trail of the head, each heading for the
+            // one before it, the first along the track
+            let aheadX = head[0]! + head[2]!;
+            let aheadZ = head[1]! + head[3]!;
             for (let w = 0; w < WAGONS; w++) {
                 const index = t * WAGONS + w;
                 let behind = w * WAGON;
@@ -478,7 +453,15 @@ class Trains {
                     z = trail[k + 1]!;
                     k -= 2;
                 }
-                this.positions.setXYZ(index, x, 0, z);
+                this.positions.setXYZ(
+                    index,
+                    x,
+                    this.terrain.under(x, z) + LIFT.traffic,
+                    z,
+                );
+                this.headings.setX(index, heading(aheadX - x, aheadZ - z));
+                aheadX = x;
+                aheadZ = z;
                 // a wagon shows once the train has come that far in
                 this.alphas.setX(index, behind > 0 ? 0 : 1);
             }
@@ -491,6 +474,7 @@ class Trains {
             }
         });
         this.positions.needsUpdate = true;
+        this.headings.needsUpdate = true;
         this.alphas.needsUpdate = true;
     }
 }
@@ -501,15 +485,21 @@ export class Traffic {
     private readonly cars: Cars;
     private readonly trains: Trains;
 
-    constructor(map: MapData, dpr: number) {
+    constructor(map: MapData, terrain: Terrain) {
         const station = map.landmarks.find(({ icon }) => icon === "station");
-        this.cars = new Cars(new Graph(map.roads, map.roads.kinds), CARS, dpr);
+        this.cars = new Cars(
+            new Graph(map.roads, map.roads.kinds),
+            terrain,
+            CARS,
+        );
         this.trains = new Trains(
             new Graph(map.rails),
+            terrain,
             station && new THREE.Vector3(station.at[0], 0, -station.at[1]),
-            dpr,
         );
-        this.group.add(this.cars.points, this.trains.points);
+        this.cars.object.renderOrder = TRAFFIC_ORDER;
+        this.trains.object.renderOrder = TRAFFIC_ORDER;
+        this.group.add(this.cars.object, this.trains.object);
     }
 
     update(delta: number) {

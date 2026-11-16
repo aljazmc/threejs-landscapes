@@ -5,10 +5,12 @@ import type { LineMaterial } from "three/addons/lines/LineMaterial.js";
 import { ICON_PIXELS, type Icons } from "./icons";
 import { ORDER, PALETTE, type Place, type Quarter } from "./layers";
 import { inPolygon } from "./map";
+import { WIRE } from "./models";
+import type { Terrain } from "./terrain";
 import type { View } from "./view";
 
-// below these distances of the camera the landmarks and the other places
-// are named, above this one the quarters and villages
+// below these distances from the camera the landmarks and the other places
+// are named, above this one of the view the quarters and villages
 const LANDMARK_NAMES = 2600;
 const PLACE_NAMES = 1200;
 const QUARTER_NAMES = 2000;
@@ -31,38 +33,51 @@ export function quarterAt(quarters: Quarter[], x: number, y: number) {
 
 /**
  * The quarters and villages under the pointer: their borders light up when
- * pointed at and stay lit when chosen. A click turns the view round the
- * point clicked, a double click also zooms in on it. Their names float over
- * the map, and so do the icons of the places, the more important ones
- * first, leaving out those that would cover them, and near enough, the
- * places' names.
+ * pointed at and stay lit when chosen. A click turns the camera, where it
+ * stands, to look at the point clicked, so the wheel zooms to it; a double
+ * click also flies a third of the way there. Their names float over the
+ * map, and so do the icons of the places, the more important ones first,
+ * leaving out those that would cover them, and near enough, the places'
+ * names; the hills hide names behind them. Pointing at an icon tells
+ * which place it is (onPoint), to show what is known of it.
  */
 export function Quarters({
     quarters,
     places,
     icons,
+    terrain,
     view,
     labels,
     onHover,
     onSelect,
+    onPoint,
 }: {
     quarters: Quarter[];
     places: Place[];
     icons: Icons;
+    terrain: Terrain;
     view: View;
     labels: React.RefObject<Map<string, HTMLDivElement>>;
     onHover: (name: string | null) => void;
     onSelect: (name: string | null) => void;
+    /** The place pointed at (its index in places) and where, or null. */
+    onPoint: (place: number | null, x: number, y: number) => void;
 }) {
     const camera = useThree((state) => state.camera) as THREE.PerspectiveCamera;
     const element = useThree((state) => state.gl.domElement);
     const size = useThree((state) => state.size);
     const hovered = useRef<string | null>(null);
+    // the icons on the screen each frame: left, top, right, bottom and
+    // distance from the camera, the distance Infinity where not shown
+    const boxes = useMemo(
+        () =>
+            new Float32Array(places.length * 5).fill(Number.POSITIVE_INFINITY),
+        [places],
+    );
 
     useEffect(() => {
         const raycaster = new THREE.Raycaster();
         const pointer = new THREE.Vector2();
-        const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
         const pick = (event: MouseEvent) => {
             const rect = element.getBoundingClientRect();
             pointer.set(
@@ -70,35 +85,38 @@ export function Quarters({
                 -((event.clientY - rect.top) / rect.height) * 2 + 1,
             );
             raycaster.setFromCamera(pointer, camera);
-            const point = raycaster.ray.intersectPlane(
-                plane,
-                new THREE.Vector3(),
-            );
+            const point = terrain.raycast(raycaster.ray);
             if (!point) {
                 return null;
             }
-            const quarter = quarterAt(quarters, point.x, -point.z);
-            return quarter ? { point, quarter } : null;
+            return { point, quarter: quarterAt(quarters, point.x, -point.z) };
         };
         const focus = (event: MouseEvent, closer: number) => {
             const hit = pick(event);
             if (!hit) {
                 return;
             }
-            view.selected = hit.quarter.name;
+            const distance = camera.position.distanceTo(hit.point);
             view.goal = {
                 target: hit.point,
-                distance: Math.max(view.distance * closer, 60),
+                distance: Math.max(distance * closer, Math.min(distance, 60)),
             };
-            onSelect(hit.quarter.name);
+            if (hit.quarter) {
+                view.selected = hit.quarter.name;
+                onSelect(hit.quarter.name);
+            }
         };
         let pending: PointerEvent | null = null;
         const move = (event: PointerEvent) => {
             if (!pending) {
                 requestAnimationFrame(() => {
-                    const hit = pending ? pick(pending) : null;
-                    const name = hit ? hit.quarter.name : null;
+                    const event = pending;
+                    const hit = event ? pick(event) : null;
+                    const name = hit?.quarter?.name ?? null;
                     pending = null;
+                    if (event) {
+                        point(event);
+                    }
                     if (name !== hovered.current) {
                         hovered.current = name;
                         onHover(name);
@@ -106,6 +124,30 @@ export function Quarters({
                 });
             }
             pending = event;
+        };
+        // the nearest icon under the pointer, not behind a hill
+        const top = new THREE.Vector3();
+        const point = (event: PointerEvent) => {
+            const rect = element.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            let best = -1;
+            for (let k = 0; k < places.length; k++) {
+                const b = 5 * k;
+                if (
+                    x >= boxes[b]! &&
+                    x <= boxes[b + 2]! &&
+                    y >= boxes[b + 1]! &&
+                    y <= boxes[b + 3]! &&
+                    (best < 0 || boxes[b + 4]! < boxes[5 * best + 4]!)
+                ) {
+                    top.copy(places[k]!.at).y += 3;
+                    if (terrain.sees(camera.position, top)) {
+                        best = k;
+                    }
+                }
+            }
+            onPoint(best < 0 ? null : best, event.clientX, event.clientY);
         };
         let down: { x: number; y: number } | null = null;
         const press = (event: PointerEvent) => {
@@ -126,6 +168,7 @@ export function Quarters({
         const leave = () => {
             hovered.current = null;
             onHover(null);
+            onPoint(null, 0, 0);
         };
         const menu = (event: MouseEvent) => event.preventDefault();
         element.addEventListener("pointermove", move);
@@ -142,7 +185,18 @@ export function Quarters({
             element.removeEventListener("dblclick", double);
             element.removeEventListener("contextmenu", menu);
         };
-    }, [camera, element, quarters, view, onHover, onSelect]);
+    }, [
+        camera,
+        element,
+        quarters,
+        places,
+        boxes,
+        terrain,
+        view,
+        onHover,
+        onSelect,
+        onPoint,
+    ]);
 
     const projected = useMemo(() => new THREE.Vector3(), []);
     const written = useMemo(() => new Map<string, string>(), []);
@@ -154,7 +208,11 @@ export function Quarters({
         let style = "0";
         if (opacity > 0.01) {
             projected.copy(at).project(camera);
-            if (projected.z < 1 && Math.abs(projected.x) < 1.2) {
+            if (
+                projected.z < 1 &&
+                Math.abs(projected.x) < 1.2 &&
+                terrain.sees(camera.position, at)
+            ) {
                 const x = Math.round(((projected.x + 1) / 2) * size.width);
                 const y = Math.round(((1 - projected.y) / 2) * size.height);
                 style = `${opacity.toFixed(2)}|${x}|${y}`;
@@ -170,18 +228,12 @@ export function Quarters({
         }
     };
     useFrame((_, delta) => {
+        icons.expire();
         const far = THREE.MathUtils.smoothstep(
             view.distance,
             QUARTER_NAMES * 0.7,
             QUARTER_NAMES * 1.6,
         );
-        const near =
-            1 -
-            THREE.MathUtils.smoothstep(
-                view.distance,
-                LANDMARK_NAMES * 0.6,
-                LANDMARK_NAMES,
-            );
         const ease = 1 - Math.exp(-delta * 8);
         for (const quarter of quarters) {
             const selected = quarter.name === view.selected;
@@ -195,6 +247,8 @@ export function Quarters({
             const shown = selected ? 0.55 : pointed ? 0.4 : 0.2;
             lines.opacity += (shown - lines.opacity) * ease;
             quarter.border.renderOrder = selected ? ORDER.chosen : ORDER.lines;
+            // the chosen border over all, the veils too
+            lines.depthTest = !selected;
             // with a quarter chosen, the others go dim under a dark veil
             const veil = quarter.fill.material;
             const dim = view.selected && !selected ? 0.6 : 0;
@@ -215,13 +269,6 @@ export function Quarters({
         const room = ICON_PIXELS * 1.1;
         const taken: number[] = [];
         const names: number[] = [];
-        const placeNames =
-            1 -
-            THREE.MathUtils.smoothstep(
-                view.distance,
-                PLACE_NAMES * 0.6,
-                PLACE_NAMES,
-            );
         places.forEach((spot, k) => {
             projected.copy(spot.at).project(camera);
             const x = ((projected.x + 1) / 2) * size.width;
@@ -239,14 +286,28 @@ export function Quarters({
                     Math.abs(taken[i + 1]! - y) > room;
             }
             icons.show(k, free);
+            const distance = camera.position.distanceTo(spot.at);
             if (free) {
                 taken.push(x, y);
+                // where it shows, to point at, a little wider to catch
+                const shown = icons.pixels(k, distance, WIRE.perPixel.value);
+                const half = shown.width / 2 + 4;
+                boxes.set(
+                    [x - half, y - shown.height - 4, x + half, y + 4, distance],
+                    5 * k,
+                );
+            } else {
+                boxes[5 * k] = Number.POSITIVE_INFINITY;
             }
-            const wanted = spot.group === "landmark" ? near : placeNames;
+            // named near enough the camera, the landmarks from farther
+            const most =
+                spot.group === "landmark" ? LANDMARK_NAMES : PLACE_NAMES;
+            const wanted =
+                1 - THREE.MathUtils.smoothstep(distance, most * 0.6, most);
             let named = free && wanted > 0.01;
             // the name stands above the icon, centered on it
             const half = (spot.name.length * LETTER) / 2;
-            const top = y - ICON_PIXELS / 2 - NAME_HEIGHT;
+            const top = y - ICON_PIXELS - NAME_HEIGHT;
             for (let i = 0; named && i < names.length; i += 4) {
                 named =
                     x + half < names[i]! ||

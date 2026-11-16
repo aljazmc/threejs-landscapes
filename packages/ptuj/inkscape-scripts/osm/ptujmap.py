@@ -19,6 +19,7 @@ import sys
 
 import numpy as np
 
+import bans as banned
 from geo import inside, load, project, rings, simplify, way_points
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -91,11 +92,60 @@ UNNAMED = {"post_office": "Pošta", "doctors": "Ambulanta",
            "restaurant": "Restavracija", "fast_food": "Okrepčevalnica",
            "fire_station": "Gasilski dom", "kindergarten": "Vrtec",
            "school": "Šola"}
+# meters within which two places with the same icon may be one place the
+# map has twice
+TWIN = 30
 
 
-def pois(directory, outline):
+def without_twins(places):
+    """Leaves out the places the map has twice under the same icon, near
+    each other: where one has only a name given for unnamed places (an
+    unnamed node beside the named building of the same restaurant) or
+    both have the same name but for case and punctuation (McDonalds and
+    McDonald's). The named one stays, else the first."""
+    defaults = set(UNNAMED.values())
+
+    def plain(name):
+        return "".join(c for c in name.casefold() if c.isalnum())
+
+    kept = []
+    for place in sorted(places, key=lambda p: p["name"] in defaults):
+        twin = any(
+            other["icon"] == place["icon"]
+            and math.dist(other["at"], place["at"]) < TWIN
+            and (place["name"] in defaults
+                 or plain(other["name"]) == plain(place["name"]))
+            for other in kept)
+        if not twin:
+            kept.append(place)
+    # in the order they came
+    return [p for p in places if any(p is k for k in kept)]
+
+
+def info(tags):
+    """What the map says of a place, to show when it is pointed at: its
+    address, operator, opening hours, phone and website, where known."""
+    street = tags.get("addr:street") or tags.get("addr:place")
+    number = tags.get("addr:housenumber", "")
+    town = " ".join(filter(None, (tags.get("addr:postcode"),
+                                  tags.get("addr:city"))))
+    result = {
+        "address": ", ".join(filter(None, (f"{street} {number}".strip()
+                                           if street else "", town))),
+        "operator": tags.get("operator"),
+        "hours": tags.get("opening_hours"),
+        "phone": tags.get("phone") or tags.get("contact:phone")
+        or tags.get("contact:mobile"),
+        "website": tags.get("website") or tags.get("contact:website"),
+    }
+    return {key: value for key, value in result.items() if value}
+
+
+def pois(directory, outline, bans=None):
     """The places with icons, most important first, leaving out those the
-    landmarks already show and those the map has twice."""
+    landmarks already show and those the map has twice; with what the map
+    says of them and, for a listed employer, the latest end of its bans on
+    employing foreigners (see bans.py)."""
     path = os.path.join(directory, "pois.json")
     if not os.path.exists(path):
         return []
@@ -125,8 +175,15 @@ def pois(directory, outline):
                for other in found):
             continue
         _, icon, group = POIS[kinds.index(kind)]
-        found.append({"name": name, "icon": icon, "group": group,
-                      "at": [r1(at[0]), r1(at[1])], "rank": kinds.index(kind)})
+        place = {"name": name, "icon": icon, "group": group,
+                 "at": [r1(at[0]), r1(at[1])], "rank": kinds.index(kind)}
+        if info(tags):
+            place["info"] = info(tags)
+        until = banned.ban(tags, bans, f"{element['type']}/{element['id']}")
+        if until:
+            place["ban"] = until
+        found.append(place)
+    found = without_twins(found)
     found.sort(key=lambda p: (GROUPS.index(p["group"]), p["rank"]))
     for place in found:
         del place["rank"]
@@ -467,7 +524,10 @@ def main(directory):
     plan["landmarks"] = [{"name": name, "icon": icon, "at": list(at)}
                          | ({"group": groups[icon]} if icon in groups else {})
                          for name, icon, at in LANDMARKS]
-    plan["pois"] = pois(directory, outline)
+    bans = banned.load(directory)
+    plan["pois"] = pois(directory, outline, bans)
+    if bans:
+        plan["bans"] = {"source": banned.SOURCE, "listed": bans["listed"]}
 
     os.makedirs(os.path.dirname(OUTPUT), exist_ok=True)
     with open(OUTPUT, "w") as file:

@@ -11247,7 +11247,11 @@
             "name": "Služba nujne medicinske pomoči",
             "icon": "hospital",
             "group": "health",
-            "at": [232.6, 670.5]
+            "at": [232.6, 670.5],
+            "info": {
+                "address": "Potrčeva cesta 19A, 2250 Ptuj",
+                "operator": "JZ Zdravstveni dom Ptuj"
+            }
         },
         {
             "name": "Splošna bolnišnica dr. Jožeta Potrča Ptuj",
@@ -11259,247 +11263,393 @@
             "name": "JZ Zdravstveni dom Ptuj",
             "icon": "clinic",
             "group": "health",
-            "at": [251.4, 664.4]
+            "at": [251.4, 664.4],
+            "info": {
+                "address": "Potrčeva cesta 19A, 2250 Ptuj",
+                "operator": "JZ Zdravstveni dom Ptuj",
+                "phone": "+386 (02) 787 15 00"
+            }
         },
         {
             "name": "LEKARNA TOPLEK",
             "icon": "pharmacy",
             "group": "health",
-            "at": [381.8, 635.9]
+            "at": [381.8, 635.9],
+            "info": {
+                "address": "Potrčeva cesta 23, 2250 Ptuj",
+                "operator": "LEKARNA TOPLEK",
+                "hours": "Mo-Fr 07:00-19:00"
+            }
         },
         {
             "name": "Lekarne Ptuj",
             "icon": "pharmacy",
             "group": "health",
-            "at": [163.9, 113.0]
+            "at": [163.9, 113.0],
+            "info": {
+                "address": "Trstenjakova ulica 9, 2250 Ptuj",
+                "operator": "Lekarne Ptuj",
+                "website": "https://www.lekarne-ptuj.si/"
+            }
         },
         {
             "name": "Lekarne Ptuj - PE Budina-Brstje",
             "icon": "pharmacy",
             "group": "health",
-            "at": [547.0, -59.9]
+            "at": [547.0, -59.9],
+            "info": {
+                "address": "Ormoška cesta 15, 2250 Ptuj",
+                "operator": "Javni zavod Lekarne Ptuj",
+                "phone": "+386 2 748 18 66",
+                "website": "https://www.lekarne-ptuj.si/lekarne/#gallery-details-budina-brstje"
+            }
         },
         {
             "name": "Lekarne Ptuj",
             "icon": "pharmacy",
             "group": "health",
-            "at": [-496.1, -382.3]
+            "at": [-496.1, -382.3],
+            "info": {
+                "address": "Zadružni trg 9, 2250 Ptuj",
+                "operator": "Lekarne Ptuj"
+            }
         },
         {
             "name": "Lekarna Breg",
             "icon": "pharmacy",
             "group": "health",
-            "at": [-563.9, -332.8]
+            "at": [-563.9, -332.8],
+            "info": {
+                "address": "Zadružni trg 12c, 2250 Ptuj",
+                "phone": "+3862 788 53 46"
+            }
         },
         {
             "name": "Digitalna slikovna diagnostika",
             "icon": "clinic",
             "group": "health",
-            "at": [1018.6, -133.7]
+            "at": [1018.6, -133.7],
+            "info": {
+                "address": "Puhova ulica 9A, 2250 Ptuj",
+                "operator": "Digitalna Slikovna diagnostika, medicinska diagnostika in druge storitve, d.o.o.",
+                "phone": "+386 2 772 07 31",
+                "website": "https://www.dsd.si/"
+            }
         },
         {
             "name": "Ambulanta Tominc d.o.o.",
             "icon": "clinic",
             "group": "health",
-            "at": [1104.1, 716.8]
+            "at": [1104.1, 716.8],
+            "info": {
+                "address": "Rogozniška cesta 32B, 2250 Ptuj",
+                "operator": "Ambulanta Tominc d.o.o."
+            }
         },
         {
             "name": "AMBULANTA ZA VSE GENERACIJE, d.o.o.",
             "icon": "clinic",
             "group": "health",
-            "at": [341.2, 579.5]
+            "at": [341.2, 579.5],
+            "info": {
+                "address": "Potrčeva cesta 15, 2250 Ptuj",
+                "operator": "LIDIJA LETONJA JAUŠOVEC, dr. med., spec. družinske medicine",
+                "phone": "+386 2 746 76 01",
+                "website": "https://www.ambulantazavsegeneracije.si/"
+            }
         },
         {
             "name": "Zrilić Iris - Zasebna pediatrična ambulanta",
             "icon": "clinic",
             "group": "health",
-            "at": [344.8, 585.0]
+            "at": [344.8, 585.0],
+            "info": {
+                "address": "Potrčeva cesta 15, 2250 Ptuj",
+                "operator": "Zrilić Iris dr.med.",
+                "phone": "+386 2 780 09 13",
+                "website": "https://www.zrilic.si/"
+            }
         },
         {
             "name": "BiVal zdravje d.o.o.",
             "icon": "clinic",
             "group": "health",
-            "at": [354.3, 597.6]
+            "at": [354.3, 597.6],
+            "info": {
+                "address": "Potrčeva cesta 17, 2250 Ptuj",
+                "operator": "BiVal zdravje d.o.o.",
+                "phone": "+386 69 760 573",
+                "website": "https://ortopedijaestetikakirurgija.si/"
+            }
         },
         {
             "name": "Optaldus očesna ambulanta d.o.o.",
             "icon": "clinic",
             "group": "health",
-            "at": [112.8, 472.1]
+            "at": [112.8, 472.1],
+            "info": { "address": "Panonska ulica 5, 2250 Ptuj" }
         },
         {
             "name": "Ambulanta ŠAŠKO",
             "icon": "clinic",
             "group": "health",
-            "at": [314.6, 103.1]
+            "at": [314.6, 103.1],
+            "info": {
+                "address": "Osojnikova cesta 9, 2250 Ptuj",
+                "operator": "Valerija Šaško, dr.med.",
+                "website": "https://www.sasko.si"
+            }
         },
         {
             "name": "FIZIOTERAPIJA ŠILAK",
             "icon": "clinic",
             "group": "health",
-            "at": [314.0, 108.0]
+            "at": [314.0, 108.0],
+            "info": {
+                "address": "Osojnikova cesta 9, 2250 Ptuj",
+                "operator": "FIZIOTERAPIJA IN SVETOVANJE NA TERENU - DRAGICA ŠILAK",
+                "website": "https://fizioterapija-silak.si/"
+            }
         },
         {
             "name": "Milumed ginekološka ambulanta",
             "icon": "clinic",
             "group": "health",
-            "at": [311.9, 91.8]
+            "at": [311.9, 91.8],
+            "info": {
+                "address": "Osojnikova cesta 9, 2250 Ptuj",
+                "website": "https://www.ginekologija-lukman.si/"
+            }
         },
         {
             "name": "Kirurški center Toš d.o.o.",
             "icon": "clinic",
             "group": "health",
-            "at": [315.3, 97.2]
+            "at": [315.3, 97.2],
+            "info": {
+                "address": "Osojnikova cesta 9, 2250 Ptuj",
+                "operator": "Kirurški center Toš d.o.o.",
+                "phone": "+386 2 7800 900",
+                "website": "https://www.kc-tos.si/"
+            }
         },
         {
             "name": "FIZIO-MANUAL",
             "icon": "clinic",
             "group": "health",
-            "at": [-1590.7, -437.4]
+            "at": [-1590.7, -437.4],
+            "info": {
+                "operator": "Denis Jezernik s.p.",
+                "phone": "+386 69 993 526",
+                "website": "https://www.fizioterapija-cajnko.si/"
+            }
         },
         {
             "name": "Fizio Medic Center",
             "icon": "clinic",
             "group": "health",
-            "at": [-1581.8, -447.1]
-        },
-        {
-            "name": "Ambulanta",
-            "icon": "clinic",
-            "group": "health",
-            "at": [1021.3, -133.1]
+            "at": [-1581.8, -447.1],
+            "info": {
+                "operator": "Jožica Cajnko s.p.",
+                "phone": "+386 31 713 263",
+                "website": "https://www.fizioterapija-cajnko.si/"
+            }
         },
         {
             "name": "Center za duševno zdravje",
             "icon": "clinic",
             "group": "health",
-            "at": [-109.4, 266.2]
+            "at": [-109.4, 266.2],
+            "info": {
+                "address": "Raičeva ulica 6, 2250 Ptuj",
+                "operator": "Zdravstveni dom Ptuj",
+                "website": "https://www.zd-ptuj.si/index.php/component/sppagebuilder/32-center-za-dusevno-zdravje"
+            }
         },
         {
             "name": "KLINKON ZDRAVSTVENI ZAVOD",
             "icon": "clinic",
             "group": "health",
-            "at": [692.3, 905.8]
+            "at": [692.3, 905.8],
+            "info": {
+                "address": "Potrčeva cesta 49, 2250 Ptuj",
+                "operator": "dr. Irena Puntarec Djukanović",
+                "phone": "+386 2 780 10 56",
+                "website": "https://klinkon-zdravstveni-zavod.webador.com/"
+            }
         },
         {
             "name": "Policijska postaja Ptuj",
             "icon": "police",
             "group": "public",
-            "at": [805.6, 864.5]
+            "at": [805.6, 864.5],
+            "info": {
+                "address": "Osojnikova cesta 29, 2250 Ptuj",
+                "phone": "+386 2 780 91 00",
+                "website": "https://www.policija.si/"
+            }
         },
         {
             "name": "PGD Kicar",
             "icon": "fire",
             "group": "public",
-            "at": [3163.6, 3804.3]
+            "at": [3163.6, 3804.3],
+            "info": {
+                "address": "Kicar 80A, 2250 Ptuj",
+                "operator": "PGD Kicar"
+            }
         },
         {
             "name": "Gasilski dom Pacinje",
             "icon": "fire",
             "group": "public",
-            "at": [4951.5, 3404.5]
+            "at": [4951.5, 3404.5],
+            "info": {
+                "address": "Pacinje 5, 2252 Dornava",
+                "operator": "PGD Pacinje"
+            }
         },
         {
             "name": "PGD Spodnji Velovlek",
             "icon": "fire",
             "group": "public",
-            "at": [3635.1, 4909.1]
+            "at": [3635.1, 4909.1],
+            "info": {
+                "address": "Spodnji Velovlek 30A, 2250 Ptuj",
+                "operator": "PGD Spodnji Velovlek"
+            }
         },
         {
             "name": "PGD Podvinci",
             "icon": "fire",
             "group": "public",
-            "at": [3387.9, 1427.8]
+            "at": [3387.9, 1427.8],
+            "info": {
+                "address": "Podvinci 13A, 2250 Ptuj",
+                "operator": "PGD Podvinci"
+            }
         },
         {
             "name": "PGD Turnišče Ptuj",
             "icon": "fire",
             "group": "public",
-            "at": [-848.6, -2278.8]
+            "at": [-848.6, -2278.8],
+            "info": { "address": "Selska cesta 2, 2250 Ptuj" }
         },
         {
             "name": "Gasilski dom Spuhlja",
             "icon": "fire",
             "group": "public",
-            "at": [2925.1, -765.6]
-        },
-        {
-            "name": "Gasilski dom",
-            "icon": "fire",
-            "group": "public",
-            "at": [-851.3, -2279.8]
+            "at": [2925.1, -765.6],
+            "info": {
+                "address": "Spuhlja 12A, 2250 Ptuj",
+                "operator": "PGD Spuhlja"
+            }
         },
         {
             "name": "PGD Pacinje",
             "icon": "fire",
             "group": "public",
-            "at": [4950.9, 3403.2]
+            "at": [4950.9, 3403.2],
+            "info": {
+                "address": "Pacinje 5, 2252 Dornava",
+                "operator": "PGD Pacinje"
+            }
         },
         {
             "name": "Gasilski dom Ptuj",
             "icon": "fire",
             "group": "public",
-            "at": [994.4, 929.5]
+            "at": [994.4, 929.5],
+            "info": {
+                "address": "Natašina pot 1a, 2250 Ptuj",
+                "operator": "PGD Ptuj"
+            }
         },
         {
             "name": "Območna gasilska zveza Ptuj",
             "icon": "fire",
             "group": "public",
-            "at": [1012.1, 910.4]
+            "at": [1012.1, 910.4],
+            "info": {
+                "address": "Natašina pot 1A, 2250 Ptuj",
+                "operator": "PGD Ptuj"
+            }
         },
         {
             "name": "PGD Grajena",
             "icon": "fire",
             "group": "public",
-            "at": [-2523.3, 4206.1]
-        },
-        {
-            "name": "Gasilski dom",
-            "icon": "fire",
-            "group": "public",
-            "at": [-2527.5, 4196.2]
+            "at": [-2523.3, 4206.1],
+            "info": {
+                "address": "Grajena 50a, 2250 Ptuj",
+                "phone": "+38627512281"
+            }
         },
         {
             "name": "Okrajno sodišče Ptuj",
             "icon": "court",
             "group": "public",
-            "at": [55.7, -105.5]
+            "at": [55.7, -105.5],
+            "info": {
+                "address": "Vodnikova ulica 2, 2250 Ptuj",
+                "phone": "+386 2 748 08 00",
+                "website": "https://www.sodisce.si/okrapt/osnovne_informacije_o_sodiscu/kontaktne_informacije/"
+            }
         },
         {
             "name": "Okrožno sodišče na Ptuju",
             "icon": "court",
             "group": "public",
-            "at": [-32.9, -104.4]
+            "at": [-32.9, -104.4],
+            "info": {
+                "address": "Krempljeva ulica 7, 2250 Ptuj",
+                "phone": "+386 2 748 08 00",
+                "website": "https://www.sodisce.si/okropt/osnovne_informacije_o_sodiscu/kontaktne_informacije/"
+            }
         },
         {
             "name": "Pošta Slovenije - Pošta 2249 Ptuj",
             "icon": "post",
             "group": "public",
-            "at": [1116.9, 407.3]
+            "at": [1116.9, 407.3],
+            "info": {
+                "address": "Puhova ulica 21, 2250 Ptuj",
+                "operator": "Pošta Slovenije",
+                "hours": "Mo-Fr 08:00-19:00"
+            }
         },
         {
             "name": "Pošta Slovenije - Pošta 2251 Ptuj",
             "icon": "post",
             "group": "public",
-            "at": [-928.9, -325.0]
+            "at": [-928.9, -325.0],
+            "info": {
+                "address": "Mariborska cesta 19, 2251 Ptuj",
+                "operator": "Pošta Slovenije"
+            }
         },
         {
             "name": "Pošta Slovenije - Pošta 2250 Ptuj",
             "icon": "post",
             "group": "public",
-            "at": [122.5, 101.1]
-        },
-        {
-            "name": "Pošta",
-            "icon": "post",
-            "group": "public",
-            "at": [-930.9, -326.8]
+            "at": [122.5, 101.1],
+            "info": {
+                "address": "Vinarski trg 1, 2250 Ptuj",
+                "operator": "Pošta Slovenije",
+                "phone": "+386 30 719 709"
+            }
         },
         {
             "name": "Knjižnica Ivana Potrča Ptuj",
             "icon": "library",
             "group": "public",
-            "at": [-439.2, 34.4]
+            "at": [-439.2, 34.4],
+            "info": {
+                "address": "Prešernova ulica 33, 2250 Ptuj",
+                "phone": "+386 2 771 48 00",
+                "website": "https://www.knjiznica-ptuj.si/en/"
+            }
         },
         {
             "name": "Rimski kamp Poetovio amfiteater",
@@ -11511,7 +11661,11 @@
             "name": "Kino Ptuj",
             "icon": "theatre",
             "group": "public",
-            "at": [-220.7, -62.7]
+            "at": [-220.7, -62.7],
+            "info": {
+                "address": "Cvetkov trg 1, 2250 Ptuj",
+                "website": "www.kinoptuj.si"
+            }
         },
         {
             "name": "Tradicionalne pustne maske na ptujskem območju",
@@ -11523,121 +11677,196 @@
             "name": "Razstavišče Stari zapori",
             "icon": "museum",
             "group": "public",
-            "at": [-491.4, 73.9]
+            "at": [-491.4, 73.9],
+            "info": {
+                "address": "Prešernova ulica 37, 2250 Ptuj",
+                "operator": "PMPO",
+                "hours": "Tu-Fr 11:00-13:00",
+                "phone": "+386 2 787 92 30"
+            }
         },
         {
             "name": "III. mitrej Svetšče boga Mitra",
             "icon": "museum",
             "group": "public",
-            "at": [-1329.1, -195.4]
+            "at": [-1329.1, -195.4],
+            "info": {
+                "operator": "PMPO",
+                "website": "https://pmpo.si/stalne_zbirke/iii-mitrej/"
+            }
         },
         {
             "name": "PMPO Pokrajinski muzej Ptuj Ormož - uprava",
             "icon": "museum",
             "group": "public",
-            "at": [-495.4, 80.4]
+            "at": [-495.4, 80.4],
+            "info": {
+                "address": "Prešernova ulica 37, 2250 Ptuj",
+                "operator": "MO Ptuj, Občina Ormož",
+                "website": "https://pmpo.si/"
+            }
         },
         {
             "name": "Ptujska grajska tiskarna",
             "icon": "museum",
             "group": "public",
-            "at": [-400.0, 270.1]
+            "at": [-400.0, 270.1],
+            "info": {
+                "address": "Raičeva ulica 11, 2250 Ptuj",
+                "operator": "Zgodovinsko društvo Kastali",
+                "phone": "+386 41 684 910",
+                "website": "https://kastali.si/ptujska-grajska-tiskarna/"
+            }
         },
         {
             "name": "PMPO - Arheološki oddelek",
             "icon": "museum",
             "group": "public",
-            "at": [-533.8, 161.4]
+            "at": [-533.8, 161.4],
+            "info": {
+                "address": "Muzejski trg 2, 2250 Ptuj",
+                "operator": "MO Ptuj, Občina Ormož",
+                "website": "https://pmpo.si/"
+            }
         },
         {
             "name": "Vinogradniški muzej Stara preša",
             "icon": "museum",
             "group": "public",
-            "at": [-100.2, 3578.7]
+            "at": [-100.2, 3578.7],
+            "info": { "address": "Mestni Vrh 28, 2250 Ptuj" }
         },
         {
             "name": "Oskarjeva hiša",
             "icon": "museum",
             "group": "public",
-            "at": [-398.8, 267.5]
+            "at": [-398.8, 267.5],
+            "info": {
+                "address": "Raičeva ulica 11, 2250 Ptuj",
+                "operator": "Zgodovinsko društvo Kastali"
+            }
         },
         {
             "name": "Narodni dom Ptuj",
             "icon": "community",
             "group": "public",
-            "at": [-175.9, -121.3]
+            "at": [-175.9, -121.3],
+            "info": { "address": "Jadranska ulica 13, 2250 Ptuj" }
         },
         {
             "name": "Center interesnih dejavnosti Ptuj",
             "icon": "community",
             "group": "public",
-            "at": [222.7, 132.9]
+            "at": [222.7, 132.9],
+            "info": {
+                "address": "Osojnikova cesta 9, 2250 Ptuj",
+                "website": "https://www.cid.si/"
+            }
         },
         {
             "name": "Dom krajanov Rogoznica",
             "icon": "community",
             "group": "public",
-            "at": [1454.6, 1470.1]
+            "at": [1454.6, 1470.1],
+            "info": {
+                "address": "Slovenskogoriška 18, 2250 Ptuj",
+                "operator": "MO Ptuj",
+                "phone": "+386 (0)31 565 024",
+                "website": "http://kdrogoznica.si/"
+            }
         },
         {
             "name": "Stara steklarska, Mladinsko kulturni center",
             "icon": "community",
             "group": "public",
-            "at": [-141.4, -0.7]
+            "at": [-141.4, -0.7],
+            "info": {
+                "address": "Ulica Tomaža Šalamuna 1, 2250 Ptuj",
+                "operator": "Center interesnih dejavnosti Ptuj",
+                "phone": "+386 (0)2 780-55-40",
+                "website": "https://www.cid.si/mladinski-center/"
+            }
         },
         {
             "name": "Dom krajanov dr. Jožeta Potrča - ČS Center",
             "icon": "community",
             "group": "public",
-            "at": [359.4, 538.3]
+            "at": [359.4, 538.3],
+            "info": {
+                "address": "Potrčeva cesta 34, 2250 Ptuj",
+                "operator": "MO Ptuj"
+            }
         },
         {
             "name": "Dom krajanov Budina-Brstje - ČS Jezero",
             "icon": "community",
             "group": "public",
-            "at": [1426.0, -298.8]
+            "at": [1426.0, -298.8],
+            "info": {
+                "address": "Belšakova ulica 20A, 2250 Ptuj",
+                "operator": "MO Ptuj"
+            }
         },
         {
             "name": "Dom krajanov Olge Meglič - ČS Panorama",
             "icon": "community",
             "group": "public",
-            "at": [-904.7, 518.0]
+            "at": [-904.7, 518.0],
+            "info": { "address": "Vičava 46, 2250 Ptuj", "operator": "MO Ptuj" }
         },
         {
             "name": "Četrtna skupnost Grajena",
             "icon": "community",
             "group": "public",
-            "at": [-2377.7, 4312.3]
+            "at": [-2377.7, 4312.3],
+            "info": { "address": "Grajena 57, 2250 Ptuj" }
         },
         {
             "name": "Dom krajanov Bratje Reš",
             "icon": "community",
             "group": "public",
-            "at": [-362.4, 864.3]
+            "at": [-362.4, 864.3],
+            "info": {
+                "address": "Volkmerjeva cesta 26, 2250 Ptuj",
+                "operator": "MO Ptuj",
+                "website": "https://www.ptuj.si/objava/379532"
+            }
         },
         {
             "name": "KUD Fuerstova hiša",
             "icon": "community",
             "group": "public",
-            "at": [-23.8, -46.3]
+            "at": [-23.8, -46.3],
+            "info": {
+                "address": "Krempljeva ulica 1, 2250 Ptuj",
+                "phone": "+386 51 385 779",
+                "website": "https://fuerstovahisa.weebly.com/"
+            }
         },
         {
             "name": "Zavod za zdravstveno zavarovanje",
             "icon": "office",
             "group": "public",
-            "at": [34.2, -107.7]
+            "at": [34.2, -107.7],
+            "info": { "address": "Vodnikova ulica 2, 2250 Ptuj" }
         },
         {
             "name": "PSS Ptuj d.o.o.",
             "icon": "office",
             "group": "public",
-            "at": [-197.5, -129.6]
+            "at": [-197.5, -129.6],
+            "info": { "address": "Vošnjakova ulica 6, 2250 Ptuj" }
         },
         {
             "name": "Upravna enota Ptuj",
             "icon": "office",
             "group": "public",
-            "at": [-4.1, 218.3]
+            "at": [-4.1, 218.3],
+            "info": {
+                "address": "Slomškova ulica 10, 2250 Ptuj",
+                "hours": "Mo-Tu 08:00-12:00,13:00-15:00; We 07:00-12:00,13:00-17:00; Th 08:00-12:00,13:00-15:00; Fr 08:00-13:00",
+                "website": "https://www.gov.si/drzavni-organi/upravne-enote/ptuj/"
+            }
         },
         {
             "name": "Izpitni center za vozniške izpite Ptuj",
@@ -11649,379 +11878,635 @@
             "name": "Center za socialno delo Ptuj",
             "icon": "office",
             "group": "public",
-            "at": [174.1, 166.9]
+            "at": [174.1, 166.9],
+            "info": {
+                "address": "Trstenjakova ulica 5a, 2250 Ptuj",
+                "website": "https://www.csd-ptuj.si/"
+            }
         },
         {
             "name": "Finančna uprava Republike Slovenije - Finančni urad Ptuj",
             "icon": "office",
             "group": "public",
-            "at": [115.2, 168.9]
+            "at": [115.2, 168.9],
+            "info": {
+                "address": "Trstenjakova ulica 2A, 2250 Ptuj",
+                "operator": "Republika Slovenija",
+                "phone": "+386 2 512 2600",
+                "website": "https://www.fu.gov.si/kontakti/financni_urad_ptuj?type=raitnapy#c6787"
+            }
         },
         {
             "name": "Zgodovinski arhiv na Ptuju",
             "icon": "office",
             "group": "public",
-            "at": [-634.9, 310.6]
+            "at": [-634.9, 310.6],
+            "info": {
+                "address": "Vičava 5, 2250 Ptuj",
+                "phone": "+386 2 787 97 30",
+                "website": "https://www.arhiv-ptuj.si/"
+            }
         },
         {
             "name": "Ministrstvo za okolje in prostor, GURS, Območna geodetska uprava Ptuj",
             "icon": "office",
             "group": "public",
-            "at": [-32.5, -22.6]
+            "at": [-32.5, -22.6],
+            "info": {
+                "address": "Krempljeva ulica 2, 2250 Ptuj",
+                "website": "https://www.gov.si/drzavni-organi/organi-v-sestavi/geodetska-uprava/"
+            }
         },
         {
             "name": "Okrožno državno tožilstvo na Ptuju",
             "icon": "office",
             "group": "public",
-            "at": [59.8, -86.0]
+            "at": [59.8, -86.0],
+            "info": {
+                "address": "Vodnikova ulica 2, 2250 Ptuj",
+                "phone": "+386 2 787 90 60",
+                "website": "https://www.dt-rs.si/odt-na-ptuju"
+            }
         },
         {
             "name": "Državno odvetništvo Republike Slovenije, zunanji oddelek na Ptuju",
             "icon": "office",
             "group": "public",
-            "at": [-184.8, -85.3]
+            "at": [-184.8, -85.3],
+            "info": {
+                "address": "Jadranska ulica 12, 2250 Ptuj",
+                "phone": "+386 2 787 90 90",
+                "website": "https://www.dodv-rs.si/kaj-delamo/organizacija/#ptuj"
+            }
         },
         {
             "name": "KGZS - Kmetijsko gozdarski zavod Ptuj",
             "icon": "office",
             "group": "public",
-            "at": [774.6, -363.3]
+            "at": [774.6, -363.3],
+            "info": {
+                "address": "Ormoška cesta 28, 2250 Ptuj",
+                "phone": "+386 2 749 36 10",
+                "website": "https://www.kgz-ptuj.si/"
+            }
         },
         {
             "name": "Zavod Republike Slovenije za zaposlovanje - Urad za delo Ptuj",
             "icon": "office",
             "group": "public",
-            "at": [121.2, 150.8]
+            "at": [121.2, 150.8],
+            "info": {
+                "address": "Trstenjakova ulica 2A, 2250 Ptuj",
+                "website": "https://www.ess.gov.si/iskalci-zaposlitve/kontakti-in-uradne-ure/#/contact-data?uid=94"
+            }
         },
         {
             "name": "Zavod za pokojninsko in invalidsko zavarovanje Slovenije - izpostava Ptuj",
             "icon": "office",
             "group": "public",
-            "at": [166.5, 17.4]
+            "at": [166.5, 17.4],
+            "info": {
+                "address": "Vinarski trg 8, 2250 Ptuj",
+                "phone": "+386 1 4745 100",
+                "website": "https://www.zpiz.si/cms"
+            }
         },
         {
             "name": "Zavod Republike Slovenije za zaposlovanje - Območna služba Ptuj",
             "icon": "office",
             "group": "public",
-            "at": [198.6, -22.3]
+            "at": [198.6, -22.3],
+            "info": {
+                "address": "Osojnikova cesta 1, 2250 Ptuj",
+                "website": "https://www.ess.gov.si/iskalci-zaposlitve/kontakti-in-uradne-ure/#/contact-data?uid=50"
+            }
         },
         {
             "name": "Zemljiška knjiga - urad Ptuj",
             "icon": "office",
             "group": "public",
-            "at": [66.9, 24.6]
+            "at": [66.9, 24.6],
+            "info": {
+                "address": "Ulica heroja Lacka 5, 2250 Ptuj",
+                "hours": "Mo,We 09:00-12:00,14:00-16:00; Fr 09:00-12:00",
+                "phone": "+386 2 748 08 00",
+                "website": "https://zemljiskaknjiga.com/"
+            }
         },
         {
             "name": "Sodni register - urad Ptuj",
             "icon": "office",
             "group": "public",
-            "at": [67.8, 28.0]
+            "at": [67.8, 28.0],
+            "info": {
+                "address": "Ulica heroja Lacka 5, 2250 Ptuj",
+                "hours": "Mo,We 09:00-12:00,14:00-16:30; Tu,Th,Fr 09:00-12:00",
+                "phone": "+386 2 748 08 27",
+                "website": "https://www.sodisce.si/okropt/osnovne_informacije_o_sodiscu/organizacijske_enote/"
+            }
         },
         {
             "name": "Uprava RS za varno hrano, veterinarstvo in varstvo rastlin - Območni urad Ptuj",
             "icon": "office",
             "group": "public",
-            "at": [22.9, 108.8]
+            "at": [22.9, 108.8],
+            "info": {
+                "address": "Miklošičeva ulica 5, 2250 Ptuj",
+                "hours": "Mo,We 09:00-11:00",
+                "phone": "+386 2 798 03 60",
+                "website": "https://www.gov.si/drzavni-organi/organi-v-sestavi/uprava-za-varno-hrano-veterinarstvo-in-varstvo-rastlin/o-upravi/inspekcija-za-varno-hrano-veterinarstvo-in-varstvo-rastlin/"
+            }
         },
         {
             "name": "Animacija d.o.o.",
             "icon": "school",
             "group": "education",
-            "at": [-107.4, -53.2]
+            "at": [-107.4, -53.2],
+            "info": { "address": "Aškerčeva ulica 1, 2250 Ptuj" }
         },
         {
             "name": "Glasbena šola Karol Pahor Ptuj PE Dravska",
             "icon": "school",
             "group": "education",
-            "at": [-309.0, -94.7]
+            "at": [-309.0, -94.7],
+            "info": {
+                "address": "Dravska ulica 11, 2250 Ptuj",
+                "website": "https://gsptuj.si/"
+            }
         },
         {
             "name": "Osnovna šola Olge Meglič",
             "icon": "school",
             "group": "education",
-            "at": [-402.3, 44.9]
+            "at": [-402.3, 44.9],
+            "info": {
+                "address": "Prešernova ulica 31, 2250 Ptuj",
+                "operator": "Mestna občina Ptuj",
+                "website": "https://www.olgica.si/"
+            }
         },
         {
             "name": "CŠOD OE Štrk",
             "icon": "school",
             "group": "education",
-            "at": [3791.1, -666.8]
+            "at": [3791.1, -666.8],
+            "info": {
+                "address": "Spuhlja 34a, 2250 Ptuj",
+                "operator": "Center šolskih in obšolskih dejavnosti",
+                "phone": "+386 31 607 582",
+                "website": "https://www.csod.si/dom/strk"
+            }
         },
         {
             "name": "OŠ Mladika",
             "icon": "school",
             "group": "education",
-            "at": [78.8, -322.3]
+            "at": [78.8, -322.3],
+            "info": {
+                "address": "Žnidaričevo nabrežje 1, 2250 Ptuj",
+                "operator": "Mestna občina Ptuj",
+                "website": "http://www.mladika.si/index.php?option=com_content&view=category&layout=blog&id=41&Itemid=151"
+            }
         },
         {
             "name": "Srednješolski center Ptuj",
             "icon": "school",
             "group": "education",
-            "at": [-182.5, 725.9]
+            "at": [-182.5, 725.9],
+            "info": {
+                "address": "Volkmerjeva cesta 19, 2250 Ptuj",
+                "website": "www.s-scptuj.mb.edus.si"
+            }
         },
         {
             "name": "OŠ Ljudski Vrt",
             "icon": "school",
             "group": "education",
-            "at": [449.9, 1005.4]
+            "at": [449.9, 1005.4],
+            "info": {
+                "address": "Župančičeva ulica 10, 2250 Ptuj",
+                "operator": "Mestna občina Ptuj",
+                "website": "https://www.os-ljudskivrtptuj.si/"
+            }
         },
         {
             "name": "Gimnazija Ptuj",
             "icon": "school",
             "group": "education",
-            "at": [-216.3, 653.6]
+            "at": [-216.3, 653.6],
+            "info": {
+                "address": "Volkmerjeva cesta 15, 2250 Ptuj",
+                "website": "https://www.gimptuj.si/"
+            }
         },
         {
             "name": "OŠ Grajena",
             "icon": "school",
             "group": "education",
-            "at": [-2405.6, 4356.6]
+            "at": [-2405.6, 4356.6],
+            "info": { "address": "Grajena 60, 2250 Ptuj" }
         },
         {
             "name": "Šola",
             "icon": "school",
             "group": "education",
-            "at": [-105.1, 712.3]
+            "at": [-105.1, 712.3],
+            "info": { "operator": "Srednješolski center Ptuj" }
         },
         {
             "name": "OŠ Breg",
             "icon": "school",
             "group": "education",
-            "at": [-771.1, -595.2]
-        },
-        {
-            "name": "Šola",
-            "icon": "school",
-            "group": "education",
-            "at": [-780.1, -578.6]
+            "at": [-771.1, -595.2],
+            "info": {
+                "address": "Rogaška cesta 6, 2250 Ptuj",
+                "operator": "Mestna občina Ptuj",
+                "website": "https://www.os-breg.si/"
+            }
         },
         {
             "name": "Višja strokovna šola Ptuj - Šolski center Ptuj",
             "icon": "school",
             "group": "education",
-            "at": [-680.7, 374.8]
+            "at": [-680.7, 374.8],
+            "info": {
+                "address": "Vičava 1, 2250 Ptuj",
+                "operator": "Šolski center Ptuj",
+                "phone": "+386 2 787 18 19",
+                "website": "https://vss.scptuj.si/"
+            }
         },
         {
             "name": "Visoka šola na Ptuju",
             "icon": "school",
             "group": "education",
-            "at": [-667.9, 383.3]
+            "at": [-667.9, 383.3],
+            "info": {
+                "address": "Vičava 1, 2250 Ptuj",
+                "phone": "+386 2 787 18 29",
+                "website": "https://vsptuj.si/"
+            }
         },
         {
             "name": "Ljudska univerza Ptuj",
             "icon": "school",
             "group": "education",
-            "at": [-38.3, 10.9]
+            "at": [-38.3, 10.9],
+            "info": {
+                "address": "Mestni trg 2, 2250 Ptuj",
+                "operator": "Mestna občina Ptuj",
+                "website": "https://www.lu-ptuj.si/"
+            }
         },
         {
             "name": "Vrtec Ptuj-enota Zvonček",
             "icon": "kindergarten",
             "group": "education",
-            "at": [-640.3, -310.5]
+            "at": [-640.3, -310.5],
+            "info": {
+                "address": "Mlinska cesta 1b, 2250 Ptuj",
+                "operator": "Vrtec Ptuj"
+            }
         },
         {
             "name": "Vrtec Ptuj - enota Mačice",
             "icon": "kindergarten",
             "group": "education",
-            "at": [235.6, 584.7]
+            "at": [235.6, 584.7],
+            "info": {
+                "address": "Potrčeva cesta 9A, 2250 Ptuj",
+                "operator": "Vrtec Ptuj",
+                "phone": "+386 2 74 92 836",
+                "website": "http://vrtec-ptuj.si/"
+            }
         },
         {
             "name": "Vrtec Ptuj - enota Spominčica",
             "icon": "kindergarten",
             "group": "education",
-            "at": [247.3, 515.1]
+            "at": [247.3, 515.1],
+            "info": {
+                "address": "Potrčeva cesta 9, 2250 Ptuj",
+                "operator": "Vrtec Ptuj",
+                "phone": "+386 2 74 92 850",
+                "website": "http://vrtec-ptuj.si"
+            }
         },
         {
             "name": "Vrtec enota Tulipan",
             "icon": "kindergarten",
             "group": "education",
-            "at": [-79.9, 312.6]
+            "at": [-79.9, 312.6],
+            "info": {
+                "address": "Med vrti 2, 2250 Ptuj",
+                "operator": "Vrtec Ptuj",
+                "website": "https://vrtec-ptuj.si/enote-vrtca/enote-tulipan/"
+            }
         },
         {
             "name": "Vrtec Ptuj - enota Deteljica",
             "icon": "kindergarten",
             "group": "education",
-            "at": [1396.5, -331.1]
+            "at": [1396.5, -331.1],
+            "info": {
+                "address": "Mladinska ulica 2, 2250 Ptuj",
+                "operator": "Vrtec Ptuj",
+                "phone": "+386 2 749 284 6",
+                "website": "https://vrtec-ptuj.si/enote-vrtca/enota-deteljica/"
+            }
         },
         {
             "name": "Vrtec Ptuj - enota Marjetica",
             "icon": "kindergarten",
             "group": "education",
-            "at": [-198.8, 416.9]
+            "at": [-198.8, 416.9],
+            "info": {
+                "address": "Med vrti 11, 2250 Ptuj",
+                "operator": "Vrtec Ptuj",
+                "phone": "+386 2 74 92 841",
+                "website": "http://vrtec-ptuj.si"
+            }
         },
         {
             "name": "Vrtec Ptuj-Enota Vijolica",
             "icon": "kindergarten",
             "group": "education",
-            "at": [-1297.2, -1072.8]
+            "at": [-1297.2, -1072.8],
+            "info": {
+                "address": "Rogaška cesta 19, 2250 Ptuj",
+                "operator": "Vrtec Ptuj"
+            }
         },
         {
             "name": "Vrtec Ptuj - enota Trobentica",
             "icon": "kindergarten",
             "group": "education",
-            "at": [1403.5, 1392.5]
+            "at": [1403.5, 1392.5],
+            "info": {
+                "address": "Slovenskogoriška cesta 13, 2250",
+                "operator": "Vrtec Ptuj",
+                "hours": "Mo-Fr 06:00-16:30",
+                "phone": "+386 2 78 71 400",
+                "website": "http://vrtec-ptuj.si/enote-vrtca/enota-trobentica/"
+            }
         },
         {
             "name": "Pizzeria Njami",
             "icon": "restaurant",
             "group": "food",
-            "at": [-55.6, -132.2]
+            "at": [-55.6, -132.2],
+            "info": {
+                "address": "Minoritski trg 3, 2250 Ptuj",
+                "phone": "+386 31 667 100",
+                "website": "https://www.pizzeria-njami.si/"
+            }
         },
         {
             "name": "Caffe & Pizzerija Marakuja",
             "icon": "restaurant",
             "group": "food",
-            "at": [-152.6, -154.6]
+            "at": [-152.6, -154.6],
+            "info": {
+                "address": "Vošnjakova ulica 8, 2250 Ptuj",
+                "hours": "Mo-Th 09:00-22:00; Fr 09:00-01:30; Sa 18:00-01:30",
+                "website": "https://www.marakuja.si/"
+            }
         },
         {
             "name": "Pizzeria Slonček",
             "icon": "restaurant",
             "group": "food",
-            "at": [-293.9, 36.3]
+            "at": [-293.9, 36.3],
+            "info": {
+                "address": "Prešernova ulica 19, 2250 Ptuj",
+                "hours": "Mo-Fr 09:00-22:00; Sa 10:00-22:00; Su 12:00-22:00",
+                "phone": "051325222",
+                "website": "http://www.pizzerija-sloncek.si"
+            }
         },
         {
             "name": "Pivnica Zlatorog",
             "icon": "restaurant",
             "group": "food",
-            "at": [-52.1, 128.7]
+            "at": [-52.1, 128.7],
+            "info": {
+                "address": "Slomškova ulica 20, 2250 Ptuj",
+                "hours": "Mo-Sa 09:00-22:00; Su 12:00-22:00; PH 12:00-22:00",
+                "website": "http://www.pivnica-zlatorog.si/"
+            }
         },
         {
             "name": "Gostilna Rozika",
             "icon": "restaurant",
             "group": "food",
-            "at": [18.2, 205.0]
+            "at": [18.2, 205.0],
+            "info": {
+                "address": "Slomškova ulica 7, 2250 Ptuj",
+                "operator": "Pri Omi d.o.o.",
+                "phone": "+386 70 668 487",
+                "website": "https://gostilna-rozika.si/"
+            }
         },
         {
             "name": "Balkanska kuhinja YUGO",
             "icon": "restaurant",
             "group": "food",
-            "at": [195.3, 128.5]
+            "at": [195.3, 128.5],
+            "info": { "address": "Trstenjakova ulica 9, 2250 Ptuj" }
         },
         {
             "name": "Restavracija Pomaranča",
             "icon": "restaurant",
             "group": "food",
-            "at": [-387.4, -536.8]
+            "at": [-387.4, -536.8],
+            "info": {
+                "address": "Ob Dravi 3A, 2250 Ptuj",
+                "hours": "Mo-Th 07:00-21:00; Fr 07:00-24:00; Sa 08:00-24:00; Su 08:00-22:00"
+            }
         },
         {
             "name": "Bistro Lük",
             "icon": "restaurant",
             "group": "food",
-            "at": [-105.6, 34.1]
+            "at": [-105.6, 34.1],
+            "info": { "address": "Murkova Ulica 5, 2250 Ptuj" }
         },
         {
             "name": "GOSTILNA SAVARIA s.p.",
             "icon": "restaurant",
             "group": "food",
-            "at": [1652.0, 1198.2]
+            "at": [1652.0, 1198.2],
+            "info": {
+                "address": "Cesta 8. avgusta 13A, 2250 Ptuj",
+                "hours": "Mo-Sa 07:00-22:00",
+                "phone": "+386 51 435 666"
+            }
         },
         {
             "name": "Pizzerija ANDIAMO",
             "icon": "restaurant",
             "group": "food",
-            "at": [1138.3, 348.9]
+            "at": [1138.3, 348.9],
+            "info": {
+                "address": "Puhova ulica 21, 2250 Ptuj",
+                "phone": "+386 051 22 55 22",
+                "website": "https://andiamo.si/"
+            }
         },
         {
             "name": "El restaurante de Poncho",
             "icon": "restaurant",
             "group": "food",
-            "at": [863.8, 501.3]
+            "at": [863.8, 501.3],
+            "info": {
+                "address": "Rogozniška cesta 20, 2250 Ptuj",
+                "hours": "Mo-Th 09:00-22:00; Fr 09:00-00:00; Sa 11:00-00:00; Su 11:00-22:00",
+                "phone": "+386 2 780 62 90",
+                "website": "https://www.deponcho.si/"
+            }
         },
         {
             "name": "PIZERIJA ŠPAGETARIJA ANCORA",
             "icon": "restaurant",
             "group": "food",
-            "at": [1193.2, 416.4]
+            "at": [1193.2, 416.4],
+            "info": {
+                "address": "Puhova ulica 21, 2250 Ptuj",
+                "hours": "Mo-Fr 10:00-22:00; Sa 12:00-20:00; Su 15:00-20:00",
+                "phone": "+386 31 300 909",
+                "website": "https://ancona.si/"
+            }
         },
         {
             "name": "Gostilna pri ovinku",
             "icon": "restaurant",
             "group": "food",
-            "at": [1234.3, 1053.1]
+            "at": [1234.3, 1053.1],
+            "info": {
+                "address": "Obrtniška ulica 7, 2250 Ptuj",
+                "hours": "Mo-Th 09:00-17:00; Fr 09:00-22:00; Sa 11:00-22:00; Su 11:00-16:00; PH off",
+                "phone": "+386 70 207 343",
+                "website": "http://www.priovinku.si/"
+            }
         },
         {
             "name": "Laplac & Pizza Fabrika Ptuj",
             "icon": "restaurant",
             "group": "food",
-            "at": [818.6, 204.7]
+            "at": [818.6, 204.7],
+            "info": {
+                "address": "Rajšpova ulica 26, 2250 Ptuj",
+                "operator": "Laplac d.o.o.",
+                "hours": "Mo-Fr 07:00-20:00; Sa 08:00-13:00",
+                "phone": "+386 41 555 991",
+                "website": "https://www.laplac.si/"
+            }
         },
         {
             "name": "Gastro Ptuj, gostinstvo, d.o.o.",
             "icon": "restaurant",
             "group": "food",
-            "at": [819.3, -138.0]
+            "at": [819.3, -138.0],
+            "info": {
+                "address": "Rajšpova ulica 16, 2250 Ptuj",
+                "phone": "+386 2 787 59 90",
+                "website": "https://gastro-ptuj.si"
+            }
         },
         {
             "name": "Gostilna Amadeus",
             "icon": "restaurant",
             "group": "food",
-            "at": [-445.4, 68.7]
+            "at": [-445.4, 68.7],
+            "info": {
+                "address": "Prešernova ulica 36, 2250 Ptuj",
+                "hours": "Mo-Th 12:00-22:00; Fr,Sa 12:00-23:00; Su,PH 12:00-16:00",
+                "phone": "+386 2 771 70 51",
+                "website": "http://gostilna-amadeus.si"
+            }
         },
         {
             "name": "Gostilna Grabar",
             "icon": "restaurant",
             "group": "food",
-            "at": [186.7, 1489.9]
+            "at": [186.7, 1489.9],
+            "info": {
+                "address": "Rabelčja vas 15A, 2250 Ptuj",
+                "hours": "Tu-Sa 10:00-22:00; Su 10:00-19:00",
+                "phone": "+386 2 778 2 140",
+                "website": "http://www.gostilnagrabar.com"
+            }
         },
         {
             "name": "Verdi",
             "icon": "restaurant",
             "group": "food",
-            "at": [505.8, -84.2]
-        },
-        {
-            "name": "Restavracija",
-            "icon": "restaurant",
-            "group": "food",
-            "at": [181.7, 1488.4]
+            "at": [505.8, -84.2],
+            "info": {
+                "address": "Ormoška cesta 15, 2250 Ptuj",
+                "hours": "Mo-Sa 08:00-20:00",
+                "phone": "+386 2 620 98 10"
+            }
         },
         {
             "name": "Villa Monde",
             "icon": "restaurant",
             "group": "food",
-            "at": [3197.6, -485.8]
-        },
-        {
-            "name": "Restavracija",
-            "icon": "restaurant",
-            "group": "food",
-            "at": [821.4, -136.0]
+            "at": [3197.6, -485.8],
+            "info": {
+                "address": "Spuhlja 32, 2250 Ptuj",
+                "operator": "Dušan Bezjak s.p.",
+                "hours": "Mo-Th 10:00-21:00; Fr 10:00-22:00; Sa 11:00-22:00; Su 12:00-21:00",
+                "phone": "+386 2 779 62 81",
+                "website": "https://www.villamonde.com/"
+            }
         },
         {
             "name": "Okrepčevalnica Raj",
             "icon": "restaurant",
             "group": "food",
-            "at": [848.2, 924.1]
-        },
-        {
-            "name": "Restavracija",
-            "icon": "restaurant",
-            "group": "food",
-            "at": [1227.2, 1044.9]
+            "at": [848.2, 924.1],
+            "info": {
+                "address": "Potrčeva cesta 60, 2250 Ptuj",
+                "hours": "Mo-Sa 10:00-21:00",
+                "phone": "+386 41 528 170",
+                "website": "https://okrepcevalnica-raj.com/"
+            },
+            "ban": "2027-02-13"
         },
         {
             "name": "Gostilna Muršič",
             "icon": "restaurant",
             "group": "food",
-            "at": [1485.6, 718.8]
-        },
-        {
-            "name": "McDonalds",
-            "icon": "restaurant",
-            "group": "food",
-            "at": [405.1, -63.3]
+            "at": [1485.6, 718.8],
+            "info": {
+                "address": "Dornavska cesta 5, 2250 Ptuj",
+                "hours": "Mo-Sa 07:00-21:00; Su off; PH off",
+                "phone": "+386 31 376 696",
+                "website": "https://www.gostilna-mursic.si/"
+            }
         },
         {
             "name": "Pizzeria in restavracija Lili Ptuj",
             "icon": "restaurant",
             "group": "food",
-            "at": [-896.2, -229.8]
+            "at": [-896.2, -229.8],
+            "info": {
+                "address": "Mlinska cesta 7a, 2250 Ptuj",
+                "hours": "Mo-Th 10:00-22:00; Fr 10:00-23:00; Sa 11:00-23:00; Su 11:00-22:00",
+                "phone": "+386 31 542 664",
+                "website": "https://pizzeria-lili.si/"
+            }
         },
         {
             "name": "Gostišče pri Tonetu",
             "icon": "restaurant",
             "group": "food",
-            "at": [-530.6, -333.1]
+            "at": [-530.6, -333.1],
+            "info": {
+                "address": "Zadružni trg 13, 2250 Ptuj",
+                "website": "https://www.gostisce-svensek.si/"
+            }
         },
         {
             "name": "Neli kebab",
@@ -12033,97 +12518,128 @@
             "name": "Alex Imbiss",
             "icon": "restaurant",
             "group": "food",
-            "at": [42.1, 6.4]
+            "at": [42.1, 6.4],
+            "info": {
+                "address": "Ulica heroja Lacka 4, 2250 Ptuj",
+                "website": "https://visitptuj.eu/en/eat-drink/inns-restaurants/alex-imbiss/"
+            }
         },
         {
             "name": "Okrepčevalnica Pri Perotu",
             "icon": "restaurant",
             "group": "food",
-            "at": [-596.1, -506.3]
+            "at": [-596.1, -506.3],
+            "info": { "address": "Zagrebška cesta 5, 2250 Ptuj" }
         },
         {
             "name": "KRTEK Burger",
             "icon": "restaurant",
             "group": "food",
-            "at": [932.9, 970.4]
+            "at": [932.9, 970.4],
+            "info": {
+                "address": "Potrčeva cesta 60A, 2250 Ptuj",
+                "operator": "Renata Ošlaj s.p.",
+                "phone": "+386 51 235 925",
+                "website": "https://poisci.me/sl/krtek-burger-renata-oslaj-s-p-ptuj/"
+            }
         },
         {
             "name": "Okrepčevalnica Na žlico",
             "icon": "restaurant",
             "group": "food",
-            "at": [1156.6, 363.8]
+            "at": [1156.6, 363.8],
+            "info": {
+                "address": "Puhova ulica 21, 2250 Ptuj",
+                "hours": "Mo-Fr 08:00-20:00; Sa 08:00-18:00",
+                "phone": "+386 41 533 623",
+                "website": "https://www.facebook.com/okrepcevalnica.na.zlico/"
+            }
         },
         {
             "name": "McDonald's",
             "icon": "restaurant",
             "group": "food",
-            "at": [405.3, -66.1]
+            "at": [405.3, -66.1],
+            "info": {
+                "address": "Ormoška cesta 3, 2250 Ptuj",
+                "operator": "ALPE-PANON d.o.o.",
+                "hours": "Mo-Sa 08:00-00:00; Su 09:00-00:00",
+                "phone": "+386 59 689 721",
+                "website": "https://www.mcdonalds.si/restavracije/ptuj/"
+            }
         },
         {
             "name": "Beki Kebab",
             "icon": "restaurant",
             "group": "food",
-            "at": [55.2, 612.7]
+            "at": [55.2, 612.7],
+            "info": {
+                "address": "Volkmerjeva cesta, 2250 Ptuj",
+                "phone": "+386 31 825 459"
+            }
         },
         {
             "name": "Hip-Hop",
             "icon": "restaurant",
             "group": "food",
-            "at": [59.8, 605.2]
+            "at": [59.8, 605.2],
+            "info": {
+                "address": "Volkmerjeva cesta, 2250 Ptuj",
+                "phone": "+386 41 250 132"
+            }
         },
         {
             "name": "Stari Gurman",
             "icon": "restaurant",
             "group": "food",
-            "at": [63.4, 614.4]
-        },
-        {
-            "name": "Okrepčevalnica",
-            "icon": "restaurant",
-            "group": "food",
-            "at": [931.6, 968.2]
-        },
-        {
-            "name": "Okrepčevalnica",
-            "icon": "restaurant",
-            "group": "food",
-            "at": [424.2, 648.4]
+            "at": [63.4, 614.4],
+            "info": { "hours": "Mo-Fr 09:00-18:00" }
         },
         {
             "name": "GOSTILNA MAJDA",
             "icon": "bar",
             "group": "food",
-            "at": [3076.7, -725.5]
+            "at": [3076.7, -725.5],
+            "info": { "address": "Spuhlja 26, 2250 Ptuj" }
         },
         {
             "name": "Ranca",
             "icon": "bar",
             "group": "food",
-            "at": [1262.8, -927.3]
+            "at": [1262.8, -927.3],
+            "info": { "phone": "+38640274691" }
         },
         {
             "name": "Kava Bar Orfej",
             "icon": "bar",
             "group": "food",
-            "at": [-199.7, 42.5]
+            "at": [-199.7, 42.5],
+            "info": { "address": "Prešernova ulica 5, 2250 Ptuj" }
         },
         {
             "name": "Ginko Caffe&Bar",
             "icon": "bar",
             "group": "food",
-            "at": [121.5, 214.5]
+            "at": [121.5, 214.5],
+            "info": {
+                "address": "Trstenjakova ulica 1, 2250 Ptuj",
+                "phone": "+ 386 40 261 260",
+                "website": "https://visitptuj.eu/en/eat-drink/wine-cellars-bars/ginko-caffe-bar/"
+            }
         },
         {
             "name": "Bar recesija, Natalija Kekec s.p.",
             "icon": "bar",
             "group": "food",
-            "at": [4840.7, 3509.8]
+            "at": [4840.7, 3509.8],
+            "info": { "address": "Pacinje 19C, 2252 Dornava" }
         },
         {
             "name": "Kava bar Sima",
             "icon": "bar",
             "group": "food",
-            "at": [-192.0, 41.9]
+            "at": [-192.0, 41.9],
+            "info": { "address": "Prešernova ulica 3, 2250 Ptuj" }
         },
         {
             "name": "Tarok",
@@ -12135,121 +12651,178 @@
             "name": "Bar Divino",
             "icon": "bar",
             "group": "food",
-            "at": [87.1, 280.5]
-        },
-        {
-            "name": "Bar",
-            "icon": "bar",
-            "group": "food",
-            "at": [1280.4, -944.8]
+            "at": [87.1, 280.5],
+            "info": {
+                "address": "Panonska ulica 1, 2250 Ptuj",
+                "operator": "GOSTINSTVO BOJAN ŠOŠTARIĆ S.P.",
+                "website": "http://hisadivino.com/bar-divino/"
+            }
         },
         {
             "name": "Bar Frakelj",
             "icon": "bar",
             "group": "food",
-            "at": [1410.1, 1442.2]
+            "at": [1410.1, 1442.2],
+            "info": {
+                "address": "Slovenskogoriška cesta 15, 2250",
+                "hours": "Mo-Fr 07:00-20:00; Sa 07:00-18:00; Su 08:00-13:00"
+            }
         },
         {
             "name": "Okrepčevalnica Zeleni gaj",
             "icon": "bar",
             "group": "food",
-            "at": [1880.7, 2229.0]
+            "at": [1880.7, 2229.0],
+            "info": {
+                "address": "Žabjak 65, 2250",
+                "hours": "Mo-Th 08:00-23:00; Fr-Sa 08:00-00:00; Su 08:00-22:00",
+                "phone": "(02) 745 82 81"
+            }
         },
         {
             "name": "Bar Pri Ribniku",
             "icon": "bar",
             "group": "food",
-            "at": [1677.8, 1316.1]
+            "at": [1677.8, 1316.1],
+            "info": {
+                "address": "Cesta 8. avgusta 11, 2250 Ptuj",
+                "hours": "Mo-Su 09:00-21:00"
+            }
         },
         {
             "name": "Krona bar - Šipek Ivan s.p.",
             "icon": "bar",
             "group": "food",
-            "at": [1044.2, 1091.7]
+            "at": [1044.2, 1091.7],
+            "info": { "address": "Potrčeva cesta 65, 2250 Ptuj" }
         },
         {
             "name": "MOON coffee and lounge bar",
             "icon": "bar",
             "group": "food",
-            "at": [1321.6, 2819.8]
+            "at": [1321.6, 2819.8],
+            "info": { "address": "Nova vas pri Ptuju 111A, 2250 Ptuj" }
         },
         {
             "name": "Bar Gabrovec",
             "icon": "bar",
             "group": "food",
-            "at": [289.9, 513.3]
+            "at": [289.9, 513.3],
+            "info": {
+                "address": "Potrčeva cesta 11, 2250 Ptuj",
+                "phone": "+386 2 775 40 51"
+            }
         },
         {
             "name": "Bar Napoleon",
             "icon": "bar",
             "group": "food",
-            "at": [-36.3, 140.0]
+            "at": [-36.3, 140.0],
+            "info": { "address": "Slomškova ulica 18, 2250 Ptuj" }
         },
         {
             "name": "Bar Atrij",
             "icon": "bar",
             "group": "food",
-            "at": [-1199.2, -303.4]
+            "at": [-1199.2, -303.4],
+            "info": { "address": "Mariborska cesta 42, 2250 Ptuj" }
         },
         {
             "name": "Bar Palma",
             "icon": "bar",
             "group": "food",
-            "at": [-556.0, -850.1]
+            "at": [-556.0, -850.1],
+            "info": { "address": "Zagrebška cesta 26, 2250 Ptuj" }
         },
         {
             "name": "Okrepčevalnica Tobias",
             "icon": "bar",
             "group": "food",
-            "at": [4873.9, 3417.9]
+            "at": [4873.9, 3417.9],
+            "info": {
+                "address": "Pacinje 2, 2252 Dornava",
+                "phone": "+3862755 14 81"
+            }
         },
         {
             "name": "ALIBI BAR",
             "icon": "bar",
             "group": "food",
-            "at": [268.2, -180.3]
+            "at": [268.2, -180.3],
+            "info": {
+                "address": "Čučkova ulica 6A, 2250 Ptuj",
+                "operator": "MIRJANA RADOVAC S.P."
+            },
+            "ban": "2026-12-03"
         },
         {
             "name": "Footbar",
             "icon": "bar",
             "group": "food",
-            "at": [266.7, -194.1]
+            "at": [266.7, -194.1],
+            "info": {
+                "address": "Čučkova ulica 6A, 2250 Ptuj",
+                "operator": "Nogometni klub Drava Ptuj"
+            },
+            "ban": "2028-04-30"
         },
         {
             "name": "Bar Ring",
             "icon": "bar",
             "group": "food",
-            "at": [-383.8, 751.9]
+            "at": [-383.8, 751.9],
+            "info": {
+                "address": "Maistrova ulica 18, 2250 Ptuj",
+                "operator": "Rok Črešnik s.p.",
+                "website": "https://www.facebook.com/barrring/"
+            }
         },
         {
             "name": "BAR GROZDEK",
             "icon": "bar",
             "group": "food",
-            "at": [144.0, -16.9]
+            "at": [144.0, -16.9],
+            "info": {
+                "address": "Ulica heroja Lacka 10, 2250 Ptuj",
+                "operator": "TEREZIJA BRODNJAK S.P."
+            }
         },
         {
             "name": "Sandra bar",
             "icon": "bar",
             "group": "food",
-            "at": [2736.4, -829.1]
+            "at": [2736.4, -829.1],
+            "info": { "address": "Spuhlja 91A, 2250 Ptuj" }
         },
         {
             "name": "VIDOVIČ FRANC, s.p., AVTOPREVOZNIŠTVO IN BAR",
             "icon": "bar",
             "group": "food",
-            "at": [-229.9, -3585.2]
+            "at": [-229.9, -3585.2],
+            "info": { "address": "Zagrebška cesta 122, 2250 Ptuj" }
         },
         {
             "name": "Glamur bar",
             "icon": "bar",
             "group": "food",
-            "at": [1090.6, 478.3]
+            "at": [1090.6, 478.3],
+            "info": {
+                "address": "Puhova ulica 21, 2250 Ptuj",
+                "hours": "Mo-Sa 08:00-20:00",
+                "website": "https://www.facebook.com/GlamurBar/about"
+            }
         },
         {
             "name": "Tajkun Cafe",
             "icon": "bar",
             "group": "food",
-            "at": [1180.0, 398.8]
+            "at": [1180.0, 398.8],
+            "info": {
+                "address": "Puhova ulica 21, 2250 Ptuj",
+                "operator": "Gostinske Storitve d.o.o.",
+                "hours": "Mo-Sa 08:00-20:00",
+                "website": "https://www.facebook.com/people/Tajkun-bar/100057505237128/"
+            }
         },
         {
             "name": "Fresh Corner",
@@ -12257,25 +12830,7 @@
             "group": "food",
             "at": [1098.4, 231.4]
         },
-        {
-            "name": "Bar",
-            "icon": "bar",
-            "group": "food",
-            "at": [2728.4, -828.5]
-        },
-        {
-            "name": "Bar",
-            "icon": "bar",
-            "group": "food",
-            "at": [4873.8, 3417.7]
-        },
         { "name": "Bar", "icon": "bar", "group": "food", "at": [525.1, -32.6] },
-        {
-            "name": "Bar",
-            "icon": "bar",
-            "group": "food",
-            "at": [-239.5, -3588.5]
-        },
         {
             "name": "Bar",
             "icon": "bar",
@@ -12286,97 +12841,149 @@
             "name": "PANORAMA BAR",
             "icon": "bar",
             "group": "food",
-            "at": [-815.2, 617.3]
+            "at": [-815.2, 617.3],
+            "info": {
+                "address": "Vičava 49, 2250 Ptuj",
+                "operator": "MARIŽAN CAFUTA S.P."
+            }
         },
         {
             "name": "MuziKafe - kavarna",
             "icon": "cafe",
             "group": "food",
-            "at": [-157.5, -36.5]
+            "at": [-157.5, -36.5],
+            "info": {
+                "address": "Vrazov trg 1, 2250 Ptuj",
+                "operator": "MuziKafe - domKULTure",
+                "hours": "We-Th 09:00-21:00; Fr-Sa 09:00-23:00; Su 09:00-21:00",
+                "phone": "+386 2 787 88 60",
+                "website": "http://www.muzikafe.si"
+            }
         },
         {
             "name": "Kavarna Bodi",
             "icon": "cafe",
             "group": "food",
-            "at": [78.3, -13.9]
+            "at": [78.3, -13.9],
+            "info": {
+                "address": "Ulica heroja Lacka 8, 2250 Ptuj",
+                "phone": "+386 59 308035"
+            }
         },
         {
             "name": "Kava bar Florijan",
             "icon": "cafe",
             "group": "food",
-            "at": [-21.7, 59.9]
+            "at": [-21.7, 59.9],
+            "info": { "address": "Mestni trg 4, 2250 Ptuj" }
         },
         {
             "name": "Kavarna Malina",
             "icon": "cafe",
             "group": "food",
-            "at": [65.5, 109.2]
+            "at": [65.5, 109.2],
+            "info": { "address": "Novi trg 3, 2250 Ptuj" }
         },
         {
             "name": "Divino Momento Caffe",
             "icon": "cafe",
             "group": "food",
-            "at": [948.4, -355.2]
+            "at": [948.4, -355.2],
+            "info": {
+                "address": "Ormoška cesta 30, 2250 Ptuj",
+                "operator": "Šoštarič Bojan s.p.",
+                "phone": "+38641575126",
+                "website": "https://www.facebook.com/divinomomentocaffe"
+            }
         },
         {
             "name": "Sladka Kavarna",
             "icon": "cafe",
             "group": "food",
-            "at": [-676.5, 412.7]
+            "at": [-676.5, 412.7],
+            "info": {
+                "address": "Vičava 11, 2250 Ptuj",
+                "phone": "+386 40 422 485",
+                "website": "https://m.facebook.com/SladkaKavarnaPtuj/"
+            }
         },
         {
             "name": "Kavoteka",
             "icon": "cafe",
             "group": "food",
-            "at": [-168.7, 1092.4]
+            "at": [-168.7, 1092.4],
+            "info": { "address": "Ulica 25. maja 13B, 2250 Ptuj" }
         },
         {
             "name": "Pomaranča",
             "icon": "cafe",
             "group": "food",
-            "at": [1517.8, 793.8]
+            "at": [1517.8, 793.8],
+            "info": {
+                "address": "Špindlerjeva ulica 3, 2250 Ptuj",
+                "hours": "Mo-Sa 08:00-21:00",
+                "phone": "+386 64 185 406",
+                "website": "https://www.pomaranca.si/"
+            }
         },
         {
             "name": "Kavarna Evropa Ptuj",
             "icon": "cafe",
             "group": "food",
-            "at": [-30.3, 13.8]
+            "at": [-30.3, 13.8],
+            "info": {
+                "address": "Mestni trg 2, 2250 Ptuj",
+                "website": "https://kavarna-evropa-ptuj.business.site/"
+            },
+            "ban": "2028-01-16"
         },
         {
             "name": "Campus Cafe",
             "icon": "cafe",
             "group": "food",
-            "at": [144.6, -388.4]
+            "at": [144.6, -388.4],
+            "info": { "address": "Žnidaričevo nabrežje 2, 2250 Ptuj" }
         },
         {
             "name": "Bar Code",
             "icon": "cafe",
             "group": "food",
-            "at": [532.3, -96.1]
+            "at": [532.3, -96.1],
+            "info": {
+                "address": "Ormoška cesta 15, 2250 Ptuj",
+                "hours": "Mo-Sa 08:00-20:00"
+            }
         },
         {
             "name": "Lina Bar",
             "icon": "cafe",
             "group": "food",
-            "at": [-794.9, -1926.2]
+            "at": [-794.9, -1926.2],
+            "info": { "address": "Zagrebška cesta 70, 2250 Ptuj" }
         },
         {
             "name": "Bar Center Nada",
             "icon": "cafe",
             "group": "food",
-            "at": [-2457.1, 4224.1]
+            "at": [-2457.1, 4224.1],
+            "info": {
+                "address": "Grajena 47, 2250 Ptuj",
+                "phone": "+38631 572 553"
+            }
         },
         {
             "name": "Bar Haložan",
             "icon": "cafe",
             "group": "food",
-            "at": [-923.8, -1391.9]
+            "at": [-923.8, -1391.9],
+            "info": { "address": "Čopova ulica 1, 2250 Ptuj" }
         },
         {
             "name": "Mačka Bar",
             "icon": "cafe",
             "group": "food",
-            "at": [-946.3, -1404.2]
+            "at": [-946.3, -1404.2],
+            "info": { "address": "Seliškarjeva ulica 2, 2250 Ptuj" }
         },
         {
             "name": "Kavarna",
@@ -12390,5 +12997,9 @@
             "group": "food",
             "at": [329.5, 1056.8]
         }
-    ]
+    ],
+    "bans": {
+        "source": "Zavod RS za zaposlovanje (ESS): Seznam delodajalcev s prepovedjo zaposlovanja tujcev",
+        "listed": "2026-11-02"
+    }
 }

@@ -1,132 +1,124 @@
 import * as THREE from "three";
+import { banned } from "./map";
+import { extent, FALLBACK, MODELS, SKULL, type Wire, wire } from "./models";
 
-// pixels of each icon in the atlas, and on the screen
-const CELL = 128;
-export const ICON_PIXELS = 22;
+// how many pixels high an icon stands at least, however far it is
+export const ICON_PIXELS = 30;
+// radians a second the icons turn round
+const SPIN = 0.35;
 
 export interface IconPlace {
     at: THREE.Vector3;
     icon: string;
-    color: string;
+    /** Landmarks glow brighter. */
+    bright: boolean;
+    /**
+     * The last day (yyyy-mm-dd) of a ban on employing foreigners: until
+     * then, the icon turns into a skull and back now and again.
+     */
+    ban?: string | undefined;
 }
 
 /**
- * The icons of all the places on the map in one draw call: the SVG icons
- * (drawn for Inkscape in src/icons) are drawn into one atlas texture, and
- * every place is a point that shows its cell of it, tinted, as many pixels
- * wide at any zoom. Any place can be hidden, to keep icons from crowding.
+ * The icons of all the places on the map as slowly turning 3D wireframe
+ * models (see models.ts), one draw call for each model, brightness and
+ * whether it turns into a skull, standing on the ground; any place can be
+ * hidden, to keep icons from crowding. A skull stops when its ban ends,
+ * even with the map open.
  */
 export class Icons {
-    readonly points: THREE.Points;
-    private readonly alphas: THREE.BufferAttribute;
+    readonly group = new THREE.Group();
+    /** Where each place's icon is: its wire and its copy there. */
+    private readonly slots: { wire: Wire; index: number }[] = [];
+    /** How tall each place's model is, and its largest size. */
+    private readonly sizes: { height: number; size: number }[] = [];
     private readonly visible: Uint8Array;
+    /** The places still turning into skulls, with the end of their ban. */
+    private skulls: { place: number; until: string }[] = [];
+    /** When to look again whether a ban has ended (performance.now). */
+    private nextCheck = 0;
 
-    constructor(places: IconPlace[], dpr: number, order: number) {
-        const names = [...new Set(places.map(({ icon }) => icon))];
-        const columns = Math.ceil(Math.sqrt(names.length));
-        const rows = Math.ceil(names.length / columns);
-        const canvas = document.createElement("canvas");
-        canvas.width = columns * CELL;
-        canvas.height = rows * CELL;
-        const texture = new THREE.CanvasTexture(canvas);
-        texture.colorSpace = THREE.SRGBColorSpace;
-        const context = canvas.getContext("2d");
-        names.forEach((name, k) => {
-            const image = new Image(CELL, CELL);
-            image.onload = () => {
-                context?.drawImage(
-                    image,
-                    (k % columns) * CELL,
-                    Math.floor(k / columns) * CELL,
-                    CELL,
-                    CELL,
-                );
-                texture.needsUpdate = true;
-            };
-            image.src = `icons/${name}.svg`;
+    constructor(
+        places: IconPlace[],
+        colors: { bright: string; dim: string },
+        order: number,
+    ) {
+        const kinds = new Map<string, number[]>();
+        places.forEach(({ icon, bright, ban }, k) => {
+            const skull = banned(ban);
+            if (skull) {
+                this.skulls.push({ place: k, until: ban! });
+            }
+            const key = `${icon}|${bright ? 1 : 0}|${skull ? 1 : 0}`;
+            kinds.set(key, [...(kinds.get(key) ?? []), k]);
         });
+        for (const [key, members] of kinds) {
+            const [icon = "", bright, skull] = key.split("|");
+            const lines = MODELS[icon] ?? FALLBACK;
+            const made = wire(lines, members.length, {
+                color: bright === "1" ? colors.bright : colors.dim,
+                pixels: ICON_PIXELS,
+                spin: SPIN,
+                // dim from afar, yet still there to find the places by
+                fade: { near: 1000, far: 6000, floor: 0.25 },
+                ...(skull === "1" ? { morph: SKULL } : {}),
+            });
+            made.object.renderOrder = order;
+            const size = extent(lines);
+            if (skull === "1") {
+                size.size = Math.max(size.size, extent(SKULL).size);
+            }
+            members.forEach((place, index) => {
+                const at = places[place]!.at;
+                made.offsets.setXYZ(index, at.x, at.y, at.z);
+                // each turned its own way
+                made.headings.setX(index, (place * 2.4) % (Math.PI * 2));
+                this.slots[place] = { wire: made, index };
+                this.sizes[place] = size;
+            });
+            this.group.add(made.object);
+        }
+        this.visible = new Uint8Array(places.length).fill(1);
+    }
 
-        const count = places.length;
-        const positions = new Float32Array(count * 3);
-        const colors = new Float32Array(count * 3);
-        const cells = new Float32Array(count * 2);
-        const color = new THREE.Color();
-        places.forEach(({ at, icon, color: tint }, k) => {
-            at.toArray(positions, k * 3);
-            color.set(tint).toArray(colors, k * 3);
-            const index = names.indexOf(icon);
-            cells[k * 2] = index % columns;
-            cells[k * 2 + 1] = Math.floor(index / columns);
+    /**
+     * Stops the skulls of the bans that have ended; cheap to call every
+     * frame, it looks only once a minute.
+     */
+    expire(now = performance.now()) {
+        if (now < this.nextCheck || this.skulls.length === 0) {
+            return;
+        }
+        this.nextCheck = now + 60_000;
+        this.skulls = this.skulls.filter(({ place, until }) => {
+            if (banned(until)) {
+                return true;
+            }
+            const slot = this.slots[place]!;
+            slot.wire.morphs.setX(slot.index, 0);
+            slot.wire.morphs.needsUpdate = true;
+            return false;
         });
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute(
-            "position",
-            new THREE.BufferAttribute(positions, 3),
-        );
-        geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-        geometry.setAttribute("cell", new THREE.BufferAttribute(cells, 2));
-        this.alphas = new THREE.BufferAttribute(
-            new Float32Array(count).fill(1),
-            1,
-        );
-        this.alphas.setUsage(THREE.DynamicDrawUsage);
-        geometry.setAttribute("alpha", this.alphas);
-        this.visible = new Uint8Array(count).fill(1);
-
-        const material = new THREE.ShaderMaterial({
-            uniforms: {
-                atlas: { value: texture },
-                grid: { value: new THREE.Vector2(columns, rows) },
-                size: { value: ICON_PIXELS * dpr },
-            },
-            vertexShader: `
-                attribute vec3 color;
-                attribute vec2 cell;
-                attribute float alpha;
-                uniform float size;
-                varying vec3 vColor;
-                varying vec2 vCell;
-                varying float vAlpha;
-                void main() {
-                    vColor = color;
-                    vCell = cell;
-                    vAlpha = alpha;
-                    gl_Position = projectionMatrix * modelViewMatrix *
-                        vec4(position, 1.0);
-                    gl_PointSize = alpha > 0.0 ? size : 0.0;
-                }`,
-            fragmentShader: `
-                uniform sampler2D atlas;
-                uniform vec2 grid;
-                varying vec3 vColor;
-                varying vec2 vCell;
-                varying float vAlpha;
-                void main() {
-                    // the atlas is flipped: its first row is at the top
-                    vec2 uv = vec2(
-                        (vCell.x + gl_PointCoord.x) / grid.x,
-                        1.0 - (vCell.y + gl_PointCoord.y) / grid.y
-                    );
-                    float a = texture2D(atlas, uv).a * vAlpha;
-                    if (a < 0.02) discard;
-                    gl_FragColor = vec4(vColor, a);
-                }`,
-            transparent: true,
-            depthTest: false,
-            depthWrite: false,
-        });
-        this.points = new THREE.Points(geometry, material);
-        this.points.frustumCulled = false;
-        this.points.renderOrder = order;
     }
 
     /** Shows or hides the icon of a place. */
     show(index: number, shown: boolean) {
         const value = shown ? 1 : 0;
-        if (this.visible[index] !== value) {
+        const slot = this.slots[index];
+        if (slot && this.visible[index] !== value) {
             this.visible[index] = value;
-            this.alphas.setX(index, value);
-            this.alphas.needsUpdate = true;
+            slot.wire.alphas.setX(slot.index, value);
+            slot.wire.alphas.needsUpdate = true;
         }
+    }
+
+    /**
+     * How many pixels wide and high a place's icon shows at a distance,
+     * given the meters a pixel spans at a meter (as the shader scales it).
+     */
+    pixels(index: number, distance: number, perPixel: number) {
+        const { height, size } = this.sizes[index] ?? { height: 1, size: 1 };
+        const across = Math.max(ICON_PIXELS, size / (distance * perPixel));
+        return { width: across, height: (across * height) / size };
     }
 }

@@ -34,9 +34,44 @@ export interface MapData {
         icon: string;
         group: PlaceGroup;
         at: [number, number];
+        /** What OpenStreetMap says of it, where known. */
+        info?: PlaceInfo;
+        /**
+         * For an employer on the list of bans on employing foreigners
+         * (see bans), the latest end of its bans, yyyy-mm-dd.
+         */
+        ban?: string;
     }[];
     roads: Network & { kinds: string[] };
     rails: Network;
+    /** The list the bans are from, and its date (yyyy-mm-dd). */
+    bans?: { source: string; listed: string };
+}
+
+export interface PlaceInfo {
+    address?: string;
+    operator?: string;
+    hours?: string;
+    phone?: string;
+    website?: string;
+}
+
+/** Whether a ban (its last day, yyyy-mm-dd) still holds today. */
+export function banned(until: string | undefined) {
+    if (!until) {
+        return false;
+    }
+    return until >= today();
+}
+
+/** The local date today, as yyyy-mm-dd. */
+export function today() {
+    const now = new Date();
+    return [
+        now.getFullYear(),
+        String(now.getMonth() + 1).padStart(2, "0"),
+        String(now.getDate()).padStart(2, "0"),
+    ].join("-");
 }
 
 export interface Polygon {

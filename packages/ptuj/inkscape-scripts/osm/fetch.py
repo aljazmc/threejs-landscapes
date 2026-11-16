@@ -1,5 +1,7 @@
 """Downloads the OpenStreetMap data ptujmap.py reads into a directory: the
-outline of the municipality from Nominatim and the rest from Overpass.
+outline of the municipality from Nominatim and the rest from Overpass; and
+the Employment Service of Slovenia's (ESS) list of employers banned from
+employing foreigners, as bans.xlsx.
 
     python3 fetch.py <directory>
 
@@ -16,6 +18,9 @@ AGENT = "threejs-landscapes (github.com/aljazmc/threejs-landscapes)"
 NOMINATIM = ("https://nominatim.openstreetmap.org/lookup?osm_ids=R1676350"
              "&format=geojson&polygon_geojson=1&polygon_threshold=0.0005")
 OVERPASS = "https://overpass-api.de/api/interpreter"
+BANS = ("https://www.ess.gov.si/fileadmin/user_upload/Delodajalci/"
+        "Dokumenti_DD/Zaposlovanje_tujcev/"
+        "Seznam_delodajalcev_prepoved_zaposlovanja_tujcev.xlsx")
 BOX = "46.38,15.77,46.50,15.95"
 QUERIES = {
     "sub.json": """[out:json][timeout:170];rel(1676350);map_to_area->.m;
@@ -41,14 +46,15 @@ QUERIES = {
 }
 
 
-def get(url, data=None):
+def get(url, data=None, json=True):
     request = urllib.request.Request(url, data, {"User-Agent": AGENT,
                                                  "Accept": "*/*"})
     for attempt in range(6):
         try:
             with urllib.request.urlopen(request, timeout=200) as response:
                 body = response.read()
-            if body.lstrip()[:1] in (b"{", b"["):
+            # JSON, or else a spreadsheet (a zip file)
+            if body.lstrip()[:1] in (b"{", b"[") if json else body[:2] == b"PK":
                 return body
         except OSError as error:
             print(error, file=sys.stderr)
@@ -65,6 +71,9 @@ def main(directory):
         with open(os.path.join(directory, name), "wb") as file:
             file.write(get(OVERPASS, body))
         print("fetched", name)
+    with open(os.path.join(directory, "bans.xlsx"), "wb") as file:
+        file.write(get(BANS, json=False))
+    print("fetched bans.xlsx")
 
 
 if __name__ == "__main__":
