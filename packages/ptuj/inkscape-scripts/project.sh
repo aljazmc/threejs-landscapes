@@ -4,9 +4,9 @@
 ## ../src/map/ptuj.json, where it is committed, so the builds (and CI) only
 ## copy it into dist/map, e.g. ./project.sh all
 ##
-## The landmark icons in ../src/icons are SVG drawn for Inkscape; the
-## preview draws the map as SVG and has Inkscape export it as the README's
-## picture.
+## The preview records the app itself (a development build in ../dist, from
+## yarn b:ptuj) in headless Firefox, close up over the old town, into the
+## README's animated ../preview.gif.
 ##
 ## fetch also downloads the Employment Service of Slovenia's list of
 ## employers banned from employing foreigners; map marks the places it
@@ -63,11 +63,9 @@ terrain() {
 preview() {
 
     require python3
-    require inkscape
-    mkdir -p build
-    python3 osm/preview.py "$MAP" build/preview.svg &&
-        inkscape build/preview.svg --export-type=png \
-            --export-filename=../screenshot.png
+    require firefox
+    require ffmpeg
+    python3 osm/record.py ../dist ../preview.gif
 
 }
 
@@ -77,9 +75,9 @@ usage() {
     echo "  fetch    downloads the OpenStreetMap data into $DATA" >&2
     echo "  map      makes $MAP from it" >&2
     echo "  terrain  makes $TERRAIN from elevation tiles" >&2
-    echo "  preview  draws the map into ../screenshot.png with Inkscape" >&2
+    echo "  preview  records the app into ../preview.gif with Firefox" >&2
     echo "  all      fetch, map and terrain" >&2
-    echo "  clean    removes the downloaded data and the preview" >&2
+    echo "  clean    removes the downloaded data" >&2
     exit 1
 
 }

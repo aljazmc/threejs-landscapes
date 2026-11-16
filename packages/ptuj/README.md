@@ -18,9 +18,9 @@ A retro-futuristic cyan wireframe map of the Municipality of Ptuj, in the style 
 
 You move over it as in a first person game: click a spot to look at it and scroll to zoom to it, drag to look around, right drag to move, W A S D or the arrows to walk, E and Q to rise and sink, Shift to hurry, double click to fly nearer and Esc for the whole map. On a touchscreen, one finger looks around and two pinch and move.
 
-`inkscape-scripts/project.sh all` rebuilds `src/map/ptuj.json` from OpenStreetMap (with the list of bans) and `src/map/terrain.json` from elevation tiles (`project.sh terrain` only the latter, which needs Pillow). `project.sh preview` draws the old town with Inkscape into the picture below, using the SVG icons in `src/icons`.
+`inkscape-scripts/project.sh all` rebuilds `src/map/ptuj.json` from OpenStreetMap (with the list of bans) and `src/map/terrain.json` from elevation tiles (`project.sh terrain` only the latter, which needs Pillow). `project.sh preview` records the app close up over the old town in headless Firefox into the picture below (it needs a development build from `yarn b:ptuj`, and ffmpeg).
 
-![Ptuj cyan wireframe map](screenshot.png)
+![The old town of Ptuj in the app: spinning wireframe models of the places, traffic and a train](preview.gif)
 
 Map data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, available under the [ODbL](https://opendatacommons.org/licenses/odbl/). The quarter borders are approximate.
 
