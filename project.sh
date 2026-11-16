@@ -48,12 +48,12 @@ services:
         volumes:
             - .:$PWD
         environment:
-            HOME:               $PWD
-            NODE_AUTH_TOKEN:    npm_000000000000000000000000000000000000
-            NODE_ENV:           development
-            NODE_OPTIONS:       "--experimental-vm-modules --no-webstorage"
-            NODE_NO_WARNINGS:   "1"
-            PATH:               "$PATH:$HOME/.yarn/releases/"
+            HOME: $PWD
+            NODE_AUTH_TOKEN: npm_000000000000000000000000000000000000
+            NODE_ENV: development
+            NODE_OPTIONS: "--experimental-vm-modules --no-webstorage"
+            NODE_NO_WARNINGS: "1"
+            PATH: "$PATH:$HOME/.yarn/releases/"
         network_mode: host
 EOF
 fi
