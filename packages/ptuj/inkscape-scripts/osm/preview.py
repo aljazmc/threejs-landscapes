@@ -21,6 +21,9 @@ WOODS, VINEYARDS, WATER = "#0a3a2a", "#2a1640", "#062a56"
 SHORE, STREAM, ROAD, MAJOR = "#2f9bff", "#1e7bff", "#ffb000", "#ffcf40"
 RAIL, OUTLINE, ICON, CAR, TRAIN = ("#ff3df0", "#00e5ff", "#7df9ff",
                                    "#fff2b0", "#ff5cf4")
+# the app's GROUPS, see src/layers.ts
+GROUPS = {"health": "#ff6b8a", "public": "#b48cff", "education": "#9dff7a",
+          "food": "#ffcf40"}
 
 
 def pairs(flat):
@@ -135,7 +138,8 @@ def main(source, target):
         body = icon[icon.index(">", icon.index("<svg")) + 1:icon.rindex(
             "</svg>")]
         parts.append(f'<g transform="translate({x - 6:.1f},{y - 6:.1f}) '
-                     f'scale(0.19)" fill="none" stroke="{ICON}" '
+                     f'scale(0.19)" fill="none" '
+                     f'stroke="{GROUPS.get(landmark.get("group"), ICON)}" '
                      f'stroke-width="3" stroke-linecap="round" '
                      f'stroke-linejoin="round" opacity="0.8">{body}</g>')
     for quarter in plan["quarters"]:

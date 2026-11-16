@@ -3890,8 +3890,18 @@
         [-547.3, -2546.0, -518.8, -2570.9, -472.7, -2518.7, -501.1, -2502.7]
     ],
     "landmarks": [
-        { "name": "Ptujski grad", "icon": "castle", "at": [-322, 160] },
-        { "name": "Mestna hiša", "icon": "townhall", "at": [12, -2] },
+        {
+            "name": "Ptujski grad",
+            "icon": "museum",
+            "at": [-322, 160],
+            "group": "public"
+        },
+        {
+            "name": "Mestna hiša",
+            "icon": "office",
+            "at": [12, -2],
+            "group": "public"
+        },
         { "name": "Cerkev sv. Jurija", "icon": "church", "at": [-62, 96] },
         { "name": "Mestni stolp", "icon": "tower", "at": [-108, 71] },
         { "name": "Orfejev spomenik", "icon": "monument", "at": [-125, 60] },
@@ -3906,7 +3916,12 @@
             "icon": "monastery",
             "at": [-541, 128]
         },
-        { "name": "Gostilna Ribič", "icon": "fish", "at": [-296, -130] },
+        {
+            "name": "Gostilna Ribič",
+            "icon": "restaurant",
+            "at": [-296, -130],
+            "group": "food"
+        },
         { "name": "Mestni stadion", "icon": "stadium", "at": [222, -300] },
         {
             "name": "Železniška postaja Ptuj",

@@ -5,6 +5,9 @@ import * as THREE from "three";
  * from OpenStreetMap data: positions are flat lists of x (meters east of
  * the town hall) and y (meters north of it), x0, y0, x1, y1, ...
  */
+/** The groups of the places with icons besides the landmarks. */
+export type PlaceGroup = "health" | "public" | "education" | "food";
+
 export interface MapData {
     outline: number[];
     water: Polygon[];
@@ -18,12 +21,18 @@ export interface MapData {
         label: [number, number];
         shapes: Polygon[];
     }[];
-    landmarks: { name: string; icon: string; at: [number, number] }[];
+    /** A landmark with the icon of a kind of place has that kind's group. */
+    landmarks: {
+        name: string;
+        icon: string;
+        at: [number, number];
+        group?: PlaceGroup;
+    }[];
     /** Schools, health care, institutions, restaurants and bars. */
     pois?: {
         name: string;
         icon: string;
-        group: "health" | "public" | "education" | "food";
+        group: PlaceGroup;
         at: [number, number];
     }[];
     roads: Network & { kinds: string[] };

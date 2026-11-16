@@ -40,15 +40,15 @@ DRAVA_WAYS = (28671179, 124495831, 173135099, 745391010)
 
 # the landmarks of the old town, where the map has them, and their icons
 LANDMARKS = (
-    ("Ptujski grad", "castle", (-322, 160)),
-    ("Mestna hiša", "townhall", (12, -2)),
+    ("Ptujski grad", "museum", (-322, 160)),
+    ("Mestna hiša", "office", (12, -2)),
     ("Cerkev sv. Jurija", "church", (-62, 96)),
     ("Mestni stolp", "tower", (-108, 71)),
     ("Orfejev spomenik", "monument", (-125, 60)),
     ("Dravski stolp", "tower", (-182, -209)),
     ("Minoritski samostan", "monastery", (14, -150)),
     ("Dominikanski samostan", "monastery", (-541, 128)),
-    ("Gostilna Ribič", "fish", (-296, -130)),
+    ("Gostilna Ribič", "restaurant", (-296, -130)),
     ("Mestni stadion", "stadium", (222, -300)),
     ("Železniška postaja Ptuj", "station", (526, 311)),
 )
@@ -461,7 +461,11 @@ def main(directory):
                                "kind": "quarter" if name in QUARTERS
                                else "village"})
     plan["quarters"] = quarters(outline, places, line)
+    # a landmark with the icon of a kind of place takes that kind's group
+    # (and color); the others keep the landmark color
+    groups = {icon: group for _, icon, group in POIS}
     plan["landmarks"] = [{"name": name, "icon": icon, "at": list(at)}
+                         | ({"group": groups[icon]} if icon in groups else {})
                          for name, icon, at in LANDMARKS]
     plan["pois"] = pois(directory, outline)
 

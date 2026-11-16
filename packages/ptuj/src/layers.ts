@@ -307,7 +307,8 @@ export function buildMap(map: MapData, dpr: number): MapScene {
     group.add(neon(edge, PALETTE.outline, 4, 0.05, ORDER.outline, dpr, true));
     group.add(neon(edge, PALETTE.outline, 1.3, 0.65, ORDER.outline, dpr));
 
-    // the icons of the landmarks first, then of the other places
+    // the icons of the landmarks first, then of the other places; a
+    // landmark with the icon of a kind of place is drawn in its color
     const places: Place[] = [
         ...map.landmarks.map(({ name, at }) => ({
             name,
@@ -321,10 +322,10 @@ export function buildMap(map: MapData, dpr: number): MapScene {
         })),
     ];
     const icons = new Icons(
-        [...map.landmarks, ...(map.pois ?? [])].map(({ icon }, k) => ({
+        [...map.landmarks, ...(map.pois ?? [])].map(({ icon, group }, k) => ({
             icon,
             at: places[k]!.at,
-            color: GROUPS[places[k]!.group],
+            color: GROUPS[group ?? places[k]!.group],
         })),
         dpr,
         ORDER.icons,

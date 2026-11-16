@@ -146,9 +146,9 @@ function App() {
                           kind: kind as string,
                       })),
                       ...[
-                          ...map.landmarks.map(({ name }) => ({
+                          ...map.landmarks.map(({ name, group }) => ({
                               name,
-                              kind: "landmark",
+                              kind: group ?? "landmark",
                           })),
                           ...(map.pois ?? []).map(({ name, group }) => ({
                               name,
