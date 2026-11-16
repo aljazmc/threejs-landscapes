@@ -5,10 +5,11 @@ README's picture:
     python3 preview.py ../../src/map/ptuj.json preview.svg
     inkscape preview.svg --export-type=png --export-filename=screenshot.png
 
-Like the app's first view it looks down at the map from the south, tilted,
-over the low poly ground of terrain.json beside the map (flat without it),
-its hills raised and its triangles drawn as a faint wireframe; it is
-drawn without perspective.
+Like the app it looks down at the map from the south, tilted, over the
+low poly ground of terrain.json beside the map (flat without it), its hills
+raised and its triangles drawn as a faint wireframe; it is drawn without
+perspective. It shows the old town round FOCUS, close enough to tell the
+streets and places apart, or the whole municipality when FOCUS is None.
 
 Map data © OpenStreetMap contributors, ODbL. Elevation: EU-DEM
 (Copernicus), SRTM and GMTED2010 (USGS), via Mapzen Terrain Tiles.
@@ -35,6 +36,7 @@ LANDMARK, VILLAGE = "#e6ffff", "#4fd8e8"
 EXAGGERATION = 2
 LOW_POLY = 150
 TILT = 0.45  # radians the view leans from straight down, looking north
+FOCUS = (-40, 60, 2600)  # the middle (meters from the town hall) and width
 
 
 def pairs(flat):
@@ -98,9 +100,16 @@ def main(source, target, terrain_path=None):
     outline = pairs(plan["outline"])
     xs = [x for x, _ in outline]
     ys = [y * lean + terrain.height(x, y) * rise for x, y in outline]
-    span = max((max(xs) - min(xs)) / WIDTH, (max(ys) - min(ys)) / HEIGHT)
-    scale = (1 - 2 * MARGIN) / span
-    cx, cy = (max(xs) + min(xs)) / 2, (max(ys) + min(ys)) / 2
+    if FOCUS:
+        fx, fy, width = FOCUS
+        scale = WIDTH / width
+        cx, cy = fx, fy * lean + terrain.height(fx, fy) * rise
+    else:
+        span = max((max(xs) - min(xs)) / WIDTH,
+                   (max(ys) - min(ys)) / HEIGHT)
+        scale = (1 - 2 * MARGIN) / span
+        cx, cy = (max(xs) + min(xs)) / 2, (max(ys) + min(ys)) / 2
+    bold = 2 if FOCUS else 1  # how much thicker lines and names are near
     most = terrain.step / 2  # the longest straight piece on the ground
 
     def at(x, y, h=None):
@@ -127,6 +136,7 @@ def main(source, target, terrain_path=None):
 
     def lines(paths, color, width, opacity, glow=True):
         d = " ".join(paths)
+        width *= bold
         style = (f'fill="none" stroke="{color}" stroke-width="{width}" '
                  f'stroke-opacity="{opacity}" stroke-linejoin="round" '
                  f'stroke-linecap="round"')
@@ -202,13 +212,14 @@ def main(source, target, terrain_path=None):
                "tertiary": 3, "unclassified": 1, "residential": 1}
 
     def vehicle(points, k, length, width, color, opacity):
+        length, width = length * bold, width * bold
         (ax, ay), (bx, by) = points[max(k - 1, 0)], points[min(
             k + 1, len(points) - 1)]
         x, y = at(*points[k])
         angle = math.degrees(math.atan2(-(by - ay) * lean, bx - ax))
         return (f'<rect x="{-length / 2:.1f}" y="{-width / 2:.1f}" '
                 f'width="{length}" height="{width}" fill="none" '
-                f'stroke="{color}" stroke-width="0.6" '
+                f'stroke="{color}" stroke-width="{0.6 * bold}" '
                 f'stroke-opacity="{opacity}" filter="url(#glow)" '
                 f'transform="translate({x:.1f},{y:.1f}) '
                 f'rotate({angle:.0f})"/>')
@@ -216,29 +227,47 @@ def main(source, target, terrain_path=None):
     for edge in plan["roads"]["edges"]:
         points = pairs(edge[3])
         for _ in range(weights.get(kinds[edge[2]], 0)):
-            if len(points) > 1 and rng.random() < 0.12:
+            if len(points) > 1 and rng.random() < (0.2 if FOCUS else 0.12):
                 k = rng.randrange(len(points))
                 parts.append(vehicle(points, k, 3, 1.8, CAR, 0.7))
-    rails = [pairs(e[2]) for e in plan["rails"]["edges"]]
-    for line in sorted(rails, key=len)[-3:]:
-        for k in range(min(5, len(line))):
-            parts.append(vehicle(line, k, 7, 3, TRAIN, 1))
+    rails = [follow(pairs(e[2]), False) for e in plan["rails"]["edges"]]
+    if FOCUS:
+        # a train standing by the middle of the view
+        line = min(rails, key=lambda line: min(
+            math.hypot(x - fx, y - fy) for x, y in line))
+        k = min(range(len(line)), key=lambda k: math.hypot(
+            line[k][0] - fx, line[k][1] - fy))
+        for i in range(max(k - 4, 0), min(k + 4, len(line))):
+            parts.append(vehicle(line, i, 7, 3, TRAIN, 1))
+    else:
+        for line in sorted(rails, key=len)[-3:]:
+            for k in range(min(5, len(line))):
+                parts.append(vehicle(line, k, 7, 3, TRAIN, 1))
 
-    # the landmarks' icons, standing on the ground, and the names of the
-    # quarters
-    for landmark in plan["landmarks"]:
-        x, y = at(*landmark["at"])
-        icon = open(os.path.join(ICONS, landmark["icon"] + ".svg")).read()
+    # the icons, standing on the ground: the landmarks, and near the other
+    # places too, those that don't cover one already drawn, as in the app
+    size = 12 * bold
+    shown = []
+    places = [(p, LANDMARK) for p in plan["landmarks"]]
+    if FOCUS:
+        places += [(p, VILLAGE) for p in plan["pois"]]
+    for place, color in places:
+        x, y = at(*place["at"])
+        if not (0 <= x <= WIDTH and 0 <= y <= HEIGHT) or any(
+                abs(x - a) < size and abs(y - b) < size for a, b in shown):
+            continue
+        shown.append((x, y))
+        icon = open(os.path.join(ICONS, place["icon"] + ".svg")).read()
         body = icon[icon.index(">", icon.index("<svg")) + 1:icon.rindex(
             "</svg>")]
-        parts.append(f'<g transform="translate({x - 6:.1f},{y - 12:.1f}) '
-                     f'scale(0.19)" fill="none" stroke="{LANDMARK}" '
-                     f'stroke-width="3" stroke-linecap="round" '
-                     f'stroke-linejoin="round" filter="url(#glow)">'
-                     f'{body}</g>')
+        parts.append(f'<g transform="translate({x - size / 2:.1f},'
+                     f'{y - size:.1f}) scale({0.19 * bold})" fill="none" '
+                     f'stroke="{color}" stroke-width="3" '
+                     f'stroke-linecap="round" stroke-linejoin="round" '
+                     f'filter="url(#glow)">{body}</g>')
     for quarter in plan["quarters"]:
         x, y = at(*quarter["label"])
-        size = 13 if quarter["kind"] == "quarter" else 10
+        size = (13 if quarter["kind"] == "quarter" else 10) * bold
         color = OUTLINE if quarter["kind"] == "quarter" else VILLAGE
         parts.append(f'<text x="{x:.1f}" y="{y:.1f}" fill="{color}" '
                      f'font-family="DejaVu Sans Mono, monospace" '
