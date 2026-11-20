@@ -3,7 +3,5 @@ export default {
     ignore: [".cache", ".git", ".yarn", "coverage", "dist", "node_modules"],
     rules: {
         clearMocks: true,
-        // no package has tests yet
-        passWithNoTests: true,
     },
 };
