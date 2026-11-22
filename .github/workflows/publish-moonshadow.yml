@@ -97,8 +97,9 @@ jobs:
                       exit 0
                   fi
                   cd packages/moonshadow/dist
-                  # the package's documentation for the preview repository
+                  # the package's documentation and license for the preview repository
                   cp ../README.md .
+                  cp ../LICENSE .
                   git config --global user.name aljazmc
                   git config --global user.email aljazmc@users.noreply.github.com
                   git config --global init.defaultBranch main

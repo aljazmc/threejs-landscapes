@@ -1,6 +1,10 @@
 # Moonshadow Keep
 
-A small first person shooter in elven fantasy style.
+A small first person shooter in elven fantasy style. As an elf with a sword and a bow with explosive arrows, you clear an elven keep of ten monsters. It runs in the browser on desktops, phones and tablets.
+
+**[Play Moonshadow Keep](https://aljazmc.github.io/moonshadow-preview/)** · [Source code](https://github.com/aljazmc/threejs-landscapes/tree/main/packages/moonshadow)
+
+## The fight
 
 |              | Elf                                | Monsters                              |
 | ------------ | ---------------------------------- | ------------------------------------- |
@@ -13,6 +17,10 @@ A small first person shooter in elven fantasy style.
 | 1 sword (default) | 75     | 0.6 s           | the nearest monster within 2.2 m in front of the elf (about 45° to each side)                                                                                |
 | 2 bow             | 500    | 3 s             | the arrow flies at 30 m/s, falling slightly, and explodes where it hits: the monster hit takes all 500, every other monster within 9 m less, by its distance |
 
+The main menu has _Play_, _Save_, _Load_ and _Language_ (English, Deutsch, Polski, Slovenščina). The saved game and the language are kept in the browser's local storage.
+
+## Keyboard and mouse
+
 | Mouse / key         | Action                                                 |
 | ------------------- | ------------------------------------------------------ |
 | mouse               | look around (click into the view to capture the mouse) |
@@ -20,39 +28,33 @@ A small first person shooter in elven fantasy style.
 | Space, left click   | strike or shoot (hold to keep attacking)               |
 | 1, 2                | sword, bow                                             |
 | Esc                 | pause to the main menu                                 |
+| Enter, Esc          | back to the main menu after the end of a game          |
 
-On a phone or tablet the game goes fullscreen and sideways where the browser allows it (not on iPhones):
+## Touchscreens
 
-| Touch             | Action                                                                           |
-| ----------------- | -------------------------------------------------------------------------------- |
-| left half         | a joystick where the thumb lands: walk in any direction, slower when tilted less |
-| right half        | drag to look around                                                              |
-| ATTACK button     | strike or shoot (hold to keep attacking)                                         |
-| the weapon panels | choose the sword or the bow                                                      |
-| II at the top     | pause to the main menu                                                           |
+| Touch               | Action                                                                           |
+| ------------------- | -------------------------------------------------------------------------------- |
+| menu items          | tap to choose                                                                    |
+| left half           | a joystick where the thumb lands: walk in any direction, slower when tilted less |
+| right half          | drag to aim                                                                      |
+| ATTACK button       | strike or shoot (hold to keep attacking)                                         |
+| the weapon panels   | tap to choose the sword or the bow                                               |
+| II at the top       | pause to the main menu                                                           |
+| anywhere, game over | tap to return to the main menu                                                   |
 
-The main menu has _Play_, _Save_, _Load_ and _Language_ (English, Deutsch, Polski, Slovenščina); the saved game and the language are kept in the browser's local storage.
+Tips for phones and tablets:
 
-```
-yarn s:moonshadow    # dev server
-yarn bp:moonshadow   # production build into dist/, three.js from esm.sh
-```
+- **Play sideways.** The view is 16:9. When you tap _Play_, the game goes fullscreen and locks to landscape where the browser allows it (Chrome and Firefox on Android, Safari on the iPad). iPhones can't open web pages fullscreen, so there the game stays in the page: turn the phone sideways yourself, and hide Safari's toolbar (the page menu in the address bar) for more room.
+- **Sound starts with your first touch.** Browsers play sound only after you have used the page, and Safari on iOS only once you lift your finger. If there's no sound, tap the menu once more and check that the silent switch is off.
+- **Two thumbs at once.** Keep your left thumb on the joystick while your right thumb aims or holds ATTACK. Only the first finger on the left half steers, so a second finger there aims instead.
+- **The sword needs you close.** It reaches only 2.2 m: walk right up to a monster, keep it in front of you and hold ATTACK. Arrows fall a little in flight, so aim slightly above monsters that are far away.
+- **Lighter graphics.** Touch devices start with the low quality setting (fewer lights and pixels, no multisampling, a smaller glow), so the game runs smoothly on phones. Other devices switch to it by themselves when the game runs slowly.
+- **Mixing inputs works.** On a tablet with a keyboard or mouse, the touch controls hide as soon as you use the keys or mouse, and come back with the next touch.
 
-## Sources
+## Credits
 
-`src/index.ts` starts `src/game/main.ts` (the letterboxed 960x540 view, the renderer and its environment, the screens, save and load). `menu.ts`, `play.ts` (controls and HUD), `game.ts` (the elf, the sword, the bow and its arrows), `monster.ts`, `castle.ts` (map, hull, props, lights; collisions, rays, paths), `rig.ts` (models and their joints), `view.ts` (the monsters' models, the camera, the weapons in hand, the arrows in flight, the effects), `fx.ts`, `lights.ts`, `audio.ts`, `lang.ts`, `ui.ts` and `res.ts` (loading), laid out like Bloodmoon Manor: the game's logic (`game.ts`, `monster.ts`, `fx.ts`) knows nothing of the page, controls go in, sounds come out, and the view draws it.
-
-Map coordinates (z up) are three.js' (x, z, y), and the models keep their glTF PBR materials. The keep is lit with omni lights (an energy, a range and an attenuation exponent, as three.js' point lights have), ACES tone mapping, glow above an HDR threshold of 1.2, the thin blue exponential fog, ambient light and the night sky the gold and silver reflect; the hull's glow is added unlit in a second pass. three.js lights every pixel with every light, so `lights.ts` gives a pool of 16 point lights to the keep's lights that shine brightest at the camera. The texts use Open Sans SemiBold where the system has it, or a font like it.
-
-## Resources
-
-Everything in `src/res` is generated by the scripts beside `src`:
-
-```
-./project.sh graphics   # blender-scripts/ with Blender: the map, sprite sheets and GLB models
-./project.sh audio      # fluidsynth-scripts/ with numpy and FluidSynth: sound effects (WAV) and music (OGG, and MP3 with ffmpeg for Safari)
-```
+Every model, texture, sound and piece of music is generated by the game's own Blender and FluidSynth scripts, which are in the [source code](https://github.com/aljazmc/threejs-landscapes/tree/main/packages/moonshadow). The texts use Open Sans SemiBold where the device has it, or a similar font. Built with [three.js](https://threejs.org/).
 
 ## License
 
-MIT
+[MIT](LICENSE)

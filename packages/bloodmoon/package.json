@@ -3,7 +3,7 @@
     "version": "0.2.3",
     "description": "A small first person shooter in Victorian gothic style",
     "author": "aljazmc",
-    "license": "MIT",
+    "license": "MIT AND Bitstream-Vera",
     "private": true,
     "type": "module",
     "repository": {

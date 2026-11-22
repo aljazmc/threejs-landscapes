@@ -3,7 +3,7 @@
     "version": "0.2.3",
     "description": "A small first person shooter in cyberpunk style",
     "author": "aljazmc",
-    "license": "MIT",
+    "license": "MIT AND CC0-1.0",
     "private": true,
     "type": "module",
     "repository": {

@@ -19,3 +19,13 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+The MIT License above covers the code. These files carry their own licenses:
+
+src/res/shooter-font.fnt and src/res/shooter-font.png (res/ in the build):
+a bitmap font made from Pixel Operator by Jayvee Enaguas (HarvettFox96),
+with letters added by pillow-scripts/font.py. Pixel Operator is dedicated
+to the public domain under Creative Commons Zero 1.0 Universal
+(SPDX: CC0-1.0), https://creativecommons.org/publicdomain/zero/1.0/.
