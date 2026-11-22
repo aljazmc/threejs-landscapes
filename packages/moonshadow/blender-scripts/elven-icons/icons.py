@@ -1,9 +1,6 @@
 import importlib
-import math
 import os
 import sys
-
-import bpy
 
 from shooter import Sheet, add_sun, add_world, front_camera, glow, setup_scene
 

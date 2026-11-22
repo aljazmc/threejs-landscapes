@@ -1,6 +1,18 @@
 import numpy
 
-from sound import RATE, delayed, drive, envelope, fade, lowpass, mix, noise, normalize, sine, sweep
+from sound import (
+    RATE,
+    delayed,
+    drive,
+    envelope,
+    fade,
+    lowpass,
+    mix,
+    noise,
+    normalize,
+    sine,
+    sweep,
+)
 
 # The grenade's explosion, 2.5 s: a sharp crack, a roar of noise whose
 # muffling closes as it fades, a sub-bass boom dropping in pitch, and

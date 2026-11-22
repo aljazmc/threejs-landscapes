@@ -5,9 +5,22 @@ animates)."""
 
 import math
 
-from creatures import (arm, biped_legs, blade, claws, eyes, held, horns, insect_legs,
-                       quadruped_legs, skins, spikes, start, tail)
-from shooter import box, cylinder, joint, limb, material, sphere, tube
+from creatures import (
+    arm,
+    biped_legs,
+    blade,
+    claws,
+    eyes,
+    held,
+    horns,
+    insect_legs,
+    quadruped_legs,
+    skins,
+    spikes,
+    start,
+    tail,
+)
+from shooter import box, cylinder, joint, material, sphere
 
 
 def axe(mat, wood):

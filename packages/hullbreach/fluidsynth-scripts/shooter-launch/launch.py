@@ -1,4 +1,15 @@
-from sound import bandpass, delayed, envelope, fade, lowpass, mix, noise, normalize, sine, sweep
+from sound import (
+    bandpass,
+    delayed,
+    envelope,
+    fade,
+    lowpass,
+    mix,
+    noise,
+    normalize,
+    sine,
+    sweep,
+)
 
 # The grenade launcher's shot, 0.5 s: a deep thump of compressed gas, a
 # burst of hiss from the barrel and the clank of the next grenade sliding

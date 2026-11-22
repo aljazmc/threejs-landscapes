@@ -3,8 +3,20 @@ import random
 
 import bpy
 
-from shooter import (Sheet, box, clear_scene, color, emission_material, front_camera,
-                     glow, material, node, sphere, setup_scene, torus)
+from shooter import (
+    Sheet,
+    box,
+    clear_scene,
+    color,
+    emission_material,
+    front_camera,
+    glow,
+    material,
+    node,
+    setup_scene,
+    sphere,
+    torus,
+)
 
 # The grenade's explosion: 16 frames of 128x128 pixels (4 rows of 4) for a
 # billboard 6 m across. A white flash, then a cluster of turbulent fireballs

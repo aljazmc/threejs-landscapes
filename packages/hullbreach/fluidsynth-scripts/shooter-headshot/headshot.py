@@ -1,4 +1,16 @@
-from sound import bandpass, crush, delayed, envelope, fade, mix, noise, normalize, sine, square, sweep
+from sound import (
+    bandpass,
+    crush,
+    delayed,
+    envelope,
+    fade,
+    mix,
+    noise,
+    normalize,
+    sine,
+    square,
+    sweep,
+)
 
 # A shot through an alien's head, 0.4 s: a crunch of bursting chitin, a wet
 # pop, and the visor's bright two-note chirp confirming the hit.

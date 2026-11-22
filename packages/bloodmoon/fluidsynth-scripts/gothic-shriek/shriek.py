@@ -1,6 +1,18 @@
 import numpy
 
-from sound import delayed, drive, envelope, highpass, mix, noise, normalize, resonant, saw, sweep, time
+from sound import (
+    delayed,
+    drive,
+    envelope,
+    highpass,
+    mix,
+    noise,
+    normalize,
+    resonant,
+    saw,
+    sweep,
+    time,
+)
 
 # A creature of the night destroyed, 1.4 s: a piercing shriek with a
 # tremble, falling and fading into a ghostly hiss of ashes.

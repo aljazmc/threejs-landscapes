@@ -1,7 +1,16 @@
 import math
 
 from gothic import gothic_materials
-from shooter import box, clear_scene, cylinder, joint, mesh_from, new_object, sphere, tube
+from shooter import (
+    box,
+    clear_scene,
+    cylinder,
+    joint,
+    mesh_from,
+    new_object,
+    sphere,
+    tube,
+)
 
 EXPORT = "glb"
 

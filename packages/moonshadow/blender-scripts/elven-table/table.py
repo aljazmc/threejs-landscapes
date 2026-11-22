@@ -15,7 +15,7 @@ def table():
     for x in (-1.3, 1.3):
         box("Trestle", (0.08, 0.7, 0.75), m["darkwood"], location=(x, 0, 0.38))
     box("Beam", (2.6, 0.08, 0.08), m["darkwood"], location=(0, 0, 0.2))
-    for index, x in enumerate((-1.1, -0.4, 0.4, 1.1)):
+    for x in (-1.1, -0.4, 0.4, 1.1):
         for y in (-0.3, 0.3):
             cylinder("Plate", 0.11, 0.015, m["silver"], location=(x, y, 0.815), sides=16)
             cylinder("Goblet", 0.03, 0.14, m["gold"], location=(x + 0.15, y * 0.7, 0.815), top=0.04, sides=8)

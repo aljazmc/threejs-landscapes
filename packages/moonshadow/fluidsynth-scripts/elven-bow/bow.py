@@ -1,4 +1,15 @@
-from sound import bandpass, delayed, envelope, fade, lowpass, mix, noise, normalize, pluck, sweep
+from sound import (
+    bandpass,
+    delayed,
+    envelope,
+    fade,
+    lowpass,
+    mix,
+    noise,
+    normalize,
+    pluck,
+    sweep,
+)
 
 # The longbow loosing an arrow, 0.5 s: the deep twang of the string (a
 # plucked string) and the hiss of the arrow and its fizzing rune charge.

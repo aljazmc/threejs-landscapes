@@ -1,11 +1,23 @@
-import math
 import random
 
 import numpy
 
-from shooter import (Sheet, box, clear_scene, color, cylinder, emission_material,
-                     front_camera, material, mix_color, new_object, node,
-                     setup_scene, shader_material, sphere)
+from shooter import (
+    Sheet,
+    box,
+    clear_scene,
+    color,
+    cylinder,
+    emission_material,
+    front_camera,
+    material,
+    mix_color,
+    new_object,
+    node,
+    setup_scene,
+    shader_material,
+    sphere,
+)
 
 # Textures of the ship's walls, floors and ceilings: 256x256 pixel tiles of
 # 1x1 m that repeat seamlessly, modeled as relief panels seen from the front

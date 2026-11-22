@@ -1,4 +1,17 @@
-from sound import bandpass, delayed, drive, envelope, fade, lowpass, mix, noise, normalize, ring, sine, sweep
+from sound import (
+    bandpass,
+    delayed,
+    drive,
+    envelope,
+    fade,
+    lowpass,
+    mix,
+    noise,
+    normalize,
+    ring,
+    sine,
+    sweep,
+)
 
 # The revolver's shot, 0.9 s: a sharp report, the boom of black powder and
 # its echo rolling through the castle's halls, then the click of the drum.

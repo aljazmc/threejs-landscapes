@@ -1,7 +1,15 @@
 import math
 
-from shooter import (box, clear_scene, cylinder, joint, material, ship_materials,
-                     sphere, torus)
+from shooter import (
+    box,
+    clear_scene,
+    cylinder,
+    joint,
+    material,
+    ship_materials,
+    sphere,
+    torus,
+)
 
 EXPORT = "glb"
 

@@ -1,7 +1,7 @@
 import random
 
 from gothic import candle, cobweb, gothic_materials, pointed_arch
-from shooter import box, clear_scene, cylinder, sphere, tube
+from shooter import box, clear_scene, sphere, tube
 
 EXPORT = "glb"
 

@@ -1,6 +1,17 @@
 import numpy
 
-from sound import drive, envelope, mix, noise, normalize, resonant, saw, sweep, time, highpass
+from sound import (
+    drive,
+    envelope,
+    highpass,
+    mix,
+    noise,
+    normalize,
+    resonant,
+    saw,
+    sweep,
+    time,
+)
 
 # An alien's death screech, 1.3 s: a shrill saw cry with a fast tremble,
 # falling and choking off, roughened by a little distortion and breathy noise.

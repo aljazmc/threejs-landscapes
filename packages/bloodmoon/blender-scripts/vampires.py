@@ -4,8 +4,21 @@ parts of creatures.py (see there for the joints the game animates)."""
 
 import math
 
-from creatures import (arm, biped_legs, blade, claws, eyes, held, horns, quadruped_legs,
-                       skins, spikes, start, tail, wings)
+from creatures import (
+    arm,
+    biped_legs,
+    blade,
+    claws,
+    eyes,
+    held,
+    horns,
+    quadruped_legs,
+    skins,
+    spikes,
+    start,
+    tail,
+    wings,
+)
 from shooter import box, cylinder, joint, material, mesh_from, new_object, sphere, tube
 
 

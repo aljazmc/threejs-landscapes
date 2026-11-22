@@ -1,7 +1,16 @@
 import math
 
-from shooter import (Sheet, box, clear_scene, emission_material, front_camera, glow,
-                     new_object, setup_scene, sphere)
+from shooter import (
+    Sheet,
+    box,
+    clear_scene,
+    emission_material,
+    front_camera,
+    glow,
+    new_object,
+    setup_scene,
+    sphere,
+)
 
 # Two 128x128 aiming marks drawn in the middle of the screen: the sword's
 # (four silver leaves around a moon-blue point, showing its reach) and the

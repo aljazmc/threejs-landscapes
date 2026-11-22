@@ -1,4 +1,15 @@
-from sound import bandpass, delayed, envelope, fade, lowpass, mix, noise, normalize, sine, sweep
+from sound import (
+    bandpass,
+    delayed,
+    envelope,
+    fade,
+    lowpass,
+    mix,
+    noise,
+    normalize,
+    sine,
+    sweep,
+)
 
 # A monster's blow, 0.4 s: the whoosh of a heavy weapon or claw and a dull
 # thump.

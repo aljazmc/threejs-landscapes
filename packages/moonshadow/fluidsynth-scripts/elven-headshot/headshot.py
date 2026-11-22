@@ -1,4 +1,15 @@
-from sound import bandpass, delayed, envelope, fade, mix, noise, normalize, ring, sine, sweep
+from sound import (
+    bandpass,
+    delayed,
+    envelope,
+    fade,
+    mix,
+    noise,
+    normalize,
+    ring,
+    sine,
+    sweep,
+)
 
 # A blow or an arrow to a monster's head, 0.55 s: a heavy crunch of bone and
 # a clear elven chime, a bright fifth rising after it.

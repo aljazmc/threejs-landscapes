@@ -2,8 +2,16 @@ import math
 
 import bpy
 
-from shooter import (Sheet, clear_scene, emission_material, front_camera, glow,
-                     material, setup_scene, text)
+from shooter import (
+    Sheet,
+    clear_scene,
+    emission_material,
+    front_camera,
+    glow,
+    material,
+    setup_scene,
+    text,
+)
 
 # Sheet of 640x150 logos of the main menu, a row per language (the subtitle
 # translated): the title in gold letters over a silver

@@ -208,7 +208,7 @@ def tolerance(points, fine, coarse):
 def crossing(a, b, outline):
     """Where segment a-b first crosses the outline, as its share along it."""
     best = None
-    for c, d in zip(outline, outline[1:] + outline[:1]):
+    for c, d in zip(outline, outline[1:] + outline[:1], strict=False):
         rx, ry = b[0] - a[0], b[1] - a[1]
         sx, sy = d[0] - c[0], d[1] - c[1]
         den = rx * sy - ry * sx
@@ -317,14 +317,14 @@ def quarters(outline, places, river):
     X, Y = np.meshgrid(x0 + (np.arange(nx) + 0.5) * RASTER,
                        y0 + (np.arange(ny) + 0.5) * RASTER, indexing="ij")
     within = np.zeros(X.shape, bool)
-    for (ax, ay), (bx, by) in zip(outline, outline[1:] + outline[:1]):
+    for (ax, ay), (bx, by) in zip(outline, outline[1:] + outline[:1], strict=False):
         if ay != by:
             crosses = (ay > Y) != (by > Y)
             within ^= crosses & (X < ax + (Y - ay) * (bx - ax) / (by - ay))
     # which side of the Drava: negative on its right bank
     best = np.full(X.shape, np.inf)
     side = np.ones(X.shape)
-    for (ax, ay), (bx, by) in zip(river, river[1:]):
+    for (ax, ay), (bx, by) in zip(river, river[1:], strict=False):
         dx, dy = bx - ax, by - ay
         t = np.clip(((X - ax) * dx + (Y - ay) * dy) / (dx * dx + dy * dy
                                                         or 1e-9), 0, 1)
@@ -365,7 +365,7 @@ def quarters(outline, places, river):
 
 def area(ring):
     return sum(a[0] * b[1] - b[0] * a[1]
-               for a, b in zip(ring, ring[1:] + ring[:1])) / 2
+               for a, b in zip(ring, ring[1:] + ring[:1], strict=False)) / 2
 
 
 def trace(mask):

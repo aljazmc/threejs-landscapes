@@ -1,6 +1,17 @@
 import numpy
 
-from sound import drive, envelope, lowpass, mix, noise, normalize, resonant, saw, sweep, time
+from sound import (
+    drive,
+    envelope,
+    lowpass,
+    mix,
+    noise,
+    normalize,
+    resonant,
+    saw,
+    sweep,
+    time,
+)
 
 # A monster's dying roar, 1.4 s: a rough growl rising, then falling and
 # choking off, through a throat-like resonant filter.

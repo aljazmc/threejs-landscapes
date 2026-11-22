@@ -1,4 +1,4 @@
-from sound import bandpass, delayed, envelope, fade, mix, noise, normalize, ring
+from sound import bandpass, delayed, envelope, mix, noise, normalize, ring
 
 # The flamethrower running dry, 0.4 s: a last sputtering hiss and the clunk
 # of the empty valve.

@@ -5,7 +5,9 @@ import bpy
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from common import load_project
+from common import load_project  # isort: split
+
+# after common, which puts the package's blender-scripts first on the path
 import shooter
 
 # Projects declaring EXPORT = "glb" build a model instead of a sheet. It is

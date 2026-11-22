@@ -1,4 +1,3 @@
-import numpy
 
 from sound import echo, envelope, mix, normalize, resonant, saw, square, sweep
 

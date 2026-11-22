@@ -1,4 +1,3 @@
-import math
 
 from elven import elven_materials
 from shooter import box, clear_scene, cylinder, joint, sphere, tube

@@ -1,0 +1,27 @@
+# Ruff for the asset scripts (Blender, FluidSynth, Pillow, OpenStreetMap),
+# which run on the host, not in the Yarn workspaces. CI runs `ruff check`.
+target-version = "py311"
+extend-exclude = ["packages/ptuj/inkscape-scripts/osm/data"]
+# where the scripts' own modules are found: they put these directories on
+# sys.path themselves, so their imports sort as first party
+src = [
+    "shooter-scripts/blender",
+    "shooter-scripts/fluidsynth",
+    "packages/bloodmoon/blender-scripts",
+    "packages/bloodmoon/fluidsynth-scripts",
+    "packages/hullbreach/blender-scripts",
+    "packages/hullbreach/fluidsynth-scripts",
+    "packages/hullbreach/pillow-scripts",
+    "packages/moonshadow/blender-scripts",
+    "packages/moonshadow/fluidsynth-scripts",
+    "packages/ptuj/inkscape-scripts/osm",
+]
+
+[lint]
+# errors, warnings, pyflakes, sorted imports and bugbear; no line length,
+# the scripts' long tables and docstrings stay as they are
+select = ["E4", "E7", "E9", "F", "W", "I", "B"]
+
+[lint.isort]
+# Blender's and the scripts' libraries, installed on the host
+known-third-party = ["bpy", "bmesh", "mathutils", "numpy", "PIL"]

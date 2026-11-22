@@ -2,9 +2,22 @@ import math
 
 import bpy
 
-from shooter import (Sheet, box, clear_scene, color, emission_material, front_camera,
-                     glow, material, mix_color, new_object, node, setup_scene,
-                     shader_material, sphere)
+from shooter import (
+    Sheet,
+    box,
+    clear_scene,
+    color,
+    emission_material,
+    front_camera,
+    glow,
+    material,
+    mix_color,
+    new_object,
+    node,
+    setup_scene,
+    shader_material,
+    sphere,
+)
 
 # Sprite sheet of 240x52 menu button backgrounds; the game draws the labels.
 # Rows: normal (a black marble plate in an iron frame) and highlighted

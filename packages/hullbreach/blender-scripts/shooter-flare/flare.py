@@ -1,8 +1,18 @@
 import math
 import random
 
-from shooter import (Sheet, box, clear_scene, emission_material, front_camera, glow,
-                     material, new_object, setup_scene, sphere)
+from shooter import (
+    Sheet,
+    box,
+    clear_scene,
+    emission_material,
+    front_camera,
+    glow,
+    material,
+    new_object,
+    setup_scene,
+    sphere,
+)
 
 # 64x64 glow sprites for the shots, drawn as additive billboards: the laser
 # hitting (cyan burst), the laser's muzzle flash (white-cyan star), the

@@ -4,6 +4,9 @@ from sound import delayed, envelope, mix, normalize, sine
 # on the ship's consoles.
 
 
+def blip(f):
+    return sine(f, 0.05) * envelope(0.05, attack=0.002, decay=0.04, release=0.008)
+
+
 def click():
-    blip = lambda f: sine(f, 0.05) * envelope(0.05, attack=0.002, decay=0.04, release=0.008)
     return normalize(mix(blip(1320), delayed(blip(1980), 0.05)), 0.5)

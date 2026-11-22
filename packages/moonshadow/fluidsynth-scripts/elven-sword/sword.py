@@ -1,4 +1,16 @@
-from sound import bandpass, delayed, envelope, fade, highpass, lowpass, mix, noise, normalize, ring, sine, sweep
+from sound import (
+    bandpass,
+    delayed,
+    envelope,
+    fade,
+    lowpass,
+    mix,
+    noise,
+    normalize,
+    ring,
+    sine,
+    sweep,
+)
 
 # The elven sword biting into a monster, 0.5 s: the swish of the blade, a
 # heavy chop and the bright ring of the blade (inharmonic partials).

@@ -1,4 +1,15 @@
-from sound import delayed, envelope, fade, highpass, lowpass, mix, noise, normalize, sine, sweep
+from sound import (
+    delayed,
+    envelope,
+    fade,
+    highpass,
+    lowpass,
+    mix,
+    noise,
+    normalize,
+    sine,
+    sweep,
+)
 
 # A creature's claws or fangs striking, 0.4 s: a swish and a slashing rip.
 

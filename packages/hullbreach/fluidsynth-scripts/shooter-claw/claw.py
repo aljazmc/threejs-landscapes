@@ -1,4 +1,15 @@
-from sound import delayed, envelope, fade, highpass, lowpass, mix, noise, normalize, sine, sweep
+from sound import (
+    delayed,
+    envelope,
+    fade,
+    highpass,
+    lowpass,
+    mix,
+    noise,
+    normalize,
+    sine,
+    sweep,
+)
 
 # An alien's claw strike, 0.4 s: a swish of air rising in pitch as the claw
 # swings, then the scrape and click of it striking armor.

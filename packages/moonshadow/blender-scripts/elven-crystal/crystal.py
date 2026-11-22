@@ -1,7 +1,7 @@
 import math
 
 from elven import elven_materials
-from shooter import cylinder, clear_scene, joint, sphere, torus
+from shooter import clear_scene, cylinder, joint, sphere, torus
 
 EXPORT = "glb"
 

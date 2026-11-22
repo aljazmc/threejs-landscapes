@@ -2,8 +2,17 @@ import random
 
 import bpy
 
-from shooter import (Sheet, clear_scene, color, emission_material, front_camera, glow, node,
-                     setup_scene, sphere)
+from shooter import (
+    Sheet,
+    clear_scene,
+    color,
+    emission_material,
+    front_camera,
+    glow,
+    node,
+    setup_scene,
+    sphere,
+)
 
 # The flamethrower's fire: 16 frames of 128x128 pixels (4 rows of 4) of one
 # billow of burning fuel, for billboards about 1.5 m across that fly from

@@ -1,6 +1,18 @@
 import numpy
 
-from sound import RATE, delayed, drive, envelope, fade, lowpass, mix, noise, normalize, ring, sine, sweep
+from sound import (
+    RATE,
+    drive,
+    envelope,
+    fade,
+    lowpass,
+    mix,
+    noise,
+    normalize,
+    ring,
+    sine,
+    sweep,
+)
 
 # The explosive arrow's blast, 2.5 s: a crack and a boom like the
 # grenade's, with a shimmer of moon runes (bell partials) bursting out and

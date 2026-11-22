@@ -319,7 +319,7 @@ def tube(name, points, radius, mat, parent=None, sides=6):
                                                     + math.sin(a) * up))
                           for a in (2 * math.pi * i / sides
                                     for i in range(sides))])
-        for ring, following in zip(rings, rings[1:]):
+        for ring, following in zip(rings, rings[1:], strict=False):
             for i in range(sides):
                 j = (i + 1) % sides
                 bm.faces.new((ring[i], ring[j], following[j], following[i]))

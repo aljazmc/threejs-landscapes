@@ -27,7 +27,28 @@ env:
     NODE_NO_WARNINGS: "1"
 
 jobs:
+    # the asset scripts, which run on the host and not in the workspaces:
+    # the shell scripts with shellcheck, the Python with ruff (ruff.toml)
+    scripts:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v6
+              with:
+                  persist-credentials: false
+
+            - name: Check shell scripts
+              run: |
+                  shellcheck --version | head -2
+                  git ls-files -z '*.sh' | xargs -0 shellcheck
+
+            - name: Check Python scripts
+              run: pipx run ruff==0.17.6 check --output-format github .
+
     build:
+        # no versions nor publishing while the scripts fail their checks
+        needs: scripts
         runs-on: ubuntu-latest
 
         permissions:

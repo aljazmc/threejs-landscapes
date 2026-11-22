@@ -77,7 +77,7 @@ def simplify(points, tolerance):
 def inside(p, ring):
     x, y = p
     result = False
-    for (ax, ay), (bx, by) in zip(ring, ring[1:] + ring[:1]):
+    for (ax, ay), (bx, by) in zip(ring, ring[1:] + ring[:1], strict=False):
         if (ay > y) != (by > y) and x < ax + (y - ay) * (bx - ax) / (by - ay):
             result = not result
     return result

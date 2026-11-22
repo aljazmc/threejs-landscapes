@@ -1,7 +1,17 @@
 import math
 
-from shooter import (Sheet, box, clear_scene, emission_material, front_camera, glow,
-                     new_object, setup_scene, sphere, torus)
+from shooter import (
+    Sheet,
+    box,
+    clear_scene,
+    emission_material,
+    front_camera,
+    glow,
+    new_object,
+    setup_scene,
+    sphere,
+    torus,
+)
 
 # Two 128x128 aiming marks drawn in the middle of the screen: the
 # revolver's (a silver ring with four ticks and a red point) and the

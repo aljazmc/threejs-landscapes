@@ -1,4 +1,16 @@
-from sound import bandpass, delayed, drive, envelope, fade, mix, noise, normalize, ring, sine, sweep
+from sound import (
+    bandpass,
+    delayed,
+    drive,
+    envelope,
+    fade,
+    mix,
+    noise,
+    normalize,
+    ring,
+    sine,
+    sweep,
+)
 
 # A silver bullet through a creature's skull, 0.6 s: the hard crack of bone,
 # a dull knock, and the high ping of the silver ringing out like a bell.

@@ -1,7 +1,7 @@
 import math
 
 from gothic import cobweb, gothic_materials, pointed_arch, spire
-from shooter import box, clear_scene, cylinder, sphere, tube
+from shooter import box, clear_scene, cylinder, tube
 
 EXPORT = "glb"
 

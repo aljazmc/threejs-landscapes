@@ -25,8 +25,18 @@ A creature stands on the origin facing -Y.
 
 import math
 
-from shooter import (box, clear_scene, cylinder, joint, limb, material, mesh_from,
-                     new_object, sphere, tube)
+from shooter import (
+    box,
+    clear_scene,
+    cylinder,
+    joint,
+    limb,
+    material,
+    mesh_from,
+    new_object,
+    sphere,
+    tube,
+)
 
 
 def skins(name, skin, dark, glow, roughness=0.6):

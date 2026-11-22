@@ -1,4 +1,3 @@
-import math
 
 from elven import elven_materials, filigree_arch
 from shooter import box, clear_scene, cylinder, sphere, tube

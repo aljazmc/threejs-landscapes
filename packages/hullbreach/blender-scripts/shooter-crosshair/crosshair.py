@@ -1,7 +1,17 @@
 import math
 
-from shooter import (Sheet, box, clear_scene, emission_material, front_camera, glow,
-                     new_object, setup_scene, sphere, torus)
+from shooter import (
+    Sheet,
+    box,
+    clear_scene,
+    emission_material,
+    front_camera,
+    glow,
+    new_object,
+    setup_scene,
+    sphere,
+    torus,
+)
 
 # Two 128x128 targeting reticles drawn in the middle of the screen, in the
 # cyberpunk HUD style: the laser gun's (cyan broken rings, tick marks and a

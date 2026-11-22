@@ -4,7 +4,7 @@ shared by its props and the hunter's weapons."""
 
 import math
 
-from shooter import box, cylinder, joint, material, sphere, tube
+from shooter import cylinder, joint, material, sphere, tube
 
 
 def gothic_materials():

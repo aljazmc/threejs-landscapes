@@ -1,4 +1,3 @@
-import math
 
 from gothic import candle, cobweb, gothic_materials, pointed_arch, spire
 from shooter import box, clear_scene, cylinder, sphere

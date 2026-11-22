@@ -78,7 +78,7 @@ def lowpass(signal, cutoff):
     alpha = 1.0 - numpy.exp(-2.0 * numpy.pi * cutoff / RATE)
     out = numpy.empty_like(signal)
     level = 0.0
-    for i, (sample, a) in enumerate(zip(signal, alpha)):
+    for i, (sample, a) in enumerate(zip(signal, alpha, strict=False)):
         level += a * (sample - level)
         out[i] = level
     return out
@@ -100,7 +100,7 @@ def resonant(signal, cutoff, q=4.0):
     damping = 1.0 / q
     low = band = 0.0
     out = numpy.empty_like(signal)
-    for i, (sample, fi) in enumerate(zip(signal, f)):
+    for i, (sample, fi) in enumerate(zip(signal, f, strict=False)):
         low += fi * band
         high = sample - low - damping * band
         band += fi * high

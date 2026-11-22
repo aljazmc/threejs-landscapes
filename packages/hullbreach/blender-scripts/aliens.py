@@ -28,8 +28,7 @@ per species, in the neon spirit of the ship.
 
 import math
 
-from shooter import (box, clear_scene, cylinder, joint, limb, material, sphere,
-                     tube)
+from shooter import box, clear_scene, cylinder, joint, limb, material, sphere, tube
 
 
 def skins(name, skin, chitin, glow):

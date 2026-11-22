@@ -65,6 +65,17 @@ TypeScript 7, strict, with `exactOptionalPropertyTypes`, `noUncheckedIndexedAcce
 
 Each package's `tsconfig.json` extends the root one and keeps `"emitDeclarationOnly": true` and `"noEmit": false`, because TypeScript 7 refuses referenced composite projects that disable emitting (TS6310). Check the whole solution with `tsc -b` on the root.
 
+### Script checks
+
+The shell and Python scripts are checked in CI with [ShellCheck](https://www.shellcheck.net/) and [Ruff](https://docs.astral.sh/ruff/) (`ruff.toml`: pyflakes, pycodestyle errors, sorted imports and bugbear, no line length). Neither runs in the Node container; run them from the repository root with Docker:
+
+```sh
+docker run --rm -v "$PWD:/mnt" -w /mnt koalaman/shellcheck:stable $(git ls-files '*.sh')
+docker run --rm -u "$(id -u):$(id -g)" -v "$PWD:/io" -w /io ghcr.io/astral-sh/ruff:0.17.6 check .        # --fix to fix
+```
+
+Keep `# isort: split` in `shooter-scripts/blender/exportglb.py`: `common` has to be imported before `shooter`, because it puts the package's own modules first on the path.
+
 ### Generated files
 
 Generated files are committed. Rebuild them on the host (not in Docker) with each package's scripts, and edit the scripts, never their output. The shooters' `./project.sh` only sets the package's theme and runs [`shooter-scripts/project.sh`](shooter-scripts/project.sh), with the Blender and FluidSynth code they share in `shooter-scripts/blender/` and `shooter-scripts/fluidsynth/`. A package's `blender-scripts/` and `fluidsynth-scripts/` hold only its theme, its level layout, its creatures and one project directory per asset.
@@ -106,7 +117,7 @@ packages/<package>/
 
 Commits follow [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`). Don't bump versions or write `version:` commits by hand.
 
-1. **CI** ([`ci.yml`](.github/workflows/ci.yml)) runs `lint`, `ct:all`, `test` and `b:all` on Node 24, 25 and 26 for every push and pull request to `main`.
+1. **CI** ([`ci.yml`](.github/workflows/ci.yml)) checks the shell and Python scripts with ShellCheck and Ruff, then runs `lint`, `ct:all`, `test` and `b:all` on Node 24, 25 and 26 for every push and pull request to `main`.
 2. On a push to `main`, the Node 26 run versions every package changed since its last version, and the root, with [`@aljazmc/monorepo`](https://www.npmjs.com/package/@aljazmc/monorepo) (`monorepo.config.ts`; a `refactor` releases a patch). It commits and tags each one as `@aljazmc/<package>@<version>` and pushes them.
 3. For every package whose new version isn't tagged in its preview repository yet, it starts `publish-<package>.yml`. That workflow builds the tag with `bp:<package>`, checks the build, and force pushes `dist/` with the README (and the LICENSE or preview) to `aljazmc/<package>-preview` as tag `v<version>`, where GitHub Pages serves it. Pushing there needs the `GH_TOKEN` secret.
 
