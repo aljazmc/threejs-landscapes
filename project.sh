@@ -85,6 +85,34 @@ docker compose run --rm node sh -c "printenv"
 
 }
 
+pytests() {
+
+    ## Runs pytests.py (packages/*/tests/py/test_*.py) in the aljazmc images:
+    ## ./project.sh pytests [image...], the six below without images. Blender's
+    ## run inside Blender, so the tests that need bpy run there too.
+    local images=("$@") image failed=()
+    [[ ${#images[@]} -eq 0 ]] && images=(blender-alpine blender-debian \
+        inkscape-alpine inkscape-debian fluidsynth-alpine fluidsynth-debian)
+
+    for image in "${images[@]}"; do
+        echo "### aljazmc/$image"
+        if [[ "$image" == blender-* ]]; then
+            command=(blender -b --factory-startup --python-exit-code 1 -P pytests.py --)
+        else
+            command=(python3 pytests.py)
+        fi
+        docker run --rm -e PYTHONDONTWRITEBYTECODE=1 -v "$PWD:$PWD:ro" -w "$PWD" \
+            "aljazmc/$image" "${command[@]}" || failed+=("$image")
+    done
+
+    if [[ ${#failed[@]} -gt 0 ]]; then
+        echo "### failed in: ${failed[*]}"
+        return 1
+    fi
+    echo "### passed in: ${images[*]}"
+
+}
+
 start() {
 
     compose
@@ -101,4 +129,4 @@ start() {
 
 }
 
-"$1"
+"$@"

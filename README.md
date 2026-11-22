@@ -52,7 +52,7 @@ docker compose run --rm node yarn <script>
 | `b:<package>`, `b:all`   | development build into `packages/<package>/dist/`                                                                                                                                    |
 | `bp:<package>`, `bp:all` | production build into `packages/<package>/dist/`                                                                                                                                     |
 | `ct:<package>`, `ct:all` | type check                                                                                                                                                                           |
-| `test`                   | the tests in `packages/*/tests/*.test.ts`, run in Node                                                                                                                               |
+| `test`                   | the TypeScript tests in `packages/*/tests/ts/*.test.ts`, run in Node                                                                                                                 |
 | `lint`, `lint:w`         | lint and format check ([lintero](https://www.npmjs.com/package/@aljazmc/lintero) and [formatero](https://www.npmjs.com/package/@aljazmc/formatero)), and the same with fixes written |
 
 The development builds bundle every dependency. The production builds leave out three.js (and React for ptuj and starter) and load them from [esm.sh](https://esm.sh/) through the import map in each package's `src/prod/index.html`. When dependencies are updated, those pinned versions must match the root `resolutions`.
@@ -64,6 +64,26 @@ The tests import only modules that don't need the DOM, and aren't type checked: 
 TypeScript 7, strict, with `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess` and `verbatimModuleSyntax`. 4 space indents, double quotes, semicolons, trailing commas and 80 columns (`formatero.config.ts`). Run `yarn lint:w` after every change and keep its fixes.
 
 Each package's `tsconfig.json` extends the root one and keeps `"emitDeclarationOnly": true` and `"noEmit": false`, because TypeScript 7 refuses referenced composite projects that disable emitting (TS6310). Check the whole solution with `tsc -b` on the root.
+
+### Python tests
+
+Every package has its TypeScript tests in `tests/ts/` and its Python tests, `tests/py/test_*.py`, beside them. The Python tests use `unittest` from the standard library and run on the host, not in the Node container:
+
+```sh
+python3 pytests.py [package...]                                                    # skips the tests that need Blender
+blender -b --factory-startup --python-exit-code 1 -P pytests.py -- [package...]    # all of them
+./project.sh pytests [image...]                                                    # in the aljazmc/* Docker images
+```
+
+CI runs only `python3 pytests.py` with numpy, with no Blender or FluidSynth on the runner. `./project.sh pytests` runs them all in `aljazmc/blender-alpine` and `blender-debian` (inside Blender), and in `inkscape-alpine`, `inkscape-debian`, `fluidsynth-alpine` and `fluidsynth-debian` (with their Python, skipping the Blender tests). `pytests.py` runs each package in a process of its own, because the packages' scripts share module names.
+
+| Package    | `tests/py`          | Checks                                                                                                                                | Needs   |
+| ---------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| bloodmoon  | `test_castlemap.py` | `src/res/gothic-map.txt` is what `castlemap.py` writes now; the props have models; the player and the ten monsters stand on the floor | —       |
+| hullbreach | `test_sounds.py`    | every sound effect is a clean mono signal within ±1 and byte for byte its committed WAV                                               | numpy   |
+| moonshadow | `test_monsters.py`  | the ten monsters, built in Blender, keep the joints of `ANIMATED`, and `rig.ts` moves every one                                       | Blender |
+| ptuj       | `test_bans.py`      | `ban()` marks a place only when its address and a distinctive word of the employer's name match, never by the address alone           | —       |
+| starter    | `test_package.py`   | the package is wired into the monorepo; it reads its own folder name, so a copy of the starter passes too                             | —       |
 
 ### Script checks
 
@@ -106,7 +126,8 @@ packages/<package>/
 ├── src/prod/index.html   production page with the esm.sh import map
 ├── src/index.css
 ├── src/…                 the app (the shooters: src/game/, generated src/res/; ptuj: generated src/map/)
-├── tests/                Node tests of the DOM-free modules
+├── tests/ts/             TypeScript tests of the DOM-free modules, run by testero in Node
+├── tests/py/             Python tests of the package's scripts, run by pytests.py
 ├── README.md             for players and users, published with the app
 └── LICENSE             (the shooters; the others use the root one)
 ```
@@ -117,7 +138,7 @@ packages/<package>/
 
 Commits follow [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`). Don't bump versions or write `version:` commits by hand.
 
-1. **CI** ([`ci.yml`](.github/workflows/ci.yml)) checks the shell and Python scripts with ShellCheck and Ruff, then runs `lint`, `ct:all`, `test` and `b:all` on Node 24, 25 and 26 for every push and pull request to `main`.
+1. **CI** ([`ci.yml`](.github/workflows/ci.yml)) checks the shell and Python scripts with ShellCheck and Ruff and runs the lightweight Python tests (`python3 pytests.py` with numpy: the Blender tests skip, and nothing is rendered or played), then runs `lint`, `ct:all`, `test` and `b:all` on Node 24, 25 and 26 for every push and pull request to `main`.
 2. On a push to `main`, the Node 26 run versions every package changed since its last version, and the root, with [`@aljazmc/monorepo`](https://www.npmjs.com/package/@aljazmc/monorepo) (`monorepo.config.ts`; a `refactor` releases a patch). It commits and tags each one as `@aljazmc/<package>@<version>` and pushes them.
 3. For every package whose new version isn't tagged in its preview repository yet, it starts `publish-<package>.yml`. That workflow builds the tag with `bp:<package>`, checks the build, and force pushes `dist/` with the README (and the LICENSE or preview) to `aljazmc/<package>-preview` as tag `v<version>`, where GitHub Pages serves it. Pushing there needs the `GH_TOKEN` secret.
 

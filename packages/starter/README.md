@@ -19,6 +19,7 @@ docker compose run --rm node yarn sp:starter   # production build, served
 4. Keep the versions in the import map of `src/prod/index.html` equal to the root `resolutions`.
 5. To publish it, copy one of `.github/workflows/publish-*.yml` to `publish-<name>.yml`, and create the `aljazmc/<name>-preview` repository with GitHub Pages.
 6. Add a `README.md` for players (the publish workflow copies it into the preview repository) and a `LICENSE`.
+7. Keep the tests apart: TypeScript in `tests/ts/*.test.ts`, Python in `tests/py/test_*.py`. The copied `tests/py/test_package.py` checks steps 1 to 3: run `python3 pytests.py <name>` from the root.
 
 ## License
 

@@ -1,4 +1,4 @@
-import { Lang, NAMES } from "../src/game/lang";
+import { Lang, NAMES } from "../../src/game/lang";
 
 describe("Lang", () => {
     afterEach(() => {

@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import terrain from "../src/map/terrain.json";
-import { Terrain } from "../src/terrain";
+import terrain from "../../src/map/terrain.json";
+import { Terrain } from "../../src/terrain";
 
 describe("Terrain", () => {
     test("is flat without terrain data", () => {

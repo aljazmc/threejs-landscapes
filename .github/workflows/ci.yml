@@ -28,7 +28,9 @@ env:
 
 jobs:
     # the asset scripts, which run on the host and not in the workspaces:
-    # the shell scripts with shellcheck, the Python with ruff (ruff.toml)
+    # the shell scripts with shellcheck, the Python with ruff (ruff.toml) and
+    # the lightweight Python tests (packages/*/tests/py, no Blender nor
+    # FluidSynth)
     scripts:
         runs-on: ubuntu-latest
 
@@ -45,6 +47,23 @@ jobs:
 
             - name: Check Python scripts
               run: pipx run ruff==0.17.6 check --output-format github .
+
+            # only the lightweight Python tests: with python3 and numpy, the
+            # tests needing Blender's bpy skip themselves, and the music is
+            # built but never played; without blender and fluidsynth on the
+            # runner neither can run by mistake (Song.render() stops without
+            # fluidsynth). ./project.sh pytests runs them all in the images.
+            - name: Run Python tests
+              run: |
+                  for bin in blender fluidsynth; do
+                      if command -v "$bin" > /dev/null; then
+                          echo "::error::$bin is on the runner: the Python tests must stay lightweight"
+                          exit 1
+                      fi
+                  done
+                  python3 -m venv "$RUNNER_TEMP/venv"
+                  "$RUNNER_TEMP/venv/bin/pip" install --quiet numpy
+                  PYTHONDONTWRITEBYTECODE=1 "$RUNNER_TEMP/venv/bin/python" pytests.py
 
     build:
         # no versions nor publishing while the scripts fail their checks
