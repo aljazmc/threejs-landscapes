@@ -12,10 +12,10 @@ import {
 
 /**
  * One of the ten vampires and minions in the castle: its mind and the pose
- * of its joints (see blender-scripts/creatures.py for their names), which
- * the view applies to its model (res/gothic-<kind>.glb). They roam the
- * castle aimlessly, each on its own, until the hunter hurts them; then they
- * hunt the hunter and strike.
+ * of its joints (see shooter-scripts/blender/creatures.py for their
+ * names), which the view applies to its model (res/gothic-<kind>.glb). They
+ * roam the castle aimlessly, each on its own, until the hunter hurts them;
+ * then they hunt the hunter and strike.
  */
 
 export const KINDS = [

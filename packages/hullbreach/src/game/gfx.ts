@@ -2,9 +2,9 @@ import * as THREE from "three";
 import * as Res from "./res";
 
 /**
- * The graphics of res/: the models (GLB, written by
- * blender-scripts/exportglb.py), textures cut from the sprite sheets, and
- * the materials and meshes of glows and beams.
+ * The graphics of res/: the models (GLB, written by export_glb() of
+ * blender-scripts/shooter.py), textures cut from the sprite sheets, and the
+ * materials and meshes of glows and beams.
  *
  * The game lights and blends in the colors as stored, without converting sRGB,
  * so the textures are uploaded as they are (NoColorSpace), color

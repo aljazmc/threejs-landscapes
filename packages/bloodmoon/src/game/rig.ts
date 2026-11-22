@@ -4,12 +4,15 @@ import * as Res from "./res";
 
 /**
  * The models of res/gothic-<name>.glb and their joints: the named joints
- * the game moves (see blender-scripts/creatures.py and the props), their
- * rest poses and the size of the model. The models keep their glTF PBR
- * materials.
+ * the game moves (see shooter-scripts/blender/creatures.py and the
+ * props), their rest poses and the size of the model. The models keep
+ * their glTF PBR materials.
  */
 
-/** The joints the game moves, as in blender-scripts/shooter.py's ANIMATED. */
+/**
+ * The joints the game moves, as in ANIMATED of
+ * shooter-scripts/blender/shooter.py.
+ */
 function animated(name: string): boolean {
     return (
         [

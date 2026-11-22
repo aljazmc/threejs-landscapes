@@ -1,9 +1,19 @@
+"""Finds the package whose sounds are built and the project to build.
+
+shooter-scripts/project.sh runs export.py from the package directory, so
+the working directory is the package (or SHOOTER_PACKAGE when set), and
+the projects are in its fluidsynth-scripts/.
+"""
+
 import importlib
 import os
 import sys
 
-scripts_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = os.path.dirname(scripts_dir)
+root_dir = os.path.abspath(os.environ.get("SHOOTER_PACKAGE", os.getcwd()))
+scripts_dir = os.path.join(root_dir, "fluidsynth-scripts")
+if not os.path.isdir(scripts_dir):
+    sys.exit(f"no fluidsynth-scripts in {root_dir}: run it from a package")
+sys.path.insert(0, scripts_dir)
 
 
 def load_project(target):
@@ -12,10 +22,10 @@ def load_project(target):
     (without extension) inside the package-level target directory.
 
     A project fluidsynth-scripts/<theme>-<name>/ must provide <name>.py with a
-    <name>() function, e.g. fluidsynth-scripts/elven-sword/sword.py:sword().
+    <name>() function, e.g. fluidsynth-scripts/gothic-revolver/revolver.py:revolver().
     """
     if len(sys.argv) < 2:
-        sys.exit("usage: python3 fluidsynth-scripts/export.py <project>")
+        sys.exit("usage: python3 shooter-scripts/fluidsynth/export.py <project> [ogg] [wav]")
 
     project = sys.argv[1]
     project_dir = os.path.join(scripts_dir, project)

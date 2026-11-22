@@ -12,7 +12,7 @@ import {
 
 /**
  * One of the ten monsters in the keep: its mind and the pose of its joints
- * (see blender-scripts/creatures.py for their names), which the view
+ * (see shooter-scripts/blender/creatures.py for their names), which the view
  * applies to its model (res/elven-<kind>.glb). They roam the keep
  * aimlessly, each on its own, until the elf hurts them; then they hunt
  * the elf and strike.

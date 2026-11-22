@@ -67,24 +67,29 @@ Each package's `tsconfig.json` extends the root one and keeps `"emitDeclarationO
 
 ### Generated files
 
-Generated files are committed. Rebuild them on the host (not in Docker) with each package's scripts, and edit the scripts, never their output.
+Generated files are committed. Rebuild them on the host (not in Docker) with each package's scripts, and edit the scripts, never their output. The shooters' `./project.sh` only sets the package's theme and runs [`shooter-scripts/project.sh`](shooter-scripts/project.sh), with the Blender and FluidSynth code they share in `shooter-scripts/blender/` and `shooter-scripts/fluidsynth/`. A package's `blender-scripts/` and `fluidsynth-scripts/` hold only its theme, its level layout, its creatures and one project directory per asset.
 
-| Package                           | Command                               | Needs                                  | Makes                                                                                                                               |
-| --------------------------------- | ------------------------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| bloodmoon, hullbreach, moonshadow | `./project.sh graphics`               | Blender                                | `src/res`: the map from `blender-scripts/exportmap.py`, the textures and GLB models from `blender-scripts/<theme>-<name>/<name>.py` |
-| bloodmoon, hullbreach, moonshadow | `./project.sh audio`                  | Python with numpy, FluidSynth, ffmpeg  | `src/res`: the sound effects and music from `fluidsynth-scripts/<theme>-<name>/` (OGG, and WAV or MP3 for Safari)                   |
-| hullbreach                        | `./project.sh font <font.fnt>`        | Python with Pillow                     | `src/res/shooter-font.*` from `pillow-scripts/font.py`: Pixel Operator with č, š, ž, ą, ł…                                          |
-| ptuj                              | `inkscape-scripts/project.sh fetch`   | Python                                 | downloads the OpenStreetMap data and the ESS list of bans into `inkscape-scripts/osm/data`                                          |
-| ptuj                              | `inkscape-scripts/project.sh map`     | Python                                 | `src/map/ptuj.json`                                                                                                                 |
-| ptuj                              | `inkscape-scripts/project.sh terrain` | Python with Pillow                     | `src/map/terrain.json` from Terrarium elevation tiles, cached in `osm/data/terrain`                                                 |
-| ptuj                              | `inkscape-scripts/project.sh all`     |                                        | `fetch`, `map` and `terrain`                                                                                                        |
-| ptuj                              | `inkscape-scripts/project.sh preview` | Firefox, ffmpeg, a `yarn b:ptuj` build | `preview.gif`, recorded close up over the old town in headless Firefox                                                              |
+| Package                           | Command                               | Needs                                  | Makes                                                                                                                            |
+| --------------------------------- | ------------------------------------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| bloodmoon, hullbreach, moonshadow | `./project.sh graphics`               | Blender                                | `src/res`: the map from the package's layout module, the textures and GLB models from `blender-scripts/<theme>-<name>/<name>.py` |
+| bloodmoon, hullbreach, moonshadow | `./project.sh audio`                  | Python with numpy, FluidSynth, ffmpeg  | `src/res`: the sound effects and music from `fluidsynth-scripts/<theme>-<name>/` (OGG, and WAV or MP3 for Safari)                |
+| hullbreach                        | `./project.sh font <font.fnt>`        | Python with Pillow                     | `src/res/shooter-font.*` from `pillow-scripts/font.py`: Pixel Operator with č, š, ž, ą, ł…                                       |
+| ptuj                              | `inkscape-scripts/project.sh fetch`   | Python                                 | downloads the OpenStreetMap data and the ESS list of bans into `inkscape-scripts/osm/data`                                       |
+| ptuj                              | `inkscape-scripts/project.sh map`     | Python                                 | `src/map/ptuj.json`                                                                                                              |
+| ptuj                              | `inkscape-scripts/project.sh terrain` | Python with Pillow                     | `src/map/terrain.json` from Terrarium elevation tiles, cached in `osm/data/terrain`                                              |
+| ptuj                              | `inkscape-scripts/project.sh all`     |                                        | `fetch`, `map` and `terrain`                                                                                                     |
+| ptuj                              | `inkscape-scripts/project.sh preview` | Firefox, ffmpeg, a `yarn b:ptuj` build | `preview.gif`, recorded close up over the old town in headless Firefox                                                           |
 
 `python3 packages/ptuj/inkscape-scripts/osm/bans.py packages/ptuj/inkscape-scripts/osm/data` lists which places match the list of bans. A place matches only when its post code, street, house number **and** a distinctive word of the employer's name all match. Matching on the address alone would mark the wrong places, because several firms share buildings. Places that are confirmed but can't be matched from their tags go in `KNOWN` in `bans.py`.
 
 ### Layout
 
 ```
+shooter-scripts/           asset scripts shared by the three shooters
+├── project.sh            graphics | audio | font, run by each shooter's ./project.sh
+├── blender/              common.py, export*.py, saveblend.py, shooter.py, creatures.py
+└── fluidsynth/           common.py, export.py, song.py, sound.py
+
 packages/<package>/
 ├── src/index.html        development page
 ├── src/prod/index.html   production page with the esm.sh import map

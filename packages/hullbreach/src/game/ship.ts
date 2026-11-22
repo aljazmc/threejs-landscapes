@@ -57,8 +57,9 @@ interface Blocker {
 
 /**
  * The spaceship of res/shooter-map.txt (written by
- * blender-scripts/exportmap.py): walls, floors and ceilings built from the
- * textures of res/shooter-tiles.png, the props (models) and the lights.
+ * shooter-scripts/blender/exportmap.py): walls, floors and ceilings built
+ * from the textures of res/shooter-tiles.png, the props (models) and the
+ * lights.
  * Cell (x, y) is the 1x1 m square from world (x, y) to (x + 1, y + 1), Z up,
  * in the game's coordinates (see space.ts).
  *

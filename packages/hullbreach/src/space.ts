@@ -7,8 +7,9 @@ import * as THREE from "three";
  * everything is drawn with y negated: a mirror, which also turns every
  * rotation around Z the other way.
  *
- * The models (GLB, written by blender-scripts/exportglb.py) are in
- * Blender's own right handed axes, standing on the origin and facing -Y.
+ * The models (GLB, written by export_glb() of blender-scripts/shooter.py)
+ * are in Blender's own right handed axes, standing on the origin and facing
+ * -Y.
  * The game reads them mirrored in X; mirrored once more for drawing, a
  * model turned by angle in the game is turned by PI - angle in three.js.
  */

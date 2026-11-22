@@ -5,8 +5,9 @@ import { model, type Rig, rig } from "./rig";
 
 /**
  * The vampire castle of res/gothic-map.txt (written by
- * blender-scripts/exportmap.py): its walls, floors and ceilings built from
- * the tiles of res/gothic-tiles.png, the props (models) and the lights.
+ * shooter-scripts/blender/exportmap.py): its walls, floors and ceilings
+ * built from the tiles of res/gothic-tiles.png, the props (models) and the
+ * lights.
  * Cell (x, y) is the 1x1 m square from (x, y) to (x + 1, y + 1) on the
  * floor; the game works in these map coordinates with z up, which are
  * three.js' (x, z, y).

@@ -10,7 +10,7 @@ look as modeled.
 Images (sprite sheets, textures, menu graphics) are rendered with Cycles.
 Models carry no image of their own: every face gets the flat color of its
 material from a small palette texture that bake_palette() makes and
-exportglb.py embeds into the GLB file. Faces of glowing materials
+export_glb() embeds into the GLB file. Faces of glowing materials
 (emission > 0) end up in the "Glow" material, which the game draws without
 lighting, the others in "Palette".
 """
@@ -597,3 +597,32 @@ def merge_model():
     for obj in objects:
         if obj not in kept and (obj.type == 'MESH' or obj.type == 'EMPTY'):
             bpy.data.objects.remove(obj)
+
+
+def export_glb(output):
+    """Writes the model to output + ".glb" for the shared exportglb.py:
+    binary glTF with Blender's axes (Z up, no conversion to glTF's Y up),
+    its meshes merged per animated joint and its palette image embedded, so
+    src/res/<theme>-<name>.glb is the whole model."""
+    with tempfile.TemporaryDirectory() as tmp:
+        bake_palette(os.path.join(tmp, "palette.png"))
+        merge_model()
+        for image in bpy.data.images:
+            image.pack()
+        bpy.ops.export_scene.gltf(
+            filepath=output + ".glb",
+            export_format='GLB',
+            export_yup=False,
+            export_apply=True,
+            export_texcoords=True,
+            export_normals=True,
+            export_materials='EXPORT',
+            export_image_format='AUTO',
+            export_animations=False,
+            export_skins=False,
+            export_morph=False,
+            export_cameras=False,
+            export_lights=False,
+            export_extras=False,
+            use_selection=False,
+        )
