@@ -88,6 +88,7 @@ jobs:
                   fi
                   cd packages/ptuj/dist
                   # the package's documentation and its preview for the preview repository
+                  cp ../LICENSE .
                   cp ../README.md .
                   cp ../preview.gif .
                   git config --global user.name aljazmc
