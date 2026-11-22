@@ -1,5 +1,14 @@
 # Ptuj
 
+[![Open the map](https://img.shields.io/badge/open-the%20map-00bcd4?logo=googlechrome&logoColor=white)](https://aljazmc.github.io/ptuj-preview/)
+[![Version](https://img.shields.io/github/package-json/v/aljazmc/threejs-landscapes?filename=packages%2Fptuj%2Fpackage.json&label=version&color=0a7bbb)](https://github.com/aljazmc/threejs-landscapes/tags)
+[![Publish](https://github.com/aljazmc/threejs-landscapes/actions/workflows/publish-ptuj.yml/badge.svg)](https://github.com/aljazmc/threejs-landscapes/actions/workflows/publish-ptuj.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/aljazmc/threejs-landscapes/blob/main/LICENSE)
+[![Map data: ODbL](https://img.shields.io/badge/map%20data-ODbL-7ebc6f?logo=openstreetmap&logoColor=white)](https://www.openstreetmap.org/copyright)
+[![three.js 0.187](https://img.shields.io/badge/three.js-0.187-black?logo=threedotjs)](https://threejs.org/)
+[![React Three Fiber](https://img.shields.io/badge/React%20Three%20Fiber-R3F-000000?logo=react&logoColor=61dafb)](https://r3f.docs.pmnd.rs/)
+[![Touch](https://img.shields.io/badge/touch-ready-4caf50)](#touchscreens)
+
 A retro-futuristic cyan wireframe map of the Municipality of Ptuj, in the style of the vector screens of the 80s and 90s. It runs in the browser on desktops, phones and tablets.
 
 **[Open the map](https://aljazmc.github.io/ptuj-preview/)** · [Source code](https://github.com/aljazmc/threejs-landscapes/tree/main/packages/ptuj)
@@ -59,4 +68,10 @@ Built with [three.js](https://threejs.org/), [React](https://react.dev/) and [Re
 
 ## License
 
-The code is [MIT](https://github.com/aljazmc/threejs-landscapes/blob/main/LICENSE). The map data stays under the ODbL.
+The code is [MIT](https://github.com/aljazmc/threejs-landscapes/blob/main/LICENSE). The map's files are generated assets, made by the Python scripts in the [source code](https://github.com/aljazmc/threejs-landscapes/tree/main/packages/ptuj), and keep the terms of the data they come from:
+
+- `map/ptuj.json` is generated from OpenStreetMap data, so it stays under the [ODbL](https://opendatacommons.org/licenses/odbl/), © OpenStreetMap contributors; the bans layer in it comes from the public list of the Employment Service of Slovenia.
+- `map/terrain.json` is generated with a [Pillow](https://github.com/python-pillow/Pillow/blob/main/LICENSE) script (MIT-CMU license) from Mapzen Terrain Tiles, with the credits above.
+- `preview.gif` is recorded by a script in headless Firefox and encoded with [FFmpeg](https://ffmpeg.org/legal.html) (GNU LGPL or GPL, depending on the build), and is under the MIT License of the code.
+
+The map runs on [three.js](https://github.com/mrdoob/three.js/blob/dev/LICENSE), [React](https://github.com/facebook/react/blob/main/LICENSE) and [React Three Fiber](https://github.com/pmndrs/react-three-fiber/blob/master/LICENSE), all under the MIT License and loaded from [esm.sh](https://esm.sh/).

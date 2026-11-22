@@ -7,8 +7,15 @@
 [![Publish moonshadow](https://github.com/aljazmc/threejs-landscapes/actions/workflows/publish-moonshadow.yml/badge.svg)](https://github.com/aljazmc/threejs-landscapes/actions/workflows/publish-moonshadow.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![three.js 0.187](https://img.shields.io/badge/three.js-0.187-black?logo=threedotjs)](https://threejs.org/)
+[![React Three Fiber](https://img.shields.io/badge/React%20Three%20Fiber-R3F-000000?logo=react&logoColor=61dafb)](https://r3f.docs.pmnd.rs/)
+[![Blender](https://img.shields.io/badge/models-Blender-e87d0d?logo=blender&logoColor=white)](https://www.blender.org/)
+[![FluidSynth](https://img.shields.io/badge/music-FluidSynth-2d6db5)](https://www.fluidsynth.org/)
+[![NumPy](https://img.shields.io/badge/sounds-NumPy-013243?logo=numpy&logoColor=white)](https://numpy.org/)
 [![TypeScript 7](https://img.shields.io/badge/TypeScript-7-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Yarn 4](https://img.shields.io/badge/Yarn-4-2c8ebb?logo=yarn&logoColor=white)](https://yarnpkg.com/)
+[![Docker only](https://img.shields.io/badge/development-Docker%20only-2496ed?logo=docker&logoColor=white)](#requirements)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![ShellCheck](https://img.shields.io/badge/ShellCheck-checked-4eaa25?logo=gnubash&logoColor=white)](https://www.shellcheck.net/)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-fe5196?logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org/)
 
 A Yarn monorepo scrapyard of experiments with [three.js](https://threejs.org/), for half-baked ideas, quirks and programming approaches, and to give scrapped assets another life. Each package in `packages/` is a static browser app, built with esbuild and published to its own `<package>-preview` repository on GitHub Pages together with its README, which is written for the people who play or use it.
@@ -146,4 +153,9 @@ A publish can also be started by hand from the Actions tab, with a version (empt
 
 ## License
 
-[MIT](LICENSE). The ptuj map data is © OpenStreetMap contributors under the [ODbL](https://opendatacommons.org/licenses/odbl/). The fonts have their own licenses, listed in their packages' LICENSE files: DejaVu Sans in bloodmoon is under the Bitstream Vera Fonts license, and Pixel Operator in hullbreach is CC0 1.0. moonshadow ships no font.
+[MIT](LICENSE). Each package's README has the details.
+
+- **Generated assets.** Every model, texture, sprite sheet, sound effect and piece of music of the shooters, and the ptuj map and terrain, are made by the scripts in this repository and are under the same MIT License. Blender (GNU GPL), FluidSynth (GNU LGPL 2.1+), NumPy (BSD 3-Clause), Pillow (MIT-CMU) and FFmpeg (LGPL or GPL) make them and put no terms of their own on their output. The music is rendered through the FluidR3_GM soundfont by Frank Wen, which is under the MIT License.
+- **Data.** The ptuj map data is © OpenStreetMap contributors under the [ODbL](https://opendatacommons.org/licenses/odbl/), and its elevation comes from Mapzen Terrain Tiles (EU-DEM, SRTM and GMTED2010).
+- **Fonts.** They have their own licenses, listed in their packages' LICENSE files: DejaVu Sans in bloodmoon is under the Bitstream Vera Fonts license, and Pixel Operator in hullbreach is CC0 1.0. moonshadow ships no font.
+- **Libraries.** three.js, React and React Three Fiber are under the MIT License.
