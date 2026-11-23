@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import root from "../../../../package.json";
+import root from "../../../../../package.json";
 
-const src = join(import.meta.dirname, "../../src");
+const src = join(import.meta.dirname, "../../../src");
 const read = (file: string) => readFileSync(join(src, file), "utf8");
 
 describe("index.html", () => {

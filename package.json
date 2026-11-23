@@ -22,6 +22,7 @@
         "@aljazmc/monorepo": "^0.5.5",
         "@aljazmc/testero": "^0.5.2",
         "esbuild": "0.28.2",
+        "playwright": "^1.65.1",
         "typescript": "^7.0.2",
         "unrs-resolver": "^1.13.0"
     },
@@ -64,6 +65,7 @@
         "ct:moonshadow": "tsc -b --noEmit packages/moonshadow",
         "ct:ptuj": "tsc -b --noEmit packages/ptuj",
         "ct:starter": "tsc -b --noEmit packages/starter",
+        "e2e": "playwright test",
         "lint": "lintero && formatero",
         "lint:w": "lintero --write && formatero --write",
         "lint:wu": "lintero --write --unsafe && formatero --write",

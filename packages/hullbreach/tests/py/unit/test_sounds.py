@@ -15,7 +15,7 @@ try:
 except ImportError:
     numpy = None
 
-PACKAGE = Path(__file__).resolve().parents[2]
+PACKAGE = Path(__file__).resolve().parents[3]
 ROOT = PACKAGE.parents[1]
 SCRIPTS = PACKAGE / "fluidsynth-scripts"
 PROJECTS = sorted(p.name for p in SCRIPTS.iterdir()

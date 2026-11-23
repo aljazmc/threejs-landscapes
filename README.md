@@ -59,12 +59,15 @@ docker compose run --rm node yarn <script>
 | `b:<package>`, `b:all`   | development build into `packages/<package>/dist/`                                                                                                                                    |
 | `bp:<package>`, `bp:all` | production build into `packages/<package>/dist/`                                                                                                                                     |
 | `ct:<package>`, `ct:all` | type check                                                                                                                                                                           |
-| `test`                   | the TypeScript tests in `packages/*/tests/ts/*.test.ts`, run in Node                                                                                                                 |
+| `test`                   | the TypeScript unit tests in `packages/*/tests/ts/unit/*.test.ts`, run in Node                                                                                                       |
+| `e2e`                    | the end-to-end tests in `packages/*/tests/ts/e2e/*.e2e.ts`, run with [Playwright](https://playwright.dev/) in Chromium against the development servers (`./project.sh e2e`)          |
 | `lint`, `lint:w`         | lint and format check ([lintero](https://www.npmjs.com/package/@aljazmc/lintero) and [formatero](https://www.npmjs.com/package/@aljazmc/formatero)), and the same with fixes written |
 
 The development builds bundle every dependency. The production builds leave out three.js (and React for ptuj and starter) and load them from [esm.sh](https://esm.sh/) through the import map in each package's `src/prod/index.html`. When dependencies are updated, those pinned versions must match the root `resolutions`.
 
-The tests import only modules that don't need the DOM, and aren't type checked: the package tsconfigs include only `src`.
+The unit tests import only modules that don't need the DOM. Neither they nor the end-to-end tests are type checked: the package tsconfigs include only `src`.
+
+The end-to-end tests need browsers, which the Node container doesn't have. `./project.sh e2e [args...]` runs `yarn e2e` in the `mcr.microsoft.com/playwright` image of the installed Playwright version, for example `./project.sh e2e --project=ptuj` for one package. `playwright.config.ts` starts each package's `s:<package>` development server on its own port (8101 to 8105).
 
 ### Code style
 
@@ -74,7 +77,7 @@ Each package's `tsconfig.json` extends the root one and keeps `"emitDeclarationO
 
 ### Python tests
 
-Every package has its TypeScript tests in `tests/ts/` and its Python tests, `tests/py/test_*.py`, beside them. The Python tests use `unittest` from the standard library and run on the host, not in the Node container:
+Every package has its TypeScript unit tests in `tests/ts/unit/`, its end-to-end tests in `tests/ts/e2e/` and its Python tests, `tests/py/unit/test_*.py`, beside them. The Python tests use `unittest` from the standard library and run on the host, not in the Node container:
 
 ```sh
 python3 pytests.py [package...]                                                    # skips the tests that need Blender
@@ -84,7 +87,7 @@ blender -b --factory-startup --python-exit-code 1 -P pytests.py -- [package...] 
 
 CI runs only `python3 pytests.py` with numpy, with no Blender or FluidSynth on the runner. `./project.sh pytests` runs them all in `aljazmc/blender-alpine` and `blender-debian` (inside Blender), and in `inkscape-alpine`, `inkscape-debian`, `fluidsynth-alpine` and `fluidsynth-debian` (with their Python, skipping the Blender tests). `pytests.py` runs each package in a process of its own, because the packages' scripts share module names.
 
-| Package    | `tests/py`          | Checks                                                                                                                                | Needs   |
+| Package    | `tests/py/unit`     | Checks                                                                                                                                | Needs   |
 | ---------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------- |
 | bloodmoon  | `test_castlemap.py` | `src/res/gothic-map.txt` is what `castlemap.py` writes now; the props have models; the player and the ten monsters stand on the floor | —       |
 | hullbreach | `test_sounds.py`    | every sound effect is a clean mono signal within ±1 and byte for byte its committed WAV                                               | numpy   |
@@ -133,8 +136,9 @@ packages/<package>/
 ├── src/prod/index.html   production page with the esm.sh import map
 ├── src/index.css
 ├── src/…                 the app (the shooters: src/game/, generated src/res/; ptuj: generated src/map/)
-├── tests/ts/             TypeScript tests of the DOM-free modules, run by testero in Node
-├── tests/py/             Python tests of the package's scripts, run by pytests.py
+├── tests/ts/unit/        TypeScript tests of the DOM-free modules, run by testero in Node
+├── tests/ts/e2e/         end-to-end tests of the app in Chromium, run by Playwright
+├── tests/py/unit/        Python tests of the package's scripts, run by pytests.py
 ├── README.md             for players and users, published with the app
 └── LICENSE             (the shooters; the others use the root one)
 ```

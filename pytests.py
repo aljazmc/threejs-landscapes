@@ -1,10 +1,11 @@
-"""Runs the Python tests of the packages, packages/<package>/tests/py/test_*.py,
+"""Runs the Python unit tests of the packages,
+packages/<package>/tests/py/unit/test_*.py,
 with unittest from the standard library, so it needs no pytest.
 
     python3 pytests.py [package...]
     blender -b --factory-startup --python-exit-code 1 -P pytests.py -- [package...]
 
-Without packages it runs those of every package that has tests/py, each in
+Without packages it runs those of every package that has tests/py/unit, each in
 a process of its own (python3, or Blender again), as the packages' scripts
 share module names (castlemap, shooter, ...). Tests that need Blender's bpy
 or numpy skip themselves where those are missing, so it runs with any of
@@ -27,7 +28,7 @@ PACKAGES = os.path.join(ROOT, "packages")
 
 
 def tests_of(package):
-    return os.path.join(PACKAGES, package, "tests", "py")
+    return os.path.join(PACKAGES, package, "tests", "py", "unit")
 
 
 def arguments():
@@ -56,7 +57,7 @@ def run_each(packages):
 def run(package):
     directory = tests_of(package)
     if not os.path.isdir(directory):
-        print(f"{package} has no tests/py", flush=True)
+        print(f"{package} has no tests/py/unit", flush=True)
         return False
     print(f"\n=== {package}", flush=True)
     suite = unittest.defaultTestLoader.discover(

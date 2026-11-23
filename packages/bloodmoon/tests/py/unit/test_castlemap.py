@@ -6,7 +6,7 @@ import sys
 import unittest
 from pathlib import Path
 
-PACKAGE = Path(__file__).resolve().parents[2]
+PACKAGE = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(PACKAGE / "blender-scripts"))
 
 import castlemap  # noqa: E402 (after the path to the scripts)

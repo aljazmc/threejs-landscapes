@@ -6,7 +6,7 @@ import json
 import unittest
 from pathlib import Path
 
-PACKAGE = Path(__file__).resolve().parents[2]
+PACKAGE = Path(__file__).resolve().parents[3]
 ROOT = PACKAGE.parents[1]
 NAME = PACKAGE.name
 
@@ -43,13 +43,23 @@ class PackageTest(unittest.TestCase):
         self.assertIn({"path": f"./packages/{NAME}"},
                       self.tsconfig["references"])
 
+    def test_e2e_server(self):
+        config = (ROOT / "playwright.config.ts").read_text()
+        packages = config[config.index("const PACKAGES = {"):]
+        packages = packages[:packages.index("};")]
+        self.assertRegex(packages, rf"\n\s+{NAME}: \d+,",
+                         "the package has no port in playwright.config.ts")
+
     def test_tests_layout(self):
         tests = PACKAGE / "tests"
-        self.assertEqual(sorted(tests.glob("*.test.ts")), [],
-                         "TypeScript tests go in tests/ts")
-        self.assertTrue(list((tests / "ts").glob("*.test.ts")))
-        self.assertTrue(list((tests / "py").glob("test_*.py")))
-
+        for loose in ("*.test.ts", "ts/*.test.ts", "py/test_*.py"):
+            with self.subTest(loose=loose):
+                self.assertEqual(sorted(tests.glob(loose)), [],
+                                 "unit tests go in tests/ts/unit and "
+                                 "tests/py/unit")
+        self.assertTrue(list((tests / "ts" / "unit").glob("*.test.ts")))
+        self.assertTrue(list((tests / "ts" / "e2e").glob("*.e2e.ts")))
+        self.assertTrue(list((tests / "py" / "unit").glob("test_*.py")))
 
 if __name__ == "__main__":
     unittest.main()

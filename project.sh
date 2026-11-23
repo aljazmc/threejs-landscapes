@@ -69,6 +69,28 @@ composehack() {
 
 }
 
+e2e() {
+
+    ## Runs the Playwright tests (packages/*/tests/ts/e2e/*.e2e.ts) in the
+    ## Playwright image of the installed version, which has the browsers:
+    ## ./project.sh e2e [playwright test arguments...], e.g. --project=ptuj
+    local version
+    version=$(sed -n 's/^ *"version": "\(.*\)",$/\1/p' \
+        node_modules/playwright/package.json)
+    if [[ -z "$version" ]]; then
+        echo "playwright is not installed, run ./project.sh start first"
+        return 1
+    fi
+
+    docker run --rm --init --ipc=host --network=host \
+        --user "$PROJECT_UID:$PROJECT_GID" -e HOME=/tmp \
+        -e CI="${CI:-}" -e NODE_NO_WARNINGS=1 \
+        -v "$PWD:$PWD" -w "$PWD" \
+        "mcr.microsoft.com/playwright:v$version-noble" \
+        node .yarn/releases/yarn-4.18.1.cjs e2e "$@"
+
+}
+
 node() {
 
 if [[ ! -f package.json ]]; then
@@ -87,7 +109,7 @@ docker compose run --rm node sh -c "printenv"
 
 pytests() {
 
-    ## Runs pytests.py (packages/*/tests/py/test_*.py) in the aljazmc images:
+    ## Runs pytests.py (packages/*/tests/py/unit/test_*.py) in the aljazmc images:
     ## ./project.sh pytests [image...], the six below without images. Blender's
     ## run inside Blender, so the tests that need bpy run there too.
     local images=("$@") image failed=()

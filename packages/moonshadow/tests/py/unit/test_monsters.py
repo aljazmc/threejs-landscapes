@@ -16,7 +16,7 @@ try:
 except ImportError:
     bpy = None
 
-PACKAGE = Path(__file__).resolve().parents[2]
+PACKAGE = Path(__file__).resolve().parents[3]
 ROOT = PACKAGE.parents[1]
 SCRIPTS = PACKAGE / "blender-scripts"
 # joints the game only looks for (view.ts: a Hover joint makes it float)

@@ -29,7 +29,7 @@ env:
 jobs:
     # the asset scripts, which run on the host and not in the workspaces:
     # the shell scripts with shellcheck, the Python with ruff (ruff.toml) and
-    # the lightweight Python tests (packages/*/tests/py, no Blender nor
+    # the lightweight Python tests (packages/*/tests/py/unit, no Blender nor
     # FluidSynth)
     scripts:
         runs-on: ubuntu-latest
@@ -101,17 +101,31 @@ jobs:
             - name: Install dependencies
               run: yarn install --immutable
 
+            # linting and the tests do not depend on the node version, only
+            # the node 26 run does them; every run checks types and builds
             - name: Check linting and formatting
+              if: matrix.node-version == '26.x'
               run: yarn lint
 
             - name: Check types
               run: yarn ct:all
 
-            - name: Run tests
+            - name: Run unit tests
+              if: matrix.node-version == '26.x'
               run: yarn test
 
             - name: Build packages
               run: yarn b:all
+
+            # packages/*/tests/ts/e2e in Chromium against the packages' dev
+            # servers, see playwright.config.ts
+            - name: Install Playwright browser
+              if: matrix.node-version == '26.x'
+              run: yarn playwright install --with-deps chromium
+
+            - name: Run e2e tests
+              if: matrix.node-version == '26.x'
+              run: yarn e2e
 
             # only the node 26 run versions and starts the publishing, the others just check
             # monorepo moves tags a rebase left behind, then bumps the versions of the
