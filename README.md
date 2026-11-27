@@ -63,6 +63,8 @@ docker compose run --rm node yarn <script>
 | `e2e`                    | the end-to-end tests in `packages/*/tests/ts/e2e/*.e2e.ts`, run with [Playwright](https://playwright.dev/) in Chromium against the development servers (`./project.sh e2e`)          |
 | `lint`, `lint:w`         | lint and format check ([lintero](https://www.npmjs.com/package/@aljazmc/lintero) and [formatero](https://www.npmjs.com/package/@aljazmc/formatero)), and the same with fixes written |
 
+The formatter, the linter, the test runner and the release tool (formatero, lintero, testero and monorepo) are developed in [aljazmc](https://github.com/aljazmc/aljazmc), a monorepo of dependency-free TypeScript tools.
+
 The development builds bundle every dependency. The production builds leave out three.js (and React for ptuj and starter) and load them from [esm.sh](https://esm.sh/) through the import map in each package's `src/prod/index.html`. When dependencies are updated, those pinned versions must match the root `resolutions`.
 
 The unit tests import only modules that don't need the DOM. Neither they nor the end-to-end tests are type checked: the package tsconfigs include only `src`.
