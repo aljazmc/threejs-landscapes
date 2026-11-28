@@ -1,0 +1,52 @@
+version: 2
+
+# commit prefixes matter: monorepo (monorepo.config.ts) versions the packages
+# from conventional commits; "ci" and "build" release nothing, "fix" a patch
+updates:
+    - package-ecosystem: github-actions
+      directories: ["/", "/.github/actions/*"]
+      schedule:
+          interval: weekly
+      commit-message:
+          prefix: ci
+      groups:
+          actions:
+              patterns: ["*"]
+
+    # the root package.json and its workspaces, packages/* (yarn.lock is
+    # not committed, CI resolves it on each run)
+    - package-ecosystem: npm
+      directory: "/"
+      schedule:
+          interval: weekly
+      # a runtime dependency changes what is published, a dev dependency
+      # only the tooling
+      commit-message:
+          prefix: fix
+          prefix-development: build
+          include: scope
+      groups:
+          development:
+              dependency-type: development
+              update-types: [minor, patch]
+          react-three-fiber:
+              patterns: ["@react-three/*"]
+      ignore:
+          # pinned in the root resolutions and, for the production builds,
+          # in the esm.sh import maps of each packages/*/src/prod/index.html,
+          # which must be changed with them (starter's html.test.ts checks
+          # that they agree): updated by hand, all in one commit
+          - dependency-name: "three"
+          - dependency-name: "@types/three"
+          - dependency-name: "react"
+          - dependency-name: "react-dom"
+          - dependency-name: "@types/react"
+          - dependency-name: "@types/react-dom"
+          - dependency-name: "esbuild"
+          - dependency-name: "unrs-resolver"
+          # the workspace packages are versioned by monorepo
+          - dependency-name: "@aljazmc/bloodmoon"
+          - dependency-name: "@aljazmc/hullbreach"
+          - dependency-name: "@aljazmc/moonshadow"
+          - dependency-name: "@aljazmc/ptuj"
+          - dependency-name: "@aljazmc/starter"

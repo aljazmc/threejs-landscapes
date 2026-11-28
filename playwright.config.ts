@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "playwright/test";
 
 /** The packages with e2e tests and the ports their dev servers listen on. */
-const PACKAGES = {
+export const PACKAGES = {
     bloodmoon: 8101,
     hullbreach: 8102,
     moonshadow: 8103,
@@ -28,11 +28,19 @@ export default defineConfig({
         },
         trace: "retain-on-failure",
     },
-    projects: Object.entries(PACKAGES).map(([name, port]) => ({
-        name,
-        testDir: `packages/${name}/tests/ts/e2e`,
-        use: { baseURL: `http://127.0.0.1:${port}` },
-    })),
+    projects: [
+        ...Object.entries(PACKAGES).map(([name, port]) => ({
+            name,
+            testDir: `packages/${name}/tests/ts/e2e`,
+            use: { baseURL: `http://127.0.0.1:${port}` },
+        })),
+        // load and frame times of every package, tests/e2e/performance.e2e.ts:
+        // only with PERFORMANCE=1, so they are measured on their own, with
+        // --project=performance --workers=1 (yarn perf)
+        ...(process.env.PERFORMANCE
+            ? [{ name: "performance", testDir: "tests/e2e" }]
+            : []),
+    ],
     webServer: Object.entries(PACKAGES).map(([name, port]) => ({
         // esbuild --serve stops when its stdin closes, so keep it open
         command: `tail -f /dev/null | yarn s:${name} --serve=127.0.0.1:${port} --log-level=warning`,

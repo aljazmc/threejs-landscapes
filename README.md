@@ -61,6 +61,7 @@ docker compose run --rm node yarn <script>
 | `ct:<package>`, `ct:all` | type check                                                                                                                                                                           |
 | `test`                   | the TypeScript unit tests in `packages/*/tests/ts/unit/*.test.ts`, run in Node                                                                                                       |
 | `e2e`                    | the end-to-end tests in `packages/*/tests/ts/e2e/*.e2e.ts`, run with [Playwright](https://playwright.dev/) in Chromium against the development servers (`./project.sh e2e`)          |
+| `perf`                   | the load and frame times of every package in Chromium, one at a time (`tests/e2e/performance.e2e.ts`), into `.cache/performance/`                                                    |
 | `lint`, `lint:w`         | lint and format check ([lintero](https://www.npmjs.com/package/@aljazmc/lintero) and [formatero](https://www.npmjs.com/package/@aljazmc/formatero)), and the same with fixes written |
 
 The formatter, the linter, the test runner and the release tool (formatero, lintero, testero and monorepo) are developed in [aljazmc](https://github.com/aljazmc/aljazmc), a monorepo of dependency-free TypeScript tools.
@@ -70,6 +71,8 @@ The development builds bundle every dependency. The production builds leave out 
 The unit tests import only modules that don't need the DOM. Neither they nor the end-to-end tests are type checked: the package tsconfigs include only `src`.
 
 The end-to-end tests need browsers, which the Node container doesn't have. `./project.sh e2e [args...]` runs `yarn e2e` in the `mcr.microsoft.com/playwright` image of the installed Playwright version, for example `./project.sh e2e --project=ptuj` for one package. `playwright.config.ts` starts each package's `s:<package>` development server on its own port (8101 to 8105).
+
+`yarn perf` (`PERFORMANCE=1 ./project.sh e2e --project=performance --workers=1` from the host) measures each package after a warm-up: the time from the navigation to the first drawn frame, and the mean, 95th percentile and slowest frame times. WebGL runs on SwiftShader, on the CPU, so the games, which draw their menu at the high quality, take about a second a frame there. The budgets only catch a page that stops loading or drawing; CI puts the table into the job summary and keeps the numbers as the `performance` artifact, to follow the trend.
 
 ### Code style
 
@@ -105,6 +108,8 @@ The shell and Python scripts are checked in CI with [ShellCheck](https://www.she
 docker run --rm -v "$PWD:/mnt" -w /mnt koalaman/shellcheck:stable $(git ls-files '*.sh')
 docker run --rm -u "$(id -u):$(id -g)" -v "$PWD:/io" -w /io ghcr.io/astral-sh/ruff:0.17.6 check .        # --fix to fix
 ```
+
+`tests/sh/wrong-input.sh`, also run in CI, is a table of wrong and missing arguments to the root `project.sh`, the shooters' and ptuj's `project.sh` and `pytests.py`, each with the exit code and the message it must end with. The commands that would need Blender, FluidSynth or Python run with a `PATH` without them, so nothing is built, fetched or rendered. The root `project.sh` runs only its own functions (`clean`, `compose`, `composehack`, `e2e`, `node`, `pytests`, `start`) and prints its usage otherwise.
 
 Keep `# isort: split` in `shooter-scripts/blender/exportglb.py`: `common` has to be imported before `shooter`, because it puts the package's own modules first on the path.
 
@@ -151,11 +156,13 @@ packages/<package>/
 
 Commits follow [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`). Don't bump versions or write `version:` commits by hand.
 
-1. **CI** ([`ci.yml`](.github/workflows/ci.yml)) checks the shell and Python scripts with ShellCheck and Ruff and runs the lightweight Python tests (`python3 pytests.py` with numpy: the Blender tests skip, and nothing is rendered or played), then runs `lint`, `ct:all`, `test` and `b:all` on Node 24, 25 and 26 for every push and pull request to `main`.
-2. On a push to `main`, the Node 26 run versions every package changed since its last version, and the root, with [`@aljazmc/monorepo`](https://www.npmjs.com/package/@aljazmc/monorepo) (`monorepo.config.ts`; a `refactor` releases a patch). It commits and tags each one as `@aljazmc/<package>@<version>` and pushes them.
-3. For every package whose new version isn't tagged in its preview repository yet, it starts `publish-<package>.yml`. That workflow builds the tag with `bp:<package>`, checks the build, and force pushes `dist/` with the README (and the LICENSE or preview) to `aljazmc/<package>-preview` as tag `v<version>`, where GitHub Pages serves it. Pushing there needs the `GH_TOKEN` secret.
+1. **CI** ([`ci.yml`](.github/workflows/ci.yml)) checks the shell and Python scripts with ShellCheck and Ruff and runs the lightweight Python tests (`python3 pytests.py` with numpy: the Blender tests skip, and nothing is rendered or played) and `tests/sh/wrong-input.sh`, then runs `ct:all` and `b:all` on Node 24, 25 and 26 for every push and pull request to `main`, and `lint`, `test`, `e2e` and `perf` on Node 26.
+2. On a push to `main`, the Node 26 run versions every package changed since its last version, and the root, with [`@aljazmc/monorepo`](https://www.npmjs.com/package/@aljazmc/monorepo) (`monorepo.config.ts`; a `refactor` releases a patch). It commits and tags each one as `@aljazmc/<package>@<version>` and pushes them. Then it makes a GitHub release of the last tag of each package that has none yet, with notes from the conventional commits since the tag before that changed the package, by kind, and a link to its preview ([`.github/scripts/release.ts`](.github/scripts/release.ts), tested in `.github/scripts/tests/`).
+3. For every package whose new version isn't tagged in its preview repository yet, it starts `publish-<package>.yml`. That workflow builds the tag with `bp:<package>`, checks the build, and commits `dist/` with the README and LICENSE (and ptuj's preview) onto the history of `aljazmc/<package>-preview` as tag `v<version>`, where GitHub Pages serves it ([`.github/actions/preview`](.github/actions/preview/action.yml)), so every published version stays there. Pushing there needs the `GH_TOKEN` secret.
 
-A publish can also be started by hand from the Actions tab, with a version (empty for the branch) and `force` to publish again a version that is already there.
+A publish can also be started by hand from the Actions tab, with a version (empty for the branch) and `force` to publish again a version that is already there, as a new commit with the tag moved to it.
+
+[Dependabot](.github/dependabot.yml) proposes weekly updates of the GitHub Actions (`ci:` commits, no release) and of the npm dependencies (`build:` for development ones, no release; `fix:` for runtime ones, a patch). three.js, React, their types, esbuild and unrs-resolver are left out: they are pinned in the root `resolutions` and in the esm.sh import maps, which have to be updated by hand together.
 
 ## License
 

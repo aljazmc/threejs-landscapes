@@ -69,6 +69,7 @@
         "lint": "lintero && formatero",
         "lint:w": "lintero --write && formatero --write",
         "lint:wu": "lintero --write --unsafe && formatero --write",
+        "perf": "PERFORMANCE=1 playwright test --project=performance --workers=1",
         "s:bloodmoon": "yarn workspace @aljazmc/bloodmoon run serve",
         "s:hullbreach": "yarn workspace @aljazmc/hullbreach run serve",
         "s:moonshadow": "yarn workspace @aljazmc/moonshadow run serve",

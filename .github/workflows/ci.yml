@@ -65,6 +65,11 @@ jobs:
                   "$RUNNER_TEMP/venv/bin/pip" install --quiet numpy
                   PYTHONDONTWRITEBYTECODE=1 "$RUNNER_TEMP/venv/bin/python" pytests.py
 
+            # the scripts refuse wrong and missing arguments with exit code 1,
+            # a table of commands and what they print, without running a tool
+            - name: Check wrong input
+              run: PYTHONDONTWRITEBYTECODE=1 tests/sh/wrong-input.sh
+
     build:
         # no versions nor publishing while the scripts fail their checks
         needs: scripts
@@ -127,6 +132,34 @@ jobs:
               if: matrix.node-version == '26.x'
               run: yarn e2e
 
+            # the load and frame times of every package, one at a time, see
+            # tests/e2e/performance.e2e.ts; the table goes into the job
+            # summary, the numbers into the performance artifact
+            - name: Measure performance
+              if: matrix.node-version == '26.x'
+              run: yarn perf
+
+            - name: Report performance
+              if: always() && matrix.node-version == '26.x'
+              run: |
+                  if [ -f .cache/performance/summary.md ]; then
+                      {
+                          echo "## Performance"
+                          echo
+                          echo "Chromium with WebGL on SwiftShader, on the CPU of the runner, Node $(node -v)."
+                          echo
+                          cat .cache/performance/summary.md
+                      } >> "$GITHUB_STEP_SUMMARY"
+                  fi
+
+            - name: Keep the performance measures
+              if: always() && matrix.node-version == '26.x'
+              uses: actions/upload-artifact@v7
+              with:
+                  name: performance
+                  path: .cache/performance/
+                  if-no-files-found: ignore
+
             # only the node 26 run versions and starts the publishing, the others just check
             # monorepo moves tags a rebase left behind, then bumps the versions of the
             # packages changed since their last version by conventional commits, see
@@ -145,6 +178,29 @@ jobs:
                   git config user.name "github-actions[bot]"
                   git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
                   yarn monorepo --push
+
+            # a GitHub release for the last tag of each package that has
+            # none yet, the ones monorepo just pushed, with notes from the
+            # commits since the tag before, see .github/scripts/release.ts
+            - name: Make the GitHub releases
+              if: matrix.node-version == '26.x' && (github.event_name == 'push' || inputs.publish) && steps.version.outputs.skip != 'true'
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  echo "## Releases" >> "$GITHUB_STEP_SUMMARY"
+                  for tag in $(node .github/scripts/release.ts latest); do
+                      if gh release view "$tag" > /dev/null 2>&1; then
+                          continue
+                      fi
+                      node .github/scripts/release.ts notes "$tag" > "$RUNNER_TEMP/notes.md"
+                      gh release create "$tag" --title "$tag" \
+                          --notes-file "$RUNNER_TEMP/notes.md" --verify-tag
+                      {
+                          echo "### $tag"
+                          echo
+                          cat "$RUNNER_TEMP/notes.md"
+                      } >> "$GITHUB_STEP_SUMMARY"
+                  done
 
             # a package is published by its own publish-$package.yml workflow, to
             # https://github.com/aljazmc/$package-preview.git, when its package.json

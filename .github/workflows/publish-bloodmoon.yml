@@ -6,7 +6,11 @@ on:
     pull_request:
         branches: [main]
         paths:
-            [".github/workflows/publish-bloodmoon.yml", "packages/bloodmoon/**"]
+            [
+                ".github/workflows/publish-bloodmoon.yml",
+                ".github/actions/preview/**",
+                "packages/bloodmoon/**",
+            ]
     # started by ci.yml when the version of bloodmoon is not in bloodmoon-preview yet, or by hand
     workflow_dispatch:
         inputs:
@@ -15,7 +19,7 @@ on:
                 type: string
                 default: ""
             force:
-                description: Publish even if the version is already in bloodmoon-preview
+                description: Publish again, moving the tag, if the version is already in bloodmoon-preview
                 type: boolean
                 default: false
 
@@ -77,33 +81,13 @@ jobs:
                   fi
                   echo "Bloodmoon Manor and $models models in packages/bloodmoon/dist."
 
-            - name: Configure git, commit, tag and force push
+            # commits the build onto the history of bloodmoon-preview, with the
+            # package's documentation and license, and tags it
+            - name: Commit, tag and push to bloodmoon-preview
               if: github.event_name == 'workflow_dispatch'
-              env:
-                  GH_TOKEN: ${{ secrets.GH_TOKEN }}
-                  FORCE: ${{ inputs.force }}
-              run: |
-                  if [ -z "$GH_TOKEN" ]; then
-                      echo "::error::GH_TOKEN secret is empty or not available to this run"
-                      exit 1
-                  fi
-                  version=$(node -p "require('./packages/bloodmoon/package.json').version")
-                  repository="https://x-access-token:${GH_TOKEN}@github.com/aljazmc/bloodmoon-preview.git"
-                  if [ "$FORCE" != "true" ] && [ -n "$(git ls-remote --tags "$repository" "refs/tags/v$version")" ]; then
-                      echo "::notice::@aljazmc/bloodmoon@$version is already in bloodmoon-preview."
-                      exit 0
-                  fi
-                  cd packages/bloodmoon/dist
-                  # the package's documentation and license for the preview repository
-                  cp ../README.md .
-                  cp ../LICENSE .
-                  git config --global user.name aljazmc
-                  git config --global user.email aljazmc@users.noreply.github.com
-                  git config --global init.defaultBranch main
-                  git config --global --type bool push.autoSetupRemote true
-                  git init
-                  git checkout -b main
-                  git add .
-                  git commit -m "feat: new package bloodmoon v$version"
-                  git tag -a "v$version" -m "version: @aljazmc/bloodmoon v$version"
-                  git push -f "$repository" main "refs/tags/v$version"
+              uses: ./.github/actions/preview
+              with:
+                  package: bloodmoon
+                  files: README.md LICENSE
+                  token: ${{ secrets.GH_TOKEN }}
+                  force: ${{ inputs.force }}

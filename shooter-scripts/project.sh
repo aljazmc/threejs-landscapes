@@ -100,12 +100,12 @@ font() {
         echo "$PACKAGE has no pillow-scripts/font.py"
         exit 1
     fi
-    require python3
-    require_module PIL Pillow
     if [[ ! -f "$1" || ! -f "${1%.fnt}.png" ]]; then
         echo "usage: ./project.sh font <font.fnt, with its .png beside it>"
         exit 1
     fi
+    require python3
+    require_module PIL Pillow
 
     echo "Writing src/res/$THEME-font.fnt"
     python3 pillow-scripts/font.py "$1" "$THEME" || exit 1

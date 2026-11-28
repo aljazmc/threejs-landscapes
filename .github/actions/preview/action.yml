@@ -1,0 +1,71 @@
+name: Preview
+description: >-
+    Commits a built package onto the history of its preview repository,
+    aljazmc/<package>-preview, tags it v<version> and pushes both, after the
+    checkout and the build of packages/<package>/dist
+
+inputs:
+    package:
+        description: The package, a folder of packages/
+        required: true
+    files:
+        description: Files of the package copied in beside its build
+        default: README.md LICENSE
+    token:
+        description: A token that can push to the preview repository
+        required: true
+    force:
+        description: Publish again, moving the tag, if the version is there already
+        default: "false"
+
+runs:
+    using: composite
+    steps:
+        - name: Commit, tag and push
+          shell: bash
+          env:
+              PACKAGE: ${{ inputs.package }}
+              FILES: ${{ inputs.files }}
+              GH_TOKEN: ${{ inputs.token }}
+              FORCE: ${{ inputs.force }}
+          run: |
+              if [ -z "$GH_TOKEN" ]; then
+                  echo "::error::GH_TOKEN secret is empty or not available to this run"
+                  exit 1
+              fi
+              dist="$PWD/packages/$PACKAGE/dist"
+              name=$(node -p "require('./packages/$PACKAGE/package.json').name")
+              version=$(node -p "require('./packages/$PACKAGE/package.json').version")
+              tag="v$version"
+              repository="https://x-access-token:${GH_TOKEN}@github.com/aljazmc/$PACKAGE-preview.git"
+              tagged=$(git ls-remote --tags "$repository" "refs/tags/$tag")
+              if [ "$FORCE" != "true" ] && [ -n "$tagged" ]; then
+                  echo "::notice::$name@$version is already in $PACKAGE-preview."
+                  exit 0
+              fi
+
+              # the history so far, or a new one for an empty repository
+              preview="$RUNNER_TEMP/$PACKAGE-preview"
+              rm -rf "$preview"
+              git clone --quiet "$repository" "$preview"
+              cd "$preview"
+              git config user.name aljazmc
+              git config user.email aljazmc@users.noreply.github.com
+              git rev-parse -q --verify HEAD > /dev/null || git checkout -q -b main
+
+              # the new build in place of the old one, so removed files go too
+              find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+              cp -a "$dist/." .
+              for file in $FILES; do
+                  cp "$dist/../$file" .
+              done
+              git add -A
+              if git diff --cached --quiet; then
+                  echo "The build of $name@$version is the same as the last one."
+              fi
+              git commit -q --allow-empty -m "feat: new package $PACKAGE v$version"
+              # only a forced publish moves a tag that is there already
+              git tag -f -a "$tag" -m "version: $name v$version"
+              branch=$(git symbolic-ref --short HEAD)
+              git push --atomic origin "$branch" "+refs/tags/$tag"
+              echo "::notice::Published $name@$version to $PACKAGE-preview, $(git rev-list --count HEAD) commits in its history."

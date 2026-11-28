@@ -73,7 +73,9 @@ e2e() {
 
     ## Runs the Playwright tests (packages/*/tests/ts/e2e/*.e2e.ts) in the
     ## Playwright image of the installed version, which has the browsers:
-    ## ./project.sh e2e [playwright test arguments...], e.g. --project=ptuj
+    ## ./project.sh e2e [playwright test arguments...], e.g. --project=ptuj,
+    ## or the load and frame times with
+    ## PERFORMANCE=1 ./project.sh e2e --project=performance --workers=1
     local version
     version=$(sed -n 's/^ *"version": "\(.*\)",$/\1/p' \
         node_modules/playwright/package.json)
@@ -84,7 +86,7 @@ e2e() {
 
     docker run --rm --init --ipc=host --network=host \
         --user "$PROJECT_UID:$PROJECT_GID" -e HOME=/tmp \
-        -e CI="${CI:-}" -e NODE_NO_WARNINGS=1 \
+        -e CI="${CI:-}" -e PERFORMANCE="${PERFORMANCE:-}" -e NODE_NO_WARNINGS=1 \
         -v "$PWD:$PWD" -w "$PWD" \
         "mcr.microsoft.com/playwright:v$version-noble" \
         node .yarn/releases/yarn-4.18.1.cjs e2e "$@"
@@ -151,4 +153,15 @@ start() {
 
 }
 
-"$@"
+usage() {
+
+    echo "usage: ./project.sh clean | compose | composehack | e2e [args...] | node | pytests [image...] | start" >&2
+    exit 1
+
+}
+
+## Runs one of the functions above, nothing else: ./project.sh <function> [args...]
+case "${1:-}" in
+    clean | compose | composehack | e2e | node | pytests | start) "$@" ;;
+    *) usage ;;
+esac
