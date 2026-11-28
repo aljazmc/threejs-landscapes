@@ -1,6 +1,6 @@
 {
     "name": "threejs-landscapes",
-    "version": "0.0.9",
+    "version": "0.0.10",
     "description": "Three browser FPS games and a neon map of Ptuj in three.js",
     "author": "aljazmc",
     "license": "MIT",
