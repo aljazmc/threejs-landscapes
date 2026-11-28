@@ -20,7 +20,7 @@
         "@aljazmc/formatero": "^0.9.1",
         "@aljazmc/lintero": "^0.9.1",
         "@aljazmc/monorepo": "^0.5.5",
-        "@aljazmc/testero": "^0.5.2",
+        "@aljazmc/testero": "^0.6.1",
         "esbuild": "0.28.2",
         "playwright": "^1.65.1",
         "typescript": "^7.0.2",
