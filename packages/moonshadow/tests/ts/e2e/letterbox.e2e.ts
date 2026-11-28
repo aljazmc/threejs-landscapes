@@ -4,9 +4,12 @@ import { expect, type Page, test } from "playwright/test";
 async function stageIn(page: Page, width: number, height: number) {
     await page.setViewportSize({ width, height });
     const stage = page.locator("#root > .stage");
-    // the stage is fitted on the window's resize event
+    // the stage is fitted on the window's resize event, which comes with a
+    // frame: on SwiftShader, with other tests running, that takes seconds
     await expect
-        .poll(async () => (await stage.boundingBox())?.width)
+        .poll(async () => (await stage.boundingBox())?.width, {
+            timeout: 45_000,
+        })
         .toBe(Math.round(960 * Math.min(width / 960, height / 540)));
     const box = await stage.boundingBox();
     if (!box) throw new Error("the stage has no box");
